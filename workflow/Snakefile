@@ -43,9 +43,7 @@ rule bed_chunks:
     output:
         beds=temp(
             expand(
-                "temp/{sm}/chunks/{chunk}.chunk.bed",
-                chunk=chunks,
-                allow_missing=True,
+                "temp/{sm}/chunks/{chunk}.chunk.bed", chunk=chunks, allow_missing=True,
             )
         ),
     threads: 1
@@ -153,7 +151,9 @@ rule apply_model:
         """
         fibertools -v model -m {input.model} -o {output.bed} {input.bed}
         """
-#--dhs {input.dhs} \
+
+
+# --dhs {input.dhs} \
 
 
 rule sort_model:
