@@ -127,3 +127,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# mine
+.snakemake/
+benchmarks/
+old/
+results/
+temp/
+
+
+

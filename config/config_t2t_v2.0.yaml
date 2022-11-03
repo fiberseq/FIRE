@@ -1,0 +1,10 @@
+ref: /mmfs1/gscratch/stergachislab/assemblies/T2Tv2.0_maskedY.fa
+ref_name: T2Tv2.0
+n_chunks: 200
+max_t: 4
+dhs: data/GM12878_DHS.bed.gz # can be anything if not traing a model
+manifest: config/indata_t2t_v2.0.tbl
+model: results/GM12878/model.dat # if not provided will train a new model
+excludes:
+  - data/hg38.blacklist.ENCFF356LFX.bed.gz
+  - data/hg38.gap.bed
