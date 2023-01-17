@@ -276,7 +276,7 @@ rule fdr_tracks:
     threads: 1
     shell:
         """
-        printf 'chr1\t0\t1\t0\n' > {output.bed}
+        head -n 1 {input.fai} | awk '{{print $1"\t0\t1\t0"}}' > {output.bed}
         zcat {input.bed} | cut -f 1-4 | awk '$4 > {wildcards.fdr}' >> {output.bed}
         bedGraphToBigWig {output.bed} {input.fai} {output.bw}
         """
