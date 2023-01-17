@@ -43,7 +43,9 @@ rule bed_chunks:
     output:
         beds=temp(
             expand(
-                "temp/{sm}/chunks/{chunk}.chunk.bed", chunk=chunks, allow_missing=True,
+                "temp/{sm}/chunks/{chunk}.chunk.bed",
+                chunk=chunks,
+                allow_missing=True,
             )
         ),
     threads: 1
@@ -67,7 +69,7 @@ rule extract_and_split:
     shell:
         """
         samtools view \
-          -h -M -L {input.bed} -@ {threads} {input.bam} \
+          -b -M -L {input.bed} -@ {threads} {input.bam} \
           | ft -t {threads} extract --all - \
           | bgzip -@ {threads} \
           > {output.bed}
@@ -110,6 +112,7 @@ rule model_input:
         (samtools view \
           -h -M -L {input.dhs} -@ {threads} {input.bam} \
           | head -n {params.n} \
+          | samtools view -u \
           | ft -t {threads} extract --all - \
           | bgzip -@ {threads} \
           > {output.bed} ) || echo "random head error"
@@ -151,9 +154,6 @@ rule apply_model:
         """
         fibertools -v model -m {input.model} -o {output.bed} {input.bed}
         """
-
-
-# --dhs {input.dhs} \
 
 
 rule sort_model:
