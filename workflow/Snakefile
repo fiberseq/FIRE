@@ -92,7 +92,7 @@ rule dhs_null:
             less {input.dhs} | cut -f 1-3 | sed 's/$/\tDHS/g' ; 
             bedtools shuffle -noOverlapping \
                 -excl <( less {input.dhs} {output.exclude} | cut -f 1-3 | bedtools sort -i - | bedtools merge -i -) \
-                -i <(bedtools intersect -v -u -a {input.dhs} -b {output.exclude}) \
+                -i <(bedtools intersect -v -a {input.dhs} -b {output.exclude}) \
                 -g {input.fai} |
                 cut -f 1-3 | sed 's/$/\tNULL/g' 
         ) |
