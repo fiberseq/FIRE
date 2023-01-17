@@ -82,7 +82,7 @@ rule dhs_null:
         dhs=dhs,
         excl=excludes,
     output:
-        "temp/{sm}/dhs_with_null.bed.gz",
+        protected("results/{sm}/dhs_with_null.bed.gz"),
     threads: 2
     shell:
         """
