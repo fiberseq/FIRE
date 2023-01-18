@@ -1,0 +1,12 @@
+ref: .test/test.fa
+ref_name: hg38
+n_chunks: 30
+max_t: 4
+dhs: config/annotations/GM12878_DHS.bed.gz # can be anything if not traing a model
+manifest: config/test.tbl
+#model: results/GM12878_v0.1.5/model.dat # if not provided will train a new model
+# only used in model training
+excludes:
+  - config/annotations/hg38.blacklist.ENCFF356LFX.bed.gz
+  - config/annotations/hg38.gap.bed
+  - .test/exclude.bed
