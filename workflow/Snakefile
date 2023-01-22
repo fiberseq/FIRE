@@ -14,7 +14,7 @@ fai = pd.read_csv(f"{ref}.fai", sep="\t", names=["chr", "length", "x", "y", "z"]
 chroms = [chrom for chrom in fai["chr"] if "_" not in chrom]
 genome_len = fai["length"].sum()
 window_size = int(genome_len / n_chunks) + 1
-
+conda = "fiberseq-smk"
 
 data = pd.read_csv(config["manifest"], sep="\t", comment="#").set_index("sample")
 
@@ -26,6 +26,19 @@ wildcard_constraints:
     call="|".join(["msp", "m6a"]),
     chunk="|".join(chunks),
     sm="|".join(data.index),
+
+
+localrules:
+    bed_chunks,
+    dhs_null,
+    model_input,
+    make_model,
+    merge_model_results,
+    make_fdr_d4,
+    make_fdr_peaks,
+    fdr_bed,
+    fdr_tracks,
+    trackhub,
 
 
 rule all:
@@ -49,6 +62,8 @@ rule bed_chunks:
             )
         ),
     threads: 1
+    conda:
+        conda
     params:
         window_size=window_size,
     shell:
@@ -66,6 +81,8 @@ rule extract_and_split:
     output:
         bed=temp("temp/{sm}/{chunk}.extract.all.bed.gz"),
     threads: 4
+    conda:
+        conda
     shell:
         """
         samtools view \
@@ -85,6 +102,8 @@ rule dhs_null:
         bed="results/{sm}/dhs_with_null.bed.gz",
         exclude=temp("temp/{sm}/exclues.bed"),
     threads: 2
+    conda:
+        conda
     shell:
         """
         less {input.exclude} | cut -f 1-3 | bedtools sort -i - | bedtools merge -i - > {output.exclude}
@@ -111,6 +130,8 @@ rule model_input:
     threads: 8
     params:
         n=500_000,
+    conda:
+        conda
     shell:
         """ 
         (samtools view \
@@ -133,6 +154,8 @@ rule make_model:
     benchmark:
         "benchmarks/{sm}/make_model.tsv"
     threads: 60
+    conda:
+        conda
     shell:
         """
         fibertools -t {threads} -v model --dhs {input.dhs} -o {output.model} {input.bed}
@@ -155,6 +178,10 @@ rule apply_model:
     benchmark:
         "benchmarks/{sm}/chunks/apply_model_{chunk}.tsv"
     threads: 1
+    resources:
+        mem_mb=1024 * 24,
+    conda:
+        conda
     shell:
         """
         fibertools -v model -m {input.model} -o {output.bed} {input.bed}
@@ -167,6 +194,8 @@ rule sort_model:
     output:
         bed=temp("temp/{sm}/chunks/{chunk}.sorted.bed"),
     threads: 1
+    conda:
+        conda
     shell:
         """
         sort -S 5G -k1,1 -k2,2n -k3,3n -k4,4 {input.bed} > {output.bed}
@@ -181,6 +210,8 @@ rule merge_model_results:
     benchmark:
         "benchmarks/{sm}/merge_model_results.tsv"
     threads: 8
+    conda:
+        conda
     params:
         n_chunks=n_chunks + 1,
     shell:
@@ -198,6 +229,8 @@ rule make_fdr_d4:
     benchmark:
         "benchmarks/{sm}/fdr.d4.tsv"
     threads: 8
+    conda:
+        conda
     shell:
         """
         fibertools -v bed2d4 \
@@ -216,6 +249,8 @@ rule make_fdr_peaks:
     benchmark:
         "benchmarks/{sm}/fdr.peaks.tsv"
     threads: 8
+    conda:
+        conda
     shell:
         """
         fibertools -v bed2d4 \
@@ -231,6 +266,8 @@ rule fdr_bed:
     output:
         bed="results/{sm}/fdr.peaks.and.coverages.bed.gz",
     threads: 8
+    conda:
+        conda
     shell:
         """
         d4tools view {input.peaks} \
@@ -251,6 +288,8 @@ rule coverage_tracks:
         link="results/{sm}/trackHub/bw/link.bw",
         nuc="results/{sm}/trackHub/bw/nuc.bw",
     threads: 1
+    conda:
+        conda
     shell:
         """
         zcat {input.bed} | cut -f 1-4 > {output.bed}
@@ -275,6 +314,8 @@ rule fdr_tracks:
         bw="results/{sm}/trackHub/bw/fdr.{fdr}.bw",
         bed=temp("temp/{sm}/trackHub/bw/fdr.{fdr}.bed"),
     threads: 1
+    conda:
+        conda
     shell:
         """
         head -n 1 {input.fai} | awk '{{print $1"\t0\t1\t0"}}' > {output.bed}
@@ -299,6 +340,8 @@ rule trackhub:
     benchmark:
         "benchmarks/{sm}/trackhub.tsv"
     threads: 1
+    conda:
+        conda
     params:
         ref=ref_name,
     shell:
