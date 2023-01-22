@@ -115,8 +115,9 @@ rule model_input:
         """ 
         (samtools view \
           -s 0.2 -h -M -L {input.dhs} -@ {threads} {input.bam} \
+          | grep -v "^@PG"  \
           | head -n {params.n} \
-          | samtools view -u \
+          | samtools view -b \
           | ft -t {threads} extract --all - \
           | bgzip -@ {threads} \
           > {output.bed} ) || echo "random head error"
