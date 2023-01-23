@@ -20,12 +20,16 @@ data = pd.read_csv(config["manifest"], sep="\t", comment="#").set_index("sample"
 
 print(data.index)
 
+types = ["fdr", "acc", "link", "nuc"]
+types_to_col = {"fdr": 4, "acc": 5, "link": 6, "nuc": 7}
+
 
 wildcard_constraints:
     chrom="|".join(chroms),
     call="|".join(["msp", "m6a"]),
     chunk="|".join(chunks),
     sm="|".join(data.index),
+    types="|".join(types),
 
 
 localrules:
@@ -39,6 +43,8 @@ localrules:
     fdr_bed,
     fdr_tracks,
     trackhub,
+    apply_model,
+    sort_model,
 
 
 rule all:
@@ -179,7 +185,7 @@ rule apply_model:
         "benchmarks/{sm}/chunks/apply_model_{chunk}.tsv"
     threads: 1
     resources:
-        mem_mb=1024 * 24,
+        mem_mb=1024 * 32,
     conda:
         conda
     shell:
@@ -193,12 +199,12 @@ rule sort_model:
         bed=rules.apply_model.output.bed,
     output:
         bed=temp("temp/{sm}/chunks/{chunk}.sorted.bed"),
-    threads: 1
+    threads: 4
     conda:
         conda
     shell:
         """
-        sort -S 5G -k1,1 -k2,2n -k3,3n -k4,4 {input.bed} > {output.bed}
+        sort --parallel={threads} -S 2G -k1,1 -k2,2n -k3,3n -k4,4 {input.bed} > {output.bed}
         """
 
 
@@ -216,7 +222,7 @@ rule merge_model_results:
         n_chunks=n_chunks + 1,
     shell:
         """
-        sort --batch-size={params.n_chunks} -k1,1 -k2,2n -k3,3n -k4,4 -S 5G -m {input.beds} | uniq | bgzip -@ {threads} > {output.bed}
+        sort --parallel={threads} --batch-size={params.n_chunks} -k1,1 -k2,2n -k3,3n -k4,4 -S 1G -u -m {input.beds} | bgzip -@ {threads} > {output.bed}
         """
 
 
@@ -282,27 +288,17 @@ rule coverage_tracks:
         bed=rules.fdr_bed.output.bed,
         fai=ancient(f"{ref}.fai"),
     output:
-        bed=temp("temp/{sm}/trackHub/bw/cov.bed"),
-        fdr="results/{sm}/trackHub/bw/fdr.bw",
-        acc="results/{sm}/trackHub/bw/acc.bw",
-        link="results/{sm}/trackHub/bw/link.bw",
-        nuc="results/{sm}/trackHub/bw/nuc.bw",
+        bed=temp("temp/{sm}/trackHub/bw/{types}.cov.bed"),
+        bw="results/{sm}/trackHub/bw/{types}.bw",
     threads: 1
+    params:
+        col=lambda wc: types_to_col[wc.types],
     conda:
         conda
     shell:
         """
-        zcat {input.bed} | cut -f 1-4 > {output.bed}
-        bedGraphToBigWig {output.bed} {input.fai} {output.fdr}
-
-        zcat {input.bed} | cut -f 1-3,5 > {output.bed}
-        bedGraphToBigWig {output.bed} {input.fai} {output.acc}
-
-        zcat {input.bed} | cut -f 1-3,6 > {output.bed}
-        bedGraphToBigWig {output.bed} {input.fai} {output.link}
-
-        zcat {input.bed} | cut -f 1-3,7 > {output.bed}
-        bedGraphToBigWig {output.bed} {input.fai} {output.nuc}
+        zcat {input.bed} | cut -f 1,2,3,{params.col} > {output.bed}
+        bedGraphToBigWig {output.bed} {input.fai} {output.bw}
         """
 
 
@@ -331,10 +327,10 @@ rule trackhub:
         bw=expand(
             rules.fdr_tracks.output.bw, fdr=[70, 80, 90, 100, 110], allow_missing=True
         ),
-        fdr=rules.coverage_tracks.output.fdr,
-        acc=rules.coverage_tracks.output.acc,
-        link=rules.coverage_tracks.output.link,
-        nuc=rules.coverage_tracks.output.nuc,
+        fdr=expand(rules.coverage_tracks.output.bw, types="fdr", allow_missing=True),
+        acc=expand(rules.coverage_tracks.output.bw, types="acc", allow_missing=True),
+        link=expand(rules.coverage_tracks.output.bw, types="link", allow_missing=True),
+        nuc=expand(rules.coverage_tracks.output.bw, types="nuc", allow_missing=True),
     output:
         hub="results/{sm}/trackHub/hub.txt",
     benchmark:
