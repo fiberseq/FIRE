@@ -76,7 +76,7 @@ rule bed_chunks:
     shell:
         """
         fibertools split \
-          -g <(grep -w chr20 {input.fai} )\
+          -g {input.fai} \
           -o {output.beds}
         """
 
