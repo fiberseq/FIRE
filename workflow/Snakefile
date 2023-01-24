@@ -41,10 +41,11 @@ localrules:
     make_fdr_d4,
     make_fdr_peaks,
     fdr_bed,
-    fdr_tracks,
     trackhub,
-    apply_model,
-    sort_model,
+#fdr_tracks,
+#apply_model,
+#sort_model,
+#coverage_tracks,
 
 
 rule all:
@@ -75,7 +76,7 @@ rule bed_chunks:
     shell:
         """
         fibertools split \
-          -g {input.fai} \
+          -g <(grep -w chr20 {input.fai} )\
           -o {output.beds}
         """
 
@@ -92,7 +93,9 @@ rule extract_and_split:
     shell:
         """
         samtools view \
-          -b -M -L {input.bed} -@ {threads} {input.bam} \
+          -F 2308 -b -M \
+          -L {input.bed} \
+          -@ {threads} {input.bam} \
           | ft -t {threads} extract --all - \
           | bgzip -@ {threads} \
           > {output.bed}
@@ -141,7 +144,7 @@ rule model_input:
     shell:
         """ 
         (samtools view \
-          -s 0.2 -h -M -L {input.dhs} -@ {threads} {input.bam} \
+          -F 2308 -s 0.2 -h -M -L {input.dhs} -@ {threads} {input.bam} \
           | grep -v "^@PG"  \
           | head -n {params.n} \
           | samtools view -b \
@@ -202,6 +205,8 @@ rule sort_model:
     threads: 4
     conda:
         conda
+    resources:
+        mem_mb=1024 * 32,
     shell:
         """
         sort --parallel={threads} -S 2G -k1,1 -k2,2n -k3,3n -k4,4 {input.bed} > {output.bed}
@@ -272,12 +277,14 @@ rule fdr_bed:
     output:
         bed="results/{sm}/fdr.peaks.and.coverages.bed.gz",
     threads: 8
+    resources:
+        mem_mb=1024 * 32,
     conda:
         conda
     shell:
         """
         d4tools view {input.peaks} \
-          | bedtools sort \
+          | sort --parallel={threads} -S 2G -k1,1 -k2,2n -k3,3n -k4,4 \
           | bgzip -@ {threads} \
         > {output.bed}
         """
@@ -295,6 +302,8 @@ rule coverage_tracks:
         col=lambda wc: types_to_col[wc.types],
     conda:
         conda
+    resources:
+        mem_mb=1024 * 32,
     shell:
         """
         zcat {input.bed} | cut -f 1,2,3,{params.col} > {output.bed}
@@ -312,6 +321,8 @@ rule fdr_tracks:
     threads: 1
     conda:
         conda
+    resources:
+        mem_mb=1024 * 32,
     shell:
         """
         head -n 1 {input.fai} | awk '{{print $1"\t0\t1\t0"}}' > {output.bed}
