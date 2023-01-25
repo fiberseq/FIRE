@@ -42,10 +42,10 @@ localrules:
     make_fdr_peaks,
     fdr_bed,
     trackhub,
-#fdr_tracks,
+    coverage_tracks,
+    fdr_tracks,
 #apply_model,
 #sort_model,
-#coverage_tracks,
 
 
 rule all:
@@ -227,9 +227,18 @@ rule merge_model_results:
         n_chunks=n_chunks + 1,
     shell:
         """
-        sort --parallel={threads} --batch-size={params.n_chunks} -k1,1 -k2,2n -k3,3n -k4,4 -S 1G -u -m {input.beds} | bgzip -@ {threads} > {output.bed}
+        sort --parallel={threads} \
+          --batch-size={params.n_chunks} -k1,1 -k2,2n -k3,3n -k4,4 -S 1G -u -m {input.beds} \
+          | bgzip -@ {threads} \
+          > {output.bed}
+        #tabix -p bed {output.bed}
         """
 
+
+def get_load(wc):
+    if "all" in wc.sm:
+        return 1000
+    return 500
 
 rule make_fdr_d4:
     input:
@@ -239,7 +248,9 @@ rule make_fdr_d4:
         d4="results/{sm}/fdr.coverages.d4",
     benchmark:
         "benchmarks/{sm}/fdr.d4.tsv"
-    threads: 8
+    threads: 16
+    resources:
+        load=get_load,
     conda:
         conda
     shell:
@@ -259,7 +270,9 @@ rule make_fdr_peaks:
         d4="results/{sm}/fdr.peaks.d4",
     benchmark:
         "benchmarks/{sm}/fdr.peaks.tsv"
-    threads: 8
+    threads: 16
+    resources:
+        load=get_load,
     conda:
         conda
     shell:
@@ -346,7 +359,9 @@ rule trackhub:
         hub="results/{sm}/trackHub/hub.txt",
     benchmark:
         "benchmarks/{sm}/trackhub.tsv"
-    threads: 1
+    resources:
+        load=get_load,
+    threads: 16
     conda:
         conda
     params:
