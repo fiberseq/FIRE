@@ -1,0 +1,94 @@
+# m6A tracks
+track m6A
+compositeTrack on
+shortLabel m6A
+longLabel m6A
+type bigBed 9 +
+maxItems 100000
+
+    track m6A_pat
+    parent m6A
+    bigDataUrl bb/canu-plus-whatshap-paternal.txt.m6a.bb
+    shortLabel m6A_pat
+    longLabel m6A_pat
+    type bigBed 9 +
+    itemRgb on
+    visibility dense
+
+    track m6A_mat
+    parent m6A
+    bigDataUrl bb/canu-plus-whatshap-maternal.txt.m6a.bb
+    shortLabel m6A_mat
+    longLabel m6A_mat
+    type bigBed 9 +
+    itemRgb on
+    visibility dense
+
+    track m6A_unk
+    parent m6A
+    bigDataUrl bb/canu-plus-whatshap-unknown.txt.m6a.bb
+    shortLabel m6A_unk
+    longLabel m6A_unk
+    type bigBed 9 +
+    itemRgb on
+    visibility dense
+
+# cpg tracks
+track CpG
+compositeTrack on
+shortLabel CpG
+longLabel CpG
+type bigWig 0 1000
+maxItems 100000
+maxHeightPixels 50:50:1
+autoScale off
+viewLimits 0.0:1.0
+alwaysZero on
+
+    track cpg_mat
+    parent CpG
+    bigDataUrl bw/canu-plus-whatshap-maternal.cpg-proportion.bw
+    shortLabel cpg_mat
+    longLabel cpg_mat
+    type bigWig
+    visibility full
+
+    track cpg_pat
+    parent CpG
+    bigDataUrl bw/canu-plus-whatshap-paternal.cpg-proportion.bw
+    shortLabel cpg_pat
+    longLabel cpg_pat
+    type bigWig
+    visibility full
+
+    track cpg_unk
+    parent CpG
+    bigDataUrl bw/canu-plus-whatshap-unknown.cpg-proportion.bw
+    shortLabel cpg_unk
+    longLabel cpg_unk
+    type bigWig
+    visibility full
+
+
+
+# Peak calls
+track FDRpeaks
+compositeTrack on
+shortLabel FDRpeaks
+longLabel FDRpeaks
+type bigBed 9 +
+maxItems 100000
+
+    track FDRpeaks97
+    parent FDRpeaks
+    bigDataUrl bb/peaks.Phased_GM12878_all.FDR97.2010365224.bb
+    shortLabel FDRpeaks97
+    longLabel FDRpeaks97
+    type bigBed 3
+    visibility dense
+
+
+
+
+# more tracks 
+
