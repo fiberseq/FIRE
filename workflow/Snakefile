@@ -329,10 +329,8 @@ rule fdr_bed:
 rule chromosome_coverage_tracks:
     input:
         bed=rules.fdr_bed.output.bed,
-        fai=ancient(f"{ref}.fai"),
     output:
         bed=temp("temp/{sm}/trackHub/bw/{chrom}.{types}.cov.bed"),
-        bw="results/{sm}/trackHub/bw/{types}.bw",
     threads: 4
     params:
         col=lambda wc: types_to_col[wc.types],
@@ -343,7 +341,6 @@ rule chromosome_coverage_tracks:
     shell:
         """
         bgzip -cd -@ {threads} {input.bed} | cut -f 1,2,3,{params.col} > {output.bed}
-        bedGraphToBigWig {output.bed} {input.fai} {output.bw}
         """
 
 
@@ -359,8 +356,6 @@ rule coverage_tracks:
         bed=temp("temp/{sm}/trackHub/bw/{types}.cov.bed"),
         bw="results/{sm}/trackHub/bw/{types}.bw",
     threads: 4
-    params:
-        col=lambda wc: types_to_col[wc.types],
     conda:
         conda
     resources:
