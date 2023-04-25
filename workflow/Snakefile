@@ -386,7 +386,7 @@ rule chromosome_fdr_tracks:
 
 rule fdr_tracks:
     input:
-        bed=expand(rules.chromosome_fdr_tracks.output.bed, chrom=chroms, allow_missing=True),
+        beds=expand(rules.chromosome_fdr_tracks.output.bed, chrom=chroms, allow_missing=True),
         fai=ancient(f"{ref}.fai"),
     output:
         bw="results/{sm}/trackHub/bw/fdr.{fdr}.bw",
