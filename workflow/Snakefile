@@ -32,6 +32,7 @@ wildcard_constraints:
     chunk="|".join(chunks),
     sm="|".join(data.index),
     types="|".join(types),
+    fdr="\d+",
 
 
 localrules:
