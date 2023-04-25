@@ -268,7 +268,7 @@ rule make_fdr_d4:
         d4=temp("temp/{sm}/{chrom}.fdr.coverages.d4"),
         bed=temp("temp/{sm}/{chrom}.fdr.coverages.bed"),
     benchmark:
-        "benchmarks/{sm}/fdr.d4.tsv"
+        "benchmarks/{sm}/{chrom}.fdr.d4.tsv"
     threads: 16
     resources:
         load=get_load,
