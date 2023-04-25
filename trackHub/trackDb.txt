@@ -3,7 +3,7 @@ track m6A
 compositeTrack on
 shortLabel m6A
 longLabel m6A
-type bigBed 9 +
+type bigBed 12 +
 maxItems 100000
 
     track m6A_pat
@@ -11,7 +11,7 @@ maxItems 100000
     bigDataUrl bb/canu-plus-whatshap-paternal.txt.m6a.bb
     shortLabel m6A_pat
     longLabel m6A_pat
-    type bigBed 9 +
+    type bigBed 12 +
     itemRgb on
     visibility dense
 
@@ -20,7 +20,7 @@ maxItems 100000
     bigDataUrl bb/canu-plus-whatshap-maternal.txt.m6a.bb
     shortLabel m6A_mat
     longLabel m6A_mat
-    type bigBed 9 +
+    type bigBed 12 +
     itemRgb on
     visibility dense
 
@@ -29,7 +29,7 @@ maxItems 100000
     bigDataUrl bb/canu-plus-whatshap-unknown.txt.m6a.bb
     shortLabel m6A_unk
     longLabel m6A_unk
-    type bigBed 9 +
+    type bigBed 12 +
     itemRgb on
     visibility dense
 
@@ -85,6 +85,70 @@ maxItems 100000
     shortLabel FDRpeaks97
     longLabel FDRpeaks97
     type bigBed 3
+    visibility dense
+
+
+
+# Codependency Interact Track
+track Codependency
+type bigInteract
+visibility full
+shortLabel Codependency
+longLabel Codependency interact track
+itemRgb on
+scoreMin 175
+maxHeightPixels 300:150:20
+bigDataUrl bb/interact_track_GM12878.bb
+
+# GM12878 TSS - CAGE + Gencode v42
+track TSS
+compositeTrack on
+shortLabel TSS
+longLabel TSS CAGE + Gencode v42
+type bigBed 6
+maxItems 100000
+
+    track TSS_CAGE
+    parent TSS
+    bigDataUrl bb/cage_gencode42_TSS_intersect_formatted.bb
+    shortLabel TSS_CAGE
+    longLabel TSS CAGE + Gencode v42
+    type bigBed 6
+    itemRgb on
+    visibility dense
+
+# GM12878 CTCF Peak Paternal Xi Actuation %
+track CTCF_Xi
+compositeTrack on
+shortLabel CTCF_Xi
+longLabel CTCF Peak Paternal Xi Actuation
+type bigBed 6
+maxItems 100000
+
+    track CTCF_Xi_Act
+    parent CTCF_Xi
+    bigDataUrl bb/color-coded_CTCF_pat_act.bed.bb
+    shortLabel CTCF_Xi_Act
+    longLabel CTCF Peak Paternal Xi
+    type bigBed 6
+    spectrum on
+    visibility dense
+
+# GM12878 CTCF Peak Paternal Xi Actuation %
+track TSS_escape
+compositeTrack on
+shortLabel TSS_escape
+longLabel TSS Fiber-seq Escape Status
+type bigBed 9
+maxItems 100000
+
+    track TSS_escape_color
+    parent TSS_escape
+    bigDataUrl bb/color-coded_X_TSS.bb
+    shortLabel TSS_escape_color
+    longLabel CTSS Escape Status
+    type bigBed 9
+    itemRgb on
     visibility dense
 
 
