@@ -405,7 +405,7 @@ rule merged_fdr_track:
     shell:
         """
         cat {input.beds} > {output.bed}
-        tabix -p {output.bed}
+        tabix -p bed {output.bed}
         """
 
 rule chromosome_fdr_tracks:
