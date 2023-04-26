@@ -287,6 +287,7 @@ rule make_fdr_d4:
         tabix {input.bed} {wildcards.chrom} >> {output.bed}
         
         fibertools -v bed2d4 \
+            --chromosome {wildcards.chrom} \
             -g {input.fai} \
             -c score \
             {output.bed} {output.d4}
