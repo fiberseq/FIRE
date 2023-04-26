@@ -27,7 +27,9 @@ types = ["fdr", "acc", "link", "nuc"]
 types_to_col = {"fdr": 4, "acc": 5, "link": 6, "nuc": 7}
 
 def get_mem_mb(wildcards, attempt):
-    return attempt * 1024 * 32
+    if attempt < 3:
+        return attempt * 1024 * 32
+    return attempt * 1024 * 42
 
 wildcard_constraints:
     chrom="|".join(chroms),
