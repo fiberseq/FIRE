@@ -320,7 +320,7 @@ rule fdr_bed:
         peaks=rules.make_fdr_peaks.output.d4,
     output:
         bed="results/{sm}/chromosomes/{chrom}.fdr.peaks.and.coverages.bed.gz",
-    threads: 8
+    threads: 4
     resources:
         mem_mb=1024 * 32,
     conda:
@@ -428,7 +428,7 @@ rule trackhub:
         "benchmarks/{sm}/trackhub.tsv"
     resources:
         load=get_load,
-    threads: 16
+    threads: 4
     conda:
         conda
     params:
@@ -454,7 +454,7 @@ rule binned_fdr_calls:
         ),
     benchmark:
         "benchmarks/{sm}/{chrom}.fdr.d4.tsv"
-    threads: 16
+    threads: 4
     resources:
         load=get_load,
     conda:
