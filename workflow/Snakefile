@@ -238,7 +238,7 @@ rule merge_model_results:
         LC_ALL=C sort \
             --parallel={threads} \
             --batch-size={params.n_chunks} \
-            -k1,1 -k2,2n -k3,3n -k4,4 -m -u -S 10G\
+            -k1,1 -k2,2n -k3,3n -k4,4 -m -u \
             {input.beds} \
           | bgzip -@ {threads} \
           > {output.bed}
