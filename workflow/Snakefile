@@ -239,7 +239,6 @@ rule merge_model_results:
           --batch-size={params.n_chunks} -k1,1 -k2,2n -k3,3n -k4,4 -S 1G -u -m {input.beds} \
           | bgzip -@ {threads} \
           > {output.bed}
-        tabix -p bed {output.bed}
         """
 
 
@@ -279,7 +278,8 @@ rule make_fdr_d4:
         conda
     shell:
         """
-        tabix {input.bed} {wildcards.chrom} > {output.bed}
+        printf "{wildcards.chrom}\t0\t1\tfake\t1\t+\t0\t1\t230,230,230\t1.0\n" > {output.bed}
+        tabix {input.bed} {wildcards.chrom} >> {output.bed}
         
         fibertools -v bed2d4 \
             -g {input.fai} \
