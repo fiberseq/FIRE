@@ -98,6 +98,8 @@ rule extract_and_split:
     output:
         bed=temp("temp/{sm}/{chunk}.extract.all.bed.gz"),
     threads: 4
+    resources:
+        mem_mb=get_mem_mb,
     conda:
         conda
     shell:
@@ -282,6 +284,7 @@ rule make_fdr_d4:
     threads: 4
     resources:
         load=get_load,
+        mem_mb=get_mem_mb,
     conda:
         conda
     shell:
@@ -310,6 +313,7 @@ rule make_fdr_peaks:
     threads: 4
     resources:
         load=get_load,
+        mem_mb=get_mem_mb,
     conda:
         conda
     shell:
@@ -486,6 +490,7 @@ rule binned_fdr_calls:
     threads: 4
     resources:
         load=get_load,
+        mem_mb=get_mem_mb,
     conda:
         conda
     shell:
@@ -503,6 +508,8 @@ rule merge_binned_fdr_calls:
         bed=temp("temp/{sm}/chromosomes/{bin}.bed"),
         bb="results/{sm}/trackHub/bins/bin.{bin}.bed.bb",
     threads: 1
+    resources:
+        mem_mb=get_mem_mb,
     conda:
         conda
     shell:
