@@ -58,8 +58,8 @@ rule all:
     input:
         expand("results/{sm}/acc.model.results.bed.gz", sm=data.index),
         expand("results/{sm}/trackHub/hub.txt", sm=data.index),
-        expand("results/{sm}/fdr.peaks.d4", sm=data.index),
-        expand("results/{sm}/fdr.peaks.and.coverages.bed.gz", sm=data.index),
+        #expand("results/{sm}/fdr.peaks.d4", sm=data.index),
+        #expand("results/{sm}/fdr.peaks.and.coverages.bed.gz", sm=data.index),
         expand("results/{sm}/trackHub/bins/bin.{bin}.bed.bb", sm=data.index, bin=bins),
 
 
