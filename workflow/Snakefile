@@ -235,8 +235,7 @@ rule merge_model_results:
         n_chunks=n_chunks + 1,
     shell:
         """
-        #sort --parallel={threads} \
-        #  --batch-size={params.n_chunks} -k1,1 -k2,2n -k3,3n -k4,4 -S 1G -u -m \
+        #sort --parallel={threads} --batch-size={params.n_chunks} -k1,1 -k2,2n -k3,3n -k4,4 -S 1G -u -m 
         cat {input.beds} \
           | bgzip -@ {threads} \
           > {output.bed}
