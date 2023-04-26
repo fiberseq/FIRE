@@ -26,6 +26,8 @@ print(data.index)
 types = ["fdr", "acc", "link", "nuc"]
 types_to_col = {"fdr": 4, "acc": 5, "link": 6, "nuc": 7}
 
+def get_mem_mb(wildcards, attempt):
+    return attempt * 1024 * 32
 
 wildcard_constraints:
     chrom="|".join(chroms),
@@ -196,7 +198,7 @@ rule apply_model:
         "benchmarks/{sm}/chunks/apply_model_{chunk}.tsv"
     threads: 1
     resources:
-        mem_mb=1024 * 48,
+        mem_mb=get_mem_mb,
     conda:
         conda
     shell:
@@ -214,7 +216,7 @@ rule sort_model:
     conda:
         conda
     resources:
-        mem_mb=1024 * 32,
+        mem_mb=get_mem_mb,
     shell:
         """
         sort --parallel={threads} -S 2G -k1,1 -k2,2n -k3,3n -k4,4 {input.bed} -o {output.bed}
@@ -327,7 +329,7 @@ rule fdr_bed:
         bed="results/{sm}/chromosomes/{chrom}.fdr.peaks.and.coverages.bed.gz",
     threads: 4
     resources:
-        mem_mb=1024 * 32,
+        mem_mb=get_mem_mb,
     conda:
         conda
     shell:
@@ -350,7 +352,7 @@ rule chromosome_coverage_tracks:
     conda:
         conda
     resources:
-        mem_mb=1024 * 32,
+        mem_mb=get_mem_mb,
     shell:
         """
         bgzip -cd -@ {threads} {input.bed} | cut -f 1,2,3,{params.col} > {output.bed}
@@ -372,7 +374,7 @@ rule coverage_tracks:
     conda:
         conda
     resources:
-        mem_mb=1024 * 32,
+        mem_mb=get_mem_mb,
     shell:
         """
         cat {input.beds} > {output.bed}
@@ -395,7 +397,7 @@ rule merged_fdr_track:
     conda:
         conda
     resources:
-        mem_mb=1024 * 32,
+        mem_mb=get_mem_mb,
     shell:
         """
         cat {input.beds} > {output.bed}
@@ -411,7 +413,7 @@ rule chromosome_fdr_tracks:
     conda:
         conda
     resources:
-        mem_mb=1024 * 32,
+        mem_mb=get_mem_mb,
     shell:
         """
         bgzip -cd -@ {threads} {input.bed} | cut -f 1-4 | awk '$4 > {wildcards.fdr}' > {output.bed}
@@ -431,7 +433,7 @@ rule fdr_tracks:
     conda:
         conda
     resources:
-        mem_mb=1024 * 32,
+        mem_mb=get_mem_mb,
     shell:
         """
         head -n 1 {input.fai} | awk '{{print $1"\t0\t1\t0"}}' > {output.bed}
