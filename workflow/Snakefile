@@ -232,11 +232,14 @@ rule merge_model_results:
     conda:
         conda
     params:
-        n_chunks=n_chunks + 1,
+        n_chunks=n_chunks + 10,
     shell:
         """
-        #sort --parallel={threads} --batch-size={params.n_chunks} -k1,1 -k2,2n -k3,3n -k4,4 -S 1G -u -m 
-        cat {input.beds} | uniq \
+        sort \
+            --parallel={threads} --batch-size={params.n_chunks} \
+            -k1,1 -k2,2n -k3,3n -k4,4 -m \
+            {input.beds} \
+          | uniq \
           | bgzip -@ {threads} \
           > {output.bed}
         """
