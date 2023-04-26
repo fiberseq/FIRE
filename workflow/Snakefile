@@ -238,9 +238,8 @@ rule merge_model_results:
         # --parallel={threads}
         sort \
             --batch-size={params.n_chunks} \
-            -k1,1 -k2,2n -k3,3n -k4,4 -m \
+            -k1,1 -k2,2n -k3,3n -k4,4 -m -u \
             {input.beds} \
-          | uniq \
           | bgzip -@ {threads} \
           > {output.bed}
         """
