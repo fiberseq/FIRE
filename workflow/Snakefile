@@ -59,7 +59,7 @@ rule all:
         expand("results/{sm}/acc.model.results.bed.gz", sm=data.index),
         expand("results/{sm}/trackHub/hub.txt", sm=data.index),
         #expand("results/{sm}/fdr.peaks.d4", sm=data.index),
-        #expand("results/{sm}/fdr.peaks.and.coverages.bed.gz", sm=data.index),
+        expand("results/{sm}/fdr.peaks.and.coverages.bed.gz", sm=data.index),
         expand("results/{sm}/trackHub/bins/bin.{bin}.bed.bb", sm=data.index, bin=bins),
 
 
@@ -379,6 +379,28 @@ rule coverage_tracks:
         bedGraphToBigWig {output.bed} {input.fai} {output.bw}
         """
 
+
+rule merged_fdr_track:
+    input:
+        beds=expand(
+            rules.fdr_bed.output.bed,
+            chrom=chroms,
+            allow_missing=True,
+        ),
+        fai=ancient(f"{ref}.fai"),
+    output:
+        bed="results/{sm}/fdr.peaks.and.coverages.bed.gz",
+        tbi="results/{sm}/fdr.peaks.and.coverages.bed.gz.tbi",
+    threads: 4
+    conda:
+        conda
+    resources:
+        mem_mb=1024 * 32,
+    shell:
+        """
+        cat {input.beds} > {output.bed}
+        tabix -p {output.bed}
+        """
 
 rule chromosome_fdr_tracks:
     input:
