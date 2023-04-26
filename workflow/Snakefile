@@ -285,7 +285,6 @@ rule make_fdr_d4:
         "benchmarks/{sm}/{chrom}.fdr.d4.tsv"
     threads: 4
     resources:
-        load=get_load,
         mem_mb=get_mem_mb,
     conda:
         conda
@@ -314,7 +313,6 @@ rule make_fdr_peaks:
         "benchmarks/{sm}/{chrom}.fdr.peaks.tsv"
     threads: 4
     resources:
-        load=get_load,
         mem_mb=get_mem_mb,
     conda:
         conda
@@ -491,7 +489,6 @@ rule binned_fdr_calls:
         "benchmarks/{sm}/{chrom}.fdr.d4.tsv"
     threads: 4
     resources:
-        load=get_load,
         mem_mb=get_mem_mb,
     conda:
         conda
