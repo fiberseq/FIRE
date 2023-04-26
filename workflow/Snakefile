@@ -463,7 +463,7 @@ rule binned_fdr_calls:
         conda
     shell:
         """
-        (zcat {input.bed} | head -n 1; tabix {input.bed} {wildcards.chrom}) \
+        ((zcat {input.bed} | head -n 1) || true; tabix {input.bed} {wildcards.chrom}) \
             | fibertools -v bin - --outs {output.beds}
         """
 
