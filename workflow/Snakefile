@@ -235,8 +235,7 @@ rule merge_model_results:
         n_chunks=n_chunks + 10,
     shell:
         """
-        # 
-        sort \
+        LC_ALL=C sort \
             --parallel={threads} \
             --batch-size={params.n_chunks} \
             -k1,1 -k2,2n -k3,3n -k4,4 -m -u -S 10G\
@@ -334,9 +333,9 @@ rule fdr_bed:
     shell:
         """
         d4tools view {input.peaks} {wildcards.chrom} \
-          | sort --parallel={threads} -S 2G -k1,1 -k2,2n -k3,3n -k4,4 \
           | bgzip -@ {threads} \
         > {output.bed}
+        #sort --parallel={threads} -S 2G -k1,1 -k2,2n -k3,3n -k4,4 
         """
 
 
