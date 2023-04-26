@@ -257,8 +257,8 @@ rule index_model_results:
 
 def get_load(wc):
     if "all" in wc.sm:
-        return 1000
-    return 500
+        return 100
+    return 50
 
 
 rule make_fdr_d4:
