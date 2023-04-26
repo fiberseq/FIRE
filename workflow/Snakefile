@@ -310,9 +310,10 @@ rule make_fdr_peaks:
     shell:
         """
         fibertools -v bed2d4 \
-          -g {input.fai} \
-          -c score \
-          -q {input.d4} {output.d4}
+            --chromosome {wildcards.chrom} \
+            -g {input.fai} \
+            -c score \
+            -q {input.d4} {output.d4}
         """
 
 
