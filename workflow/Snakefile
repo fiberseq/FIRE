@@ -196,7 +196,7 @@ rule apply_model:
         "benchmarks/{sm}/chunks/apply_model_{chunk}.tsv"
     threads: 1
     resources:
-        mem_mb=1024 * 32,
+        mem_mb=1024 * 48,
     conda:
         conda
     shell:
