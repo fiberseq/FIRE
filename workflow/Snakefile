@@ -329,7 +329,7 @@ rule fdr_bed:
         conda
     shell:
         """
-        d4tools view {input.peaks} \
+        d4tools view {input.peaks} {wildcards.chrom} \
           | sort --parallel={threads} -S 2G -k1,1 -k2,2n -k3,3n -k4,4 \
           | bgzip -@ {threads} \
         > {output.bed}
