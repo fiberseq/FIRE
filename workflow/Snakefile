@@ -248,7 +248,6 @@ def get_model(wc):
 rule apply_model:
     input:
         bed=rules.extract_and_split.output.bed,
-        dhs=rules.dhs_null.output.bed,
         model=get_model,
     output:
         bed=temp("temp/{sm}/chunks/{chunk}.bed"),
