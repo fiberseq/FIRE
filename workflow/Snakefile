@@ -163,8 +163,8 @@ rule filter_model_input_by_coverage:
         """
         bedtools coverage -b {input.bam} -a {input.bed} -sorted > {output.bed}
         median=$(cat {output.tmp} | datamash median 4)
-        min=$(echo "$median" | awk '{print $1-3*sqrt($1)}')
-        max=$(echo "$median" | awk '{print $1-3*sqrt($1)}')
+        min=$(echo "$median" | awk '{{print $1-3*sqrt($1)}}')
+        max=$(echo "$median" | awk '{{print $1-3*sqrt($1)}}')
         echo $median $min $max 
         """
 
