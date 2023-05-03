@@ -152,18 +152,15 @@ rule model_input:
         dhs=rules.dhs_null.output.bed,
     output:
         bed=temp("temp/{sm}/small.extract.all.bed.gz"),
-    threads: 8
+    threads: 16
     params:
         n=500_000,
     conda:
         conda
     shell:
         """ 
-        (samtools view \
-          -F 2308 -s 0.2 -h -M -L {input.dhs} -@ {threads} {input.bam} \
-          | grep -v "^@PG"  \
-          | head -n {params.n} \
-          | samtools view -b \
+        (samtools view -F 2308 -u -M -L {input.dhs} -@ {threads} {input.bam} \
+          | samtools view -@ {threads} -s 0.01 -u \
           | ft -t {threads} extract --all - \
           | bgzip -@ {threads} \
           > {output.bed} ) || echo "random head error"
