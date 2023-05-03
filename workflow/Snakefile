@@ -178,9 +178,15 @@ rule make_model:
     threads: 60
     conda:
         conda
+    params:
+        n=100_000,
     shell:
         """
-        fibertools -t {threads} -v model --dhs {input.dhs} -o {output.model} {input.bed}
+        fibertools -t {threads} -v model \
+            -n {params.n}
+            -o {output.model} \
+            --dhs {input.dhs} \
+            {input.bed} 
         """
 
 
