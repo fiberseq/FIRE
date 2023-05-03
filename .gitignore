@@ -144,3 +144,7 @@ phasing/
 run_scripts/
 trackHub/
 trackHub_altius/
+XCI/
+altius/
+tmp*
+temp*
