@@ -134,6 +134,13 @@ benchmarks/
 old/
 results/
 temp/
-
-
-
+cluster_logs/
+codependency/
+compare_fdr_and_dnase/
+data/
+figures/
+old/
+phasing/
+run_scripts/
+trackHub/
+trackHub_altius/
