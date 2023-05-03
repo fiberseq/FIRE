@@ -187,7 +187,7 @@ rule make_model:
     shell:
         """
         fibertools -t {threads} -v model \
-            -n {params.n}
+            -n {params.n} \
             -o {output.model} \
             --dhs {input.dhs} \
             {input.bed} 
