@@ -172,7 +172,7 @@ rule filter_model_input_by_coverage:
 rule model_input:
     input:
         bam=lambda wc: data.loc[wc.sm, "bam"],
-        dhs=rules.dhs_null.output.bed,
+        dhs=rules.filter_model_input_by_coverage.output.bed,
     output:
         bed=temp("temp/{sm}/small.extract.all.bed.gz"),
     threads: 16
