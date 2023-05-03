@@ -48,6 +48,7 @@ localrules:
     model_input,
     make_model,
     merge_model_results,
+    model_bam,
     #make_fdr_d4,
     #make_fdr_peaks,
     fdr_bed,
