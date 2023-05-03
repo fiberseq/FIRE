@@ -169,6 +169,7 @@ rule filter_model_input_by_coverage:
             | awk -v min="$min" -v max="$max" '$5 > min && $5 < max' \
             | cut -f 1-4 \
             > {output.bed}
+        head {output.bed}
         """
 
 
