@@ -209,7 +209,7 @@ rule model_input:
     shell:
         """ 
         (samtools view -F 2308 -u -M -L {input.dhs} -@ {threads} {input.bam} \
-          | samtools view -@ {threads} -s 0.05 -u \
+          | samtools view -@ {threads} -s 0.25 -u \
           | ft -t {threads} extract --all - \
           | bgzip -@ {threads} \
           > {output.bed} ) || echo "random head error"
