@@ -150,13 +150,28 @@ rule dhs_null:
             bgzip -@ {threads} > {output.bed}
         """
 
+        
+rule model_bam:
+    input:
+        bed=rules.dhs_null.output.bed,
+        bam=lambda wc: data.loc[wc.sm, "bam"],
+    output:
+        bam=temp("temp/{sm}/dhs_and_null.bam"),
+    threads: 2
+    conda:
+        conda
+    shell:
+        """
+        samtools view -F 2308 -@ 16 -M -L {input.bed} --write-index {input.bam} -o {output.bam}
+        """
+
+
 rule filter_model_input_by_coverage:
     input:
         fai=ancient(f"{ref}.fai"),
         bed=rules.dhs_null.output.bed,
-        bam=lambda wc: data.loc[wc.sm, "bam"],
+        bam=rules.model_bam.output.bam,
     output:
-        #tmp=temp("results/{sm}/dhs_with_null_with_cov.bed"),
         bed="results/{sm}/dhs_with_null_cov_filtered.bed",
     threads: 2
     conda:
@@ -181,7 +196,7 @@ rule filter_model_input_by_coverage:
 
 rule model_input:
     input:
-        bam=lambda wc: data.loc[wc.sm, "bam"],
+        bam=rules.model_bam.output.bam,
         dhs=rules.filter_model_input_by_coverage.output.bed,
     output:
         bed=temp("temp/{sm}/small.extract.all.bed.gz"),
