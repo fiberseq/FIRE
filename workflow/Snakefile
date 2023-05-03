@@ -145,6 +145,7 @@ rule dhs_null:
             grep -vw "chrM" |
             grep -vw "chrY" |
             grep -vw "chrEBV" |
+            grep -vw "chrX" |
             bgzip -@ {threads} > {output.bed}
         """
 
