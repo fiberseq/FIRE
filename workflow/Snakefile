@@ -142,6 +142,9 @@ rule dhs_null:
                 cut -f 1-3 | sed 's/$/\tNULL/g' 
         ) |
             sort -k 1,1 -k2,2n --parallel={threads} -S 5G |
+            grep -vw "chrM" |
+            grep -vw "chrY" |
+            grep -vw "chrEBV" |
             bgzip -@ {threads} > {output.bed}
         """
 
