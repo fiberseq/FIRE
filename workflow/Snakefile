@@ -170,6 +170,7 @@ rule filter_model_input_by_coverage:
                 -b {input.bam} \
             | awk -v min="$min" -v max="$max" '$5 > min && $5 < max' \
             | cut -f 1-4 \
+            | sort -k 1,1 -k2,2n \
             > {output.bed}
         head {output.bed}
         """
