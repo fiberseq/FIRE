@@ -146,6 +146,7 @@ rule dhs_null:
             grep -vw "chrY" |
             grep -vw "chrEBV" |
             grep -vw "chrX" |
+            grep -v "_" |
             bgzip -@ {threads} > {output.bed}
         """
 
@@ -168,7 +169,7 @@ rule filter_model_input_by_coverage:
         echo $median $min $max 
         bedtools coverage -mean -sorted \
                 -g {input.fai} \
-                -a <(zcat {input.bed} | sort -V -k1,1 -k2,2 ) \
+                -a <(zcat {input.bed} | sort -V -k1,1 -k2,2 | grep -v "_") \
                 -b {input.bam} \
             | awk -v min="$min" -v max="$max" '$5 > min && $5 < max' \
             | cut -f 1-4 \
