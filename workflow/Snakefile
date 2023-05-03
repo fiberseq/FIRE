@@ -157,12 +157,12 @@ rule model_bam:
         bam=lambda wc: data.loc[wc.sm, "bam"],
     output:
         bam=temp("temp/{sm}/dhs_and_null.bam"),
-    threads: 2
+    threads: 16
     conda:
         conda
     shell:
         """
-        samtools view -F 2308 -@ 16 -M -L {input.bed} --write-index {input.bam} -o {output.bam}
+        samtools view -F 2308 -@ {threads} -M -L {input.bed} --write-index {input.bam} -o {output.bam}
         """
 
 
