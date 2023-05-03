@@ -166,7 +166,7 @@ rule filter_model_input_by_coverage:
         max=$(echo "$median" | awk '{{print $1+3*sqrt($1)}}')
         echo $median $min $max 
         bedtools coverage -a {input.bed} -b {input.bam} -sorted \
-            | echo | awk -v min="$min" -v max="$max" '$5 > min && $5 < max' \
+            | awk -v min="$min" -v max="$max" '$5 > min && $5 < max' \
             | cut -f 1-4 \
             > {output.bed}
         """
