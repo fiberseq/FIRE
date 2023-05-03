@@ -219,7 +219,7 @@ rule model_input:
 rule make_model:
     input:
         bed=rules.model_input.output.bed,
-        dhs=rules.dhs_null.output.bed,
+        dhs=rules.filter_model_input_by_coverage.output.bed,
     output:
         model=protected("results/{sm}/model.dat"),
     benchmark:
