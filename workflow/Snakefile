@@ -434,7 +434,7 @@ rule coverage_tracks:
         mem_mb=get_mem_mb,
     shell:
         """
-        cat {input.beds} | awk 'NF == 9' > {output.bed}
+        cat {input.beds} > {output.bed}
         bedGraphToBigWig {output.bed} {input.fai} {output.bw}
         """
 
