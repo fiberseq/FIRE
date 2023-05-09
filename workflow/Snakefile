@@ -567,6 +567,6 @@ rule merge_binned_fdr_calls:
         conda
     shell:
         """
-        cat {input.beds} | awk 'NR == 9' > {output.bed}
+        cat {input.beds} > {output.bed}
         bedToBigBed {output.bed} {input.fai} {output.bb}
         """
