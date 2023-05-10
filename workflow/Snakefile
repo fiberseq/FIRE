@@ -20,7 +20,7 @@ window_size = int(genome_len / n_chunks) + 1
 conda = "fiberseq-smk"
 bins = list(range(1, max_bins + 1))
 data = pd.read_csv(config["manifest"], sep="\t", comment="#").set_index("sample")
-
+haps = ["all", "hap1", "hap2", "unk"]
 print(data.index)
 
 types = ["fdr", "acc", "link", "nuc"]
@@ -40,6 +40,7 @@ wildcard_constraints:
     sm="|".join(data.index),
     types="|".join(types),
     fdr="\d+",
+    hp="|".join(haps),
 
 
 localrules:
