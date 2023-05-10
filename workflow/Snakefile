@@ -549,7 +549,7 @@ rule trackhub:
           -r {params.ref} \
           --sample {wildcards.sm} \
           -t results/{wildcards.sm}/trackHub \
-          {input.bed} {input.fai} \
+          {input.fai} \
           --bw {input.acc} {input.link} {input.nuc} {input.bw} {input.fdr}
         """
 
