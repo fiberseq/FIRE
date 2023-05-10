@@ -250,7 +250,10 @@ rule apply_model:
         bed=rules.extract_and_split.output.bed,
         model=get_model,
     output:
-        bed=temp("temp/{sm}/chunks/{chunk}.bed"),
+        haps=temp("temp/{sm}/chunks/all/{chunk}.bed"),
+        hap1=temp("temp/{sm}/chunks/hap1/{chunk}.bed"),
+        hap2=temp("temp/{sm}/chunks/hap2/{chunk}.bed"),
+        unk=temp("temp/{sm}/chunks/unk/{chunk}.bed"),
     benchmark:
         "benchmarks/{sm}/chunks/apply_model_{chunk}.tsv"
     threads: 1
@@ -260,7 +263,7 @@ rule apply_model:
         conda
     shell:
         """
-        fibertools -v model -m {input.model} -o {output.bed} {input.bed}
+        fibertools -v model -m {input.model} {input.bed} -o {output.all} -h {output.hap1} {output.hap2} {output.unk}
         """
 
 
