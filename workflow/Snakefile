@@ -272,7 +272,7 @@ rule apply_model:
         """
         fibertools -v model -m {input.model} {input.bed} \
             -o {output.haps} \
-            -h {output.hap1} {output.hap2} {output.unk}
+            --haps {output.hap1} {output.hap2} {output.unk}
         """
 
 
