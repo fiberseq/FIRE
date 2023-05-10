@@ -257,10 +257,10 @@ rule apply_model:
         bed=rules.extract_and_split.output.bed,
         model=get_model,
     output:
-        haps=temp("temp/{sm}/chunks/all/{chunk}.bed"),
-        hap1=temp("temp/{sm}/chunks/hap1/{chunk}.bed"),
-        hap2=temp("temp/{sm}/chunks/hap2/{chunk}.bed"),
-        unk=temp("temp/{sm}/chunks/unk/{chunk}.bed"),
+        haps=temp("temp/{sm}/all/chunks/{chunk}.bed"),
+        hap1=temp("temp/{sm}/hap1/chunks/{chunk}.bed"),
+        hap2=temp("temp/{sm}/hap2/chunks/{chunk}.bed"),
+        unk=temp("temp/{sm}/unk/chunks/{chunk}.bed"),
     benchmark:
         "benchmarks/{sm}/chunks/apply_model_{chunk}.tsv"
     threads: 1
@@ -278,9 +278,9 @@ rule apply_model:
 
 rule sort_model:
     input:
-        bed=rules.apply_model.output.bed,
+        bed="temp/{sm}/{hp}/chunks/{chunk}.bed",
     output:
-        bed=temp("temp/{sm}/chunks/{hp}/{chunk}.sorted.bed"),
+        bed=temp("temp/{sm}/{hp}/chunks/{chunk}.sorted.bed"),
     threads: 4
     conda:
         conda
