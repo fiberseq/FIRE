@@ -594,7 +594,7 @@ rule merge_binned_fdr_calls:
         conda
     shell:
         """
-        printf "{wildcards.chrom}\t0\t1\tfake\t100\t+\t0\t1\t230,230,230\n" > {output.bed}
+        printf "chr1\t0\t1\tfake\t100\t+\t0\t1\t230,230,230\n" > {output.bed}
         cat {input.beds} | awk 'NF == 9' >> {output.bed}
         bedToBigBed {output.bed} {input.fai} {output.bb}
         """
