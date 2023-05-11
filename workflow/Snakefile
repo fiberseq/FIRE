@@ -528,7 +528,7 @@ rule average_coverage:
     shell:
         """
         samtools depth -@ {threads} {input.bam} -r {params.chrom} \
-            | cut -f 1 \
+            | cut -f 3 \
             | datamash median 1 \
             > {output.cov}
         """
