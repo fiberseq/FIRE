@@ -57,6 +57,7 @@ localrules:
     coverage_tracks,
     fdr_tracks,
     sort_model,
+    average_coverage,
 
 
 # apply_model,
