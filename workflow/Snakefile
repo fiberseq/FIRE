@@ -526,8 +526,9 @@ rule average_coverage:
         chrom=chroms[0],
     shell:
         """
-        samtools depth -@ {threads} {input.bam} \
-            | datamash median 3 \
+        samtools depth -@ {threads} {input.bam} -r {params.chrom} \
+            | cut -f 1 \
+            | datamash median 1 \
             > {output.cov}
         """
 
