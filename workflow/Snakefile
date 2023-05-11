@@ -512,10 +512,29 @@ rule fdr_tracks:
         bedGraphToBigWig {output.bed} {input.fai} {output.bw}
         """
 
+rule average_coverage:
+    input:
+        bam=lambda wc: data.loc[wc.sm, "bam"],
+    output:
+        cov="results/{sm}/average.coverage.txt",
+    threads: 16
+    resources:
+        mem_mb=get_mem_mb,
+    conda:
+        conda
+    params:
+        chrom=chroms[0],
+    shell:
+        """
+        samtools depth -@ {threads} {input.bam} \
+            | datamash median 3 \
+            > {output.cov}
+        """
 
 rule trackhub:
     input:
         fai=ancient(f"{ref}.fai"),
+        cov=rules.average_coverage.output.cov,
         bed=expand(rules.merge_model_results.output.bed, hp=haps, allow_missing=True),
         bw=expand(
             rules.fdr_tracks.output.bw, hp=haps, fdr=[90, 100], allow_missing=True
@@ -549,6 +568,7 @@ rule trackhub:
           -r {params.ref} \
           --sample {wildcards.sm} \
           -t results/{wildcards.sm}/trackHub \
+          --average-coverage $(cat {input.cov}) \
           {input.fai} \
           --bw {input.acc} {input.link} {input.nuc} {input.bw} {input.fdr}
         """
@@ -576,7 +596,6 @@ rule binned_fdr_calls:
         ((zcat {input.bed} | head -n 1) || true; tabix {input.bed} {wildcards.chrom}) \
             | fibertools -v bin - --outs {output.beds}
         """
-
 
 rule merge_binned_fdr_calls:
     input:
