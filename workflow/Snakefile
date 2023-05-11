@@ -525,9 +525,11 @@ rule average_coverage:
         conda
     params:
         chrom=chroms[0],
+        first_n=100_000_000,
     shell:
         """
         samtools depth -@ {threads} {input.bam} -r {params.chrom} \
+            | head -n {params.first_n} \
             | cut -f 3 \
             | datamash median 1 \
             > {output.cov}
