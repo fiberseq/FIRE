@@ -525,7 +525,7 @@ rule average_coverage:
         conda
     params:
         chrom=chroms[0],
-        first_n=100_000_000,
+        first_n=1_000_000_000,
     shell:
         """
         samtools depth -@ {threads} {input.bam} -r {params.chrom} \
