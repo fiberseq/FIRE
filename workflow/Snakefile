@@ -21,6 +21,7 @@ conda = "fiberseq-smk"
 bins = list(range(1, max_bins + 1))
 data = pd.read_csv(config["manifest"], sep="\t", comment="#").set_index("sample")
 haps = ["all", "hap1", "hap2", "unk"]
+not_all = ["hap1", "hap2", "unk"]
 print(data.index)
 
 types = ["fdr", "acc", "link", "nuc"]
@@ -31,6 +32,12 @@ def get_mem_mb(wildcards, attempt):
     if attempt < 3:
         return attempt * 1024 * 32
     return attempt * 1024 * 48
+
+
+def get_large_mem_mb(wildcards, attempt):
+    if attempt < 3:
+        return attempt * 1024 * 32
+    return attempt * 1024 * 64
 
 
 wildcard_constraints:
@@ -75,7 +82,7 @@ rule all:
             "results/{sm}/trackHub/bins/{hp}.bin.{bin}.bed.bb",
             sm=data.index,
             bin=bins,
-            hp=haps,
+            hp=not_all,
         ),
 
 
@@ -513,6 +520,7 @@ rule fdr_tracks:
         bedGraphToBigWig {output.bed} {input.fai} {output.bw}
         """
 
+
 rule average_coverage:
     input:
         bam=lambda wc: data.loc[wc.sm, "bam"],
@@ -534,6 +542,7 @@ rule average_coverage:
             | datamash median 1 \
             > {output.cov}
         """
+
 
 rule trackhub:
     input:
@@ -592,7 +601,7 @@ rule binned_fdr_calls:
         "benchmarks/{sm}/{hp}/{chrom}.fdr.d4.tsv"
     threads: 4
     resources:
-        mem_mb=get_mem_mb,
+        mem_mb=get_large_mem_mb,
     conda:
         conda
     shell:
@@ -600,6 +609,7 @@ rule binned_fdr_calls:
         ((zcat {input.bed} | head -n 1) || true; tabix {input.bed} {wildcards.chrom}) \
             | fibertools -v bin - --outs {output.beds}
         """
+
 
 rule merge_binned_fdr_calls:
     input:
