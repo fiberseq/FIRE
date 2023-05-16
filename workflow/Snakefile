@@ -73,8 +73,7 @@ localrules:
 rule all:
     input:
         expand("results/{sm}/{hp}/acc.model.results.bed.gz", sm=data.index, hp=haps),
-        expand("results/{sm}/trackHub/hub.txt", sm=data.index, hp=haps),
-        #expand("results/{sm}/fdr.peaks.d4", sm=data.index),
+        expand("results/{sm}/trackHub/hub.txt", sm=data.index),
         expand(
             "results/{sm}/{hp}/fdr.peaks.and.coverages.bed.gz", sm=data.index, hp=haps
         ),
