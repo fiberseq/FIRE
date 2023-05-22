@@ -148,3 +148,5 @@ XCI/
 altius/
 tmp*
 temp*
+config/**
+.test/**

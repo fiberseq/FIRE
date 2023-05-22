@@ -85,8 +85,15 @@ maxItems 100000
     shortLabel FDRpeaks97
     longLabel FDRpeaks97
     type bigBed 3
-    visibility dense
+    visibility hide
 
+    track FDRpeaks_10_percent
+    parent FDRpeaks
+    bigDataUrl bb/peaks.GM12878_130X_10_percent.bb
+    shortLabel FDRpeaks_10_percent
+    longLabel FDRpeaks_10_percent
+    type bigBed 3
+    visibility dense
 
 
 # Codependency Interact Track
@@ -151,7 +158,22 @@ maxItems 100000
     itemRgb on
     visibility dense
 
+# GM12878 CTCF footprinting color-coded by Xi
+track Xi_CTCF
+compositeTrack on
+shortLabel Xi_CTCF_footprints_color
+longLabel Xi CTCF footprints color-coded
+type bigBed 9
+maxItems 100000
 
+    track Xi_CTCF_footprint_color
+    parent Xi_CTCF
+    bigDataUrl bb/GM12878_Xi_CTCF_footprints.bb
+    shortLabel Xi_CTCF_footprints_color
+    longLabel Xi CTCF footprints color-coded
+    type bigBed 9
+    itemRgb on
+    visibility dense
 
 
 # more tracks 
