@@ -289,8 +289,8 @@ rule merge_binned_fdr_calls:
 # peak calling
 rule peak_calls_per_chromosome:
     input:
-        bed=rules.merged_fdr_track.output.bed,
-        tbi=rules.merged_fdr_track.output.tbi,
+        bed=rules.merge_model_results.output.bed,
+        tbi=rules.index_model_results.output.tbi,
     output:
         bed="temp/{sm}/{hp}/{chrom}.peak.calls.bed",
     benchmark:
@@ -299,8 +299,8 @@ rule peak_calls_per_chromosome:
     conda:
         conda
     params:
-        script=workflow.source_path("../scripts/qc/smooth-and-peak-call.tcsh"),
-        details=workflow.source_path("../scripts/qc/per-chrom-peakcall-details.tcsh"),
+        script=workflow.source_path("../scripts/smooth-and-peak-call.tcsh"),
+        details=workflow.source_path("../scripts/per-chrom-peakcall-details.tcsh"),
         fdr=80,
     shell:
         """
