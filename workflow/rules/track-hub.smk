@@ -321,6 +321,9 @@ rule merge_peak_calls:
         conda
     shell:
         """
-        cat {input.beds} > {output.bed}
+        printf \
+            "chromosome\tstart\tstop\tID\tAvgFDR\tSumFDR\tMaxFDR\tWaveletSummit\tFDR_at_WaveletSummit\tSmooth_at_WaveletSummit\n" \
+        > {output.bed}
+        cat {input.beds} >> {output.bed}
         """
 
