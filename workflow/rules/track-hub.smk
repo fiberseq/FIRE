@@ -302,9 +302,10 @@ rule peak_calls_per_chromosome:
         conda
     params:
         script=workflow.source_path("../scripts/qc/smooth-and-peak-call.tcsh"),
+        fdr=100,
     shell:
         """
         chmod +x {params.script}
-        {params.script} {wildcards.chrom} {input.bed} {output.bed}
+        {params.script} {wildcards.chrom} {input.bed} {params.fdr} {output.bed}
         """
 
