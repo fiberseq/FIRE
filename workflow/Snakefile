@@ -89,3 +89,4 @@ rule all:
             bin=bins,
             hp=not_all,
         ),
+        expand(rules.merge_peak_calls.output.bed, sm=data.index, hp=haps),
