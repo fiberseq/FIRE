@@ -29,7 +29,7 @@ endif
 mkdir -p $tmpd
 
 # create values per base
-bedextract $chrom $bed_sorted \
+tabix $bed_sorted $chrom \
   | awk 'BEGIN {s=$2} ; { while(s<$3) { print $4; s+=1 } }' \
   | tee $tmpd/$output:t.$chrom.perbase \
   | modwt --operation smooth --level $waveletlvl --to-stdout --boundary $boundary_type --filter $filter_type - \

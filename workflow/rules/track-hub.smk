@@ -284,3 +284,27 @@ rule merge_binned_fdr_calls:
         cat {input.beds} | awk 'NF == 9' >> {output.bed}
         bedToBigBed {output.bed} {input.fai} {output.bb}
         """
+
+
+
+
+# peak calling 
+rule peak_calls_per_chromosome:
+    input:
+        bed=rules.merge_model_results.output.bed,
+        tbi=rules.index_model_results.output.tbi,
+    output:
+        bed="temp/{sm}/{hp}/{chrom}.peak.calls.bed",
+    benchmark:
+        "benchmarks/{sm}/{hp}/{chrom}.peak.calls.tsv"
+    threads: 1
+    conda:
+        conda
+    params:
+        script=workflow.source_path("../scripts/qc/smooth-and-peak-call.tcsh"),
+    shell:
+        """
+        chmod +x {params.script}
+        {params.script} {wildcards.chrom} {input.bed} {output.bed}
+        """
+
