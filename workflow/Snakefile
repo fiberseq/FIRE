@@ -39,10 +39,12 @@ def get_large_mem_mb(wildcards, attempt):
         return attempt * 1024 * 32
     return attempt * 1024 * 64
 
+
 def get_load(wc):
     if "all" in wc.sm:
         return 100
     return 50
+
 
 wildcard_constraints:
     chrom="|".join(chroms),
@@ -53,9 +55,11 @@ wildcard_constraints:
     fdr="\d+",
     hp="|".join(haps),
 
+
 include: "rules/train-model.smk"
 include: "rules/apply-model.smk"
 include: "rules/track-hub.smk"
+
 
 localrules:
     bed_chunks,
@@ -70,6 +74,7 @@ localrules:
     fdr_tracks,
     sort_model,
     average_coverage,
+
 
 rule all:
     input:

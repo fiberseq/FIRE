@@ -286,9 +286,7 @@ rule merge_binned_fdr_calls:
         """
 
 
-
-
-# peak calling 
+# peak calling
 rule peak_calls_per_chromosome:
     input:
         bed=rules.merge_model_results.output.bed,
@@ -308,4 +306,3 @@ rule peak_calls_per_chromosome:
         chmod +x {params.script}
         {params.script} {wildcards.chrom} {input.bed} {params.fdr} {output.bed}
         """
-
