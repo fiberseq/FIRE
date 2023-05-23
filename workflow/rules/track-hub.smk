@@ -289,8 +289,8 @@ rule merge_binned_fdr_calls:
 # peak calling
 rule peak_calls_per_chromosome:
     input:
-        bed=rules.merge_model_results.output.bed,
-        tbi=rules.index_model_results.output.tbi,
+        bed=rules.merged_fdr_track.output.bed,
+        tbi=rules.merged_fdr_track.output.tbi,
     output:
         bed="temp/{sm}/{hp}/{chrom}.peak.calls.bed",
     benchmark:
