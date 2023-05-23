@@ -36,8 +36,6 @@ def get_mem_mb(wildcards, attempt):
 
 
 def get_large_mem_mb(wildcards, attempt):
-    if attempt < 3:
-        return attempt * 1024 * 32
     return attempt * 1024 * 64
 
 
