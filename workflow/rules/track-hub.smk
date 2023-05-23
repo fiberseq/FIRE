@@ -302,8 +302,6 @@ rule peak_calls_per_chromosome:
         script=workflow.source_path("../scripts/smooth-and-peak-call.tcsh"),
         details=workflow.source_path("../scripts/per-chrom-peakcall-details.tcsh"),
         fdr=80,
-    resources:
-        mem_mb=get_large_mem_mb,
     shell:
         """
         chmod +x {params.script} {params.details}
