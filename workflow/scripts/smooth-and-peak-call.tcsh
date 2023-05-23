@@ -37,6 +37,8 @@ tabix $bed_sorted $chrom \
   | modwt --operation smooth --level $waveletlvl --to-stdout --boundary $boundary_type --filter $filter_type - \
  >! $tmpd/$output:t.$chrom.waves
 
+echo "Waves made"
+
 # $0:h/per-chrom-peakcall-details.tcsh 
 $details \
   $tmpd \
