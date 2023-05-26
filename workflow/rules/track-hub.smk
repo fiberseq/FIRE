@@ -343,8 +343,8 @@ rule clustering_vs_null:
         bgzip -cd -@{threads} {input.bed} | awk '$5<=10' | cut -f 1-3 > {output.tmp}
         bedtools shuffle -chrom -i {output.tmp} -g {input.fai} > {output.null}
 
-        ( bedtools genomecov -bg -i {output.tmp} -f {input.fai} | sed 's/$/\\tReal/g' ; \
-          bedtools genomecov -bg -i {output.null} -f {input.fai} | sed 's/$/\\tNull/g' ) \
+        ( bedtools genomecov -bg -i {output.tmp} -g {input.fai} | sed 's/$/\\tReal/g' ; \
+          bedtools genomecov -bg -i {output.null} -g {input.fai} | sed 's/$/\\tNull/g' ) \
             | bedtools sort \
             | bgzip -@ {threads} \
         > {output.bed}
