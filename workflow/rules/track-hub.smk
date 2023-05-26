@@ -327,3 +327,27 @@ rule merge_peak_calls:
         cat {input.beds} >> {output.bed}
         """
 
+rule clustering_vs_null:
+    input:
+        acc=expand(rules.merge_model_results.output.bed, hap="all", allow_missing=True),
+        fai=ancient(f"{ref}.fai"),
+    output:
+        tmp=temp("temp/{sm}/acc.calls.bed"),
+        null=temp("temp/{sm}/null.calls.bed"),
+        bed="results/{sm}/clustering-vs-null.bed.gz",
+    threads: 1
+    conda:
+        conda
+    shell:
+        """
+        bgzip -cd -@{threads} {input.bed} | head -n 1000 | awk '$5<=10' | cut -f 1-3 > {output.tmp}
+        bedtools shuffle -chrom -i {output.tmp} -g {input.fai} > {output.null}
+
+        ( bedtools genomecov -bg -i {output.tmp} -f {input.fai} | sed 's/$/\\tReal/g' ; \
+          bedtools genomecov -bg -i {output.null} -f {input.fai} | sed 's/$/\\tNull/g' ) \
+            | bedtools sort \
+            | bgzip -@ {threads} \
+        > {output.bed}
+        """
+
+

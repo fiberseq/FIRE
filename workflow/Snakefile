@@ -89,3 +89,4 @@ rule all:
             hp=not_all,
         ),
         expand(rules.merge_peak_calls.output.bed, sm=data.index, hp=not_unk),
+        expand(rules.clustering_vs_null.output.bed, sm=data.index),
