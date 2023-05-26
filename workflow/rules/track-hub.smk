@@ -329,7 +329,7 @@ rule merge_peak_calls:
 
 rule clustering_vs_null:
     input:
-        acc=expand(rules.merge_model_results.output.bed, hp="all", allow_missing=True),
+        bed=expand(rules.merge_model_results.output.bed, hp="all", allow_missing=True),
         fai=ancient(f"{ref}.fai"),
     output:
         tmp=temp("temp/{sm}/acc.calls.bed"),
