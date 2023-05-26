@@ -335,7 +335,7 @@ rule clustering_vs_null:
         tmp=temp("temp/{sm}/acc.calls.bed"),
         null=temp("temp/{sm}/null.calls.bed"),
         bed="results/{sm}/clustering-vs-null.bed.gz",
-    threads: 1
+    threads: 8
     conda:
         conda
     shell:
