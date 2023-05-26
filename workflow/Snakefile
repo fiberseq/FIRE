@@ -73,6 +73,7 @@ localrules:
     fdr_tracks,
     sort_model,
     average_coverage,
+    clustering_vs_null,
 
 
 rule all:
