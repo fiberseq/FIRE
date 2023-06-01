@@ -350,4 +350,24 @@ rule clustering_vs_null:
         > {output.bed}
         """
 
+def my_groupby(gdf):
+    real=gdf[gdf[5] == "Real"]
+    null=gdf[gdf[5] == "Null"]
+    return real.length.sum() - null.length.sum()
+
+rule percent_in_clusters:
+    input:
+        bed=rules.clustering_vs_null.output.bed,
+    output:
+        bed="results/{sm}/percent-in-cluster.txt",
+    threads: 8
+    conda:
+        conda
+    run:
+        import pandas as pd
+        df = pd.read_csv(input.bed, sep="\t", header=None)
+        df["length"] = df[2] - df[1]
+        df = df.groupby(4).apply(my_groupby).reset_index()
+        print(df)
+
 

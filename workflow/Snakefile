@@ -74,6 +74,7 @@ localrules:
     sort_model,
     average_coverage,
     clustering_vs_null,
+    percent_in_clusters,
 
 
 rule all:
