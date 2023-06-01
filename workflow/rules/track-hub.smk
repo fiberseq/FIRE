@@ -359,7 +359,7 @@ rule percent_in_clusters:
     input:
         bed=rules.clustering_vs_null.output.bed,
     output:
-        bed="results/{sm}/percent-in-cluster.txt",
+        bed="results/{sm}/percent-in-clusters.txt",
     threads: 8
     run:
         import pandas as pd
