@@ -174,7 +174,7 @@ rule fdr_tracks:
 
 rule average_coverage:
     input:
-        bam=lambda wc: data.loc[wc.sm, "bam"],
+        bam=ancient(lambda wc: data.loc[wc.sm, "bam"]),
     output:
         cov="results/{sm}/average.coverage.txt",
     threads: 16
