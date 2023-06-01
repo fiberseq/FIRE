@@ -26,7 +26,7 @@ rule bed_chunks:
 
 rule extract_and_split:
     input:
-        bam=lambda wc: data.loc[wc.sm, "bam"],
+        bam=ancient(lambda wc: data.loc[wc.sm, "bam"]),
         bed="temp/{sm}/chunks/{chunk}.chunk.bed",
     output:
         bed=temp("temp/{sm}/{chunk}.extract.all.bed.gz"),
