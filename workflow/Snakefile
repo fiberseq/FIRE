@@ -92,3 +92,4 @@ rule all:
         ),
         expand(rules.merge_peak_calls.output.bed, sm=data.index, hp=not_unk),
         expand(rules.clustering_vs_null.output.bed, sm=data.index),
+        expand(rules.percent_in_clusters.output.bed, sm=data.index),
