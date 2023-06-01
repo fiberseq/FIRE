@@ -361,8 +361,6 @@ rule percent_in_clusters:
     output:
         bed="results/{sm}/percent-in-cluster.txt",
     threads: 8
-    conda:
-        conda
     run:
         import pandas as pd
         df = pd.read_csv(input.bed, sep="\t", header=None)
