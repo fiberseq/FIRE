@@ -8,7 +8,7 @@ def my_groupby(gdf):
 
 bed=sys.argv[1]
 df = pd.read_csv(bed, sep="\t", header=None)
-df.columns = c["ct", "st", "en", "cov", "case"]
+df.columns = ["ct", "st", "en", "cov", "case"]
 df["length"] = df.en - df.st
 print(df)
 df = df.groupby("cov").apply(my_groupby).reset_index()
