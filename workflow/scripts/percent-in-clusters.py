@@ -16,3 +16,5 @@ df = df.groupby("cov").apply(my_groupby).reset_index()
 print(df)
 over_expected = df[0][df[0]>0].sum()
 print(f"{over_expected/real_bp:%}\n")
+
+open(sys.argv[2], "w").write(f"percent-in-peaks\n{over_expected/real_bp:%}\n")
