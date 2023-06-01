@@ -4,7 +4,7 @@ import sys
 def my_groupby(gdf):
     real=gdf[gdf.case == "Real"]
     null=gdf[gdf.case == "Null"]
-    return (real.length*real.cov).sum() - (null.length*real.cov).sum()
+    return (real.length*real["cov"]).sum() - (null.length*real["cov"]).sum()
 
 bed=sys.argv[1]
 df = pd.read_csv(bed, sep="\t", header=None)
