@@ -9,5 +9,6 @@ def my_groupby(gdf):
 bed=sys.argv[1]
 df = pd.read_csv(bed, sep="\t", header=None)
 df["length"] = df[2] - df[1]
+print(df)
 df = df.groupby([4]).apply(my_groupby).reset_index()
 print(df)
