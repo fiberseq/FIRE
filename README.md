@@ -1,4 +1,4 @@
-# FIRE: Fiber-seq Implicated Regulatory Elements
+# 🔥 FIRE: Fiber-seq Implicated Regulatory Elements
 A pipeline for calling Fiber-seq Implicated Regulatory Elements (FIREs) on single molecules.
 
 ## Install
