@@ -398,7 +398,7 @@ rule n_peaks:
         txt=rules.percent_in_clusters.output.txt,
         bed=expand(rules.merge_peak_calls.output.bed, hp="all", allow_missing=True),
     output:
-        bed="results/{sm}/FDR.peaks.bed",
+        bed="results/{sm}/FIRE.peaks.bed",
     threads: 8
     conda:
         conda
