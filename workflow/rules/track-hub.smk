@@ -286,9 +286,32 @@ rule merge_binned_fdr_calls:
         """
 
 
-rule clustering_vs_null:
+
+
+rule fire_sites:
     input:
         bed=expand(rules.merge_model_results.output.bed, hp="all", allow_missing=True),
+    output:
+        bed="results/{sm}/FiREs.bed.gz",
+    threads: 8
+    conda:
+        conda
+    params:
+        min_fdr=min_fdr,
+    shell:
+        """
+        bgzip -cd -@{threads} {input.bed} \
+            | awk '$5<={params.min_fdr}' \
+            | bgzip -@{threads} \
+            > {output.bed}
+        """
+
+
+
+
+rule clustering_vs_null:
+    input:
+        bed=rules.fire_sites.output.bed,
         fai=ancient(f"{ref}.fai"),
     output:
         tmp=temp("temp/{sm}/acc.calls.bed"),
@@ -301,7 +324,7 @@ rule clustering_vs_null:
         min_fdr=min_fdr,
     shell:
         """
-        bgzip -cd -@{threads} {input.bed} | awk '$5<={params.min_fdr}' | cut -f 1-3 > {output.tmp}
+        bgzip -cd -@{threads} {input.bed} | cut -f 1-3 > {output.tmp}
         bedtools shuffle -chrom -i {output.tmp} -g {input.fai} > {output.null}
 
         ( bedtools genomecov -bg -i {output.tmp} -g {input.fai} | sed 's/$/\\tReal/g' ; \
