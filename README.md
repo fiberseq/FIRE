@@ -1,7 +1,7 @@
-# fiberseq-fdr
-A pipeline for making fiberseq FDR calls for MSPs
+# FIRE: Fiber-seq Implicated Regulatory Elements
+A pipeline for calling Fiber-seq Implicated Regulatory Elements (FIREs) on single molecules.
 
-## install
+## Install
 ```bash
 # make fibertools env for running snakemake
 mamba env update -n fibertools --file env.yaml
@@ -13,7 +13,7 @@ conda activate fibertools
 fibertools -h
 ```
 
-To get the latest fibertools without rebuiling the whole env you can do:
+To get the latest fibertools without rebuilding the whole env you can do:
 ```bash
-yes | pip uninstall fibertoolds && pip install git+ssh://git@github.com/mrvollger/fibertools.git; fibertools -h
+yes | pip uninstall fibertools && pip install git+ssh://git@github.com/mrvollger/fibertools.git; fibertools -h
 ```
