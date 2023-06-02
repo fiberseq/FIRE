@@ -405,6 +405,5 @@ rule n_peaks:
     shell:
         """
         MIN_FDR=$(hck -F min_fdr {input.txt} | tail -n 1)
-        head -n 1 {input.bed} > {output.bed}
-        awk -v min_fdr=$MIN_FDR '$7 >= min_fdr' {input.bed} >> {output.bed}
+        awk -v min_fdr=$MIN_FDR '$7 >= min_fdr' {input.bed} > {output.bed}
         """
