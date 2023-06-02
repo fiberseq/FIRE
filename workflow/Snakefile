@@ -87,7 +87,7 @@ rule all:
             "results/{sm}/{hp}/fdr.peaks.and.coverages.bed.gz", sm=data.index, hp=haps
         ),
         expand(
-            "results/{sm}/trackHub/bins/{hp}.bin.{bin}.bed.bb",
+            rules.merge_binned_fdr_calls.output.bb,
             sm=data.index,
             bin=bins,
             hp=not_all,
