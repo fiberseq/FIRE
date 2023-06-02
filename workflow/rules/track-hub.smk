@@ -353,7 +353,7 @@ rule clustering_vs_null:
 rule percent_in_clusters:
     input:
         bed=rules.clustering_vs_null.output.bed,
-        fdr=rules.merged_fdr_track.output.bed,
+        fdr=expand(rules.merged_fdr_track.output.bed, hp="all", allow_missing=True),
     output:
         bed="results/{sm}/percent-in-clusters.txt",
     threads: 8
