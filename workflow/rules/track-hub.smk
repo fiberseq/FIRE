@@ -350,22 +350,20 @@ rule clustering_vs_null:
         > {output.bed}
         """
 
-def my_groupby(gdf):
-    real=gdf[gdf[5] == "Real"]
-    null=gdf[gdf[5] == "Null"]
-    return real.length.sum() - null.length.sum()
-
 rule percent_in_clusters:
     input:
         bed=rules.clustering_vs_null.output.bed,
+        fdr=rules.merged_fdr_track.output.bed,
     output:
         bed="results/{sm}/percent-in-clusters.txt",
     threads: 8
-    run:
-        import pandas as pd
-        df = pd.read_csv(input.bed, sep="\t", header=None)
-        df["length"] = df[2] - df[1]
-        df = df.groupby(4).apply(my_groupby).reset_index()
-        print(df)
+    conda:
+        conda
+    params:
+        script=workflow.source_path("../scripts/percent-in-cluster.py"),
+    shell:
+        """
+        python {params.script} {input.bed} {input.fdr} {output.bed}
+        """
 
 
