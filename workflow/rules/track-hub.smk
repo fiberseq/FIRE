@@ -363,7 +363,7 @@ rule percent_in_clusters:
     conda:
         conda
     params:
-        script=workflow.source_path("../scripts/percent-in-cluster.py"),
+        script=workflow.source_path("../scripts/percent-in-clusters.py"),
     shell:
         """
         python {params.script} {input.bed} {input.fdr} {output.txt}
