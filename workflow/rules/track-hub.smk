@@ -286,6 +286,31 @@ rule merge_binned_fdr_calls:
         """
 
 
+rule clustering_vs_null:
+    input:
+        bed=expand(rules.merge_model_results.output.bed, hp="all", allow_missing=True),
+        fai=ancient(f"{ref}.fai"),
+    output:
+        tmp=temp("temp/{sm}/acc.calls.bed"),
+        null=temp("temp/{sm}/null.calls.bed"),
+        bed="results/{sm}/clustering-vs-null.bed.gz",
+    threads: 8
+    conda:
+        conda
+    shell:
+        """
+        bgzip -cd -@{threads} {input.bed} | awk '$5<=10' | cut -f 1-3 > {output.tmp}
+        bedtools shuffle -chrom -i {output.tmp} -g {input.fai} > {output.null}
+
+        ( bedtools genomecov -bg -i {output.tmp} -g {input.fai} | sed 's/$/\\tReal/g' ; \
+          bedtools genomecov -bg -i {output.null} -g {input.fai} | sed 's/$/\\tNull/g' ) \
+            | bedtools sort \
+            | bgzip -@ {threads} \
+        > {output.bed}
+        """
+
+
+
 # peak calling
 rule peak_calls_per_chromosome:
     input:
@@ -327,35 +352,13 @@ rule merge_peak_calls:
         cat {input.beds} >> {output.bed}
         """
 
-rule clustering_vs_null:
-    input:
-        bed=expand(rules.merge_model_results.output.bed, hp="all", allow_missing=True),
-        fai=ancient(f"{ref}.fai"),
-    output:
-        tmp=temp("temp/{sm}/acc.calls.bed"),
-        null=temp("temp/{sm}/null.calls.bed"),
-        bed="results/{sm}/clustering-vs-null.bed.gz",
-    threads: 8
-    conda:
-        conda
-    shell:
-        """
-        bgzip -cd -@{threads} {input.bed} | awk '$5<=10' | cut -f 1-3 > {output.tmp}
-        bedtools shuffle -chrom -i {output.tmp} -g {input.fai} > {output.null}
-
-        ( bedtools genomecov -bg -i {output.tmp} -g {input.fai} | sed 's/$/\\tReal/g' ; \
-          bedtools genomecov -bg -i {output.null} -g {input.fai} | sed 's/$/\\tNull/g' ) \
-            | bedtools sort \
-            | bgzip -@ {threads} \
-        > {output.bed}
-        """
 
 rule percent_in_clusters:
     input:
         bed=rules.clustering_vs_null.output.bed,
         fdr=expand(rules.merged_fdr_track.output.bed, hp="all", allow_missing=True),
     output:
-        bed="results/{sm}/percent-in-clusters.txt",
+        txt="results/{sm}/percent-in-clusters.txt",
     threads: 8
     conda:
         conda
@@ -363,7 +366,21 @@ rule percent_in_clusters:
         script=workflow.source_path("../scripts/percent-in-cluster.py"),
     shell:
         """
-        python {params.script} {input.bed} {input.fdr} {output.bed}
+        python {params.script} {input.bed} {input.fdr} {output.txt}
         """
 
 
+rule n_peaks:
+    input:
+        txt=rules.percent_in_clusters.output.txt,
+        bed=expand(rules.merge_peak_calls.output.bed, hp="all", allow_missing=True),
+    output:
+        bed="results/{sm}/FDR.peaks.bed",
+    threads: 8
+    conda:
+        conda
+    shell:
+        """
+        MIN_FDR=$(hck -F min_fdr {input.txt} | tail -n 1)
+        awk -v min_fdr=$MIN_FDR '$7 >= min_fdr' {input.bed} > {output.bed}
+        """
