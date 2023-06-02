@@ -292,7 +292,7 @@ rule fire_sites:
     input:
         bed=expand(rules.merge_model_results.output.bed, hp="all", allow_missing=True),
     output:
-        bed="results/{sm}/FiREs.bed.gz",
+        bed="results/{sm}/FIRE.bed.gz",
     threads: 8
     conda:
         conda
