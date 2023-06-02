@@ -297,7 +297,7 @@ rule fire_sites:
     conda:
         conda
     params:
-        min_fdr=min_fdr,
+        min_fdr=min_fire_fdr,
     shell:
         """
         bgzip -cd -@{threads} {input.bed} \
@@ -320,8 +320,6 @@ rule clustering_vs_null:
     threads: 8
     conda:
         conda
-    params:
-        min_fdr=min_fdr,
     shell:
         """
         bgzip -cd -@{threads} {input.bed} | cut -f 1-3 > {output.tmp}
