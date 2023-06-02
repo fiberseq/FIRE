@@ -297,9 +297,11 @@ rule clustering_vs_null:
     threads: 8
     conda:
         conda
+    params:
+        min_fdr=min_fdr,
     shell:
         """
-        bgzip -cd -@{threads} {input.bed} | awk '$5<=10' | cut -f 1-3 > {output.tmp}
+        bgzip -cd -@{threads} {input.bed} | awk '$5<={params.min_fdr}' | cut -f 1-3 > {output.tmp}
         bedtools shuffle -chrom -i {output.tmp} -g {input.fai} > {output.null}
 
         ( bedtools genomecov -bg -i {output.tmp} -g {input.fai} | sed 's/$/\\tReal/g' ; \
