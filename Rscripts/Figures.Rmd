@@ -82,22 +82,34 @@ make_hap_plots = function(SM, show_imprinted=FALSE, p_threshold = 0.05){
     my_ggsave("Figures/{SM}_hap1_vs_hap2.pdf", height=3, width=6)
     
     cor_p_threshold = max(tdf[p_adjust <= p_threshold]$p_value)
+    y_lim = ceil( max(-log10(tdf$p_value)))
+    y_by = 1 
+    if(y_lim > 10){
+        y_by = 2
+    }
     # add p-value col, volcano plot
     n=comma(nrow(tdf))
     p = tdf %>%
-        ggplot(aes(x=diff, y=-log10(p_value))) +
+        ggplot(aes(x=diff, y=p_value)) +
         geom_hex(bins=100) + scale_fill_distiller("", palette = "Spectral", trans="log10") +
-        geom_hline(aes(yintercept=-log10(p_threshold)), linetype="dashed", color="darkblue")+
-        geom_hline(aes(yintercept=-log10(cor_p_threshold)), linetype="dashed", color="darkred")+
+        geom_hline(aes(yintercept=(p_threshold)), linetype="dashed", color="darkblue")+
+        geom_hline(aes(yintercept=(cor_p_threshold)), linetype="dashed", color="darkred")+
         facet_wrap(~autosome, ncol=2)+
         scale_x_continuous("Difference between paternal and maternal accessibility", labels=percent) +
-        scale_y_continuous(glue("-log10[ adjusted p-value ]    (n = {n})"), labels=comma) +
+        scale_y_continuous(
+            glue("p-value   (n = {n})"), 
+            #labels=comma,
+            breaks=10**(-seq(0, y_lim, y_by)),
+            minor_breaks=10**(-seq(0, y_lim, 0.1)),
+            trans=reverselog_trans(10),
+            labels=scientific_10,
+        ) + 
         my_grid()
     if(show_imprinted){
         p + geom_point(
             data=tdf%>% 
                 filter(imprinted>0, p_value <= 0.05),
-            aes(x=diff, y=-log10(p_value)),
+            aes(x=diff, y=p_value),
             shape="+",
             #alpha=0.75,
             color="darkred",
@@ -105,15 +117,20 @@ make_hap_plots = function(SM, show_imprinted=FALSE, p_threshold = 0.05){
     }
     my_ggsave("Figures/{SM}_volcano_hap1_vs_hap2.pdf", height=3, width=5)
 }
+SM="GM12878_pacbiome"
+make_hap_plots(SM, show_imprinted=TRUE)
 SM="HG002_pacbiome"
+make_hap_plots(SM, show_imprinted=TRUE)
 SM="GM12878_130X"
+make_hap_plots(SM, show_imprinted=TRUE)
 SM="UDN318336"
 make_hap_plots(SM, show_imprinted=TRUE)
 ```
 
 ```{r}
 pdf %>% 
-    arrange(p_cor) %>% 
-    fwrite(glue("Tables/{SM}_hap1-vs-hap2-accessability.tsv.gz"), sep="\t")
+    group_by(sample) %>%
+    arrange(p_adjust) %>% 
+    fwrite(glue("Tables/hap1-vs-hap2-accessability.tsv.gz"), sep="\t")
 ```
 

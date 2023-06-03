@@ -19,6 +19,9 @@ library("purrr")
 library("reticulate")
 library(ggpubr)
 library(weights)
+library(karyoploteR)
+library(zoo)
+library("scales")
 
 Red="#c1272d"
 Indigo="#0000a7"
@@ -432,3 +435,23 @@ my_hgrid = function(...){
 my_vgrid = function(...){
     theme_minimal_vgrid(font_size=FONT_SIZE, ...)
 } 
+
+
+reverselog_trans <- function(base = exp(1)) {
+    trans <- function(x) -log(x, base)
+    inv <- function(x) base^(-x)
+    trans_new(paste0("reverselog-", format(base)), trans, inv, 
+              log_breaks(base = base), 
+              domain = c(1e-100, Inf))
+}
+
+scientific_10 <- function(x) {
+    is_one = as.numeric(x) == 1
+    text = gsub("e", " %*% 10^", scales::scientific_format()(x))
+    print(text)
+    text = str_remove(text, "^1 %\\*% ") # remove leading one 
+    print(text)
+    text[is_one] = "10^0"
+    rtn = parse(text=text)
+    rtn
+}

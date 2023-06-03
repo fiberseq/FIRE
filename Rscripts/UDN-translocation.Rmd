@@ -17,7 +17,7 @@ my_comparisons <- list(
     c("other", "left of chr13 BP"),
     c("other", "right of chr13 BP")
 )
-p=tdf %>% 
+chr13.df=tdf %>% 
     mutate(
         lfc=log2(hap1_frac_acc/hap2_frac_acc)
     ) %>%
@@ -36,8 +36,17 @@ p=tdf %>%
             TRUE ~ NA,
         ),
     ) %>%
-    filter(imprinted==0.0) %>%
-    group_by(location) %>% 
+    filter(imprinted==0.0)
+
+
+chr13.df %>%
+    group_by(location) %>%
+    summarise(
+        100*(1-sum(hap1_acc)/sum(hap2_acc)),
+        100*(1-sum(hap1_cov)/sum(hap2_cov))
+    )
+
+p = chr13.df %>%
     ggviolin(y = "diff", x="location",
         draw_quantiles = 0.5,
         rug = FALSE,

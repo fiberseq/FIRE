@@ -42,7 +42,7 @@ type bigWig 0 1000
 maxItems 100000
 maxHeightPixels 50:50:1
 autoScale off
-viewLimits 0.0:1.0
+viewLimits 0.0:100.0
 alwaysZero on
 
     track cpg_mat
