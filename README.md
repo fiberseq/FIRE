@@ -1,4 +1,4 @@
-## 🔥 **FIRE**: **F**iber-seq **I**mplicated **R**egulatory **E**lements
+# 🔥 **FIRE**: <ins>F</ins>iber-seq <ins>I</ins>mplicated <ins>R</ins>egulatory <ins>E</ins>lements
 A pipeline for calling Fiber-seq Implicated Regulatory Elements (FIREs) on single molecules.
 
 ## Install
