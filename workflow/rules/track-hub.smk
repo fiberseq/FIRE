@@ -195,48 +195,6 @@ rule average_coverage:
         """
 
 
-rule trackhub:
-    input:
-        fai=ancient(f"{ref}.fai"),
-        cov=rules.average_coverage.output.cov,
-        bed=expand(rules.merge_model_results.output.bed, hp=haps, allow_missing=True),
-        bw=expand(
-            rules.fdr_tracks.output.bw, hp=haps, fdr=[100], allow_missing=True
-        ),
-        fdr=expand(
-            rules.coverage_tracks.output.bw, hp=haps, types="fdr", allow_missing=True
-        ),
-        acc=expand(
-            rules.coverage_tracks.output.bw, hp=haps, types="acc", allow_missing=True
-        ),
-        link=expand(
-            rules.coverage_tracks.output.bw, hp=haps, types="link", allow_missing=True
-        ),
-        nuc=expand(
-            rules.coverage_tracks.output.bw, hp=haps, types="nuc", allow_missing=True
-        ),
-    output:
-        hub="results/{sm}/trackHub/hub.txt",
-    benchmark:
-        "benchmarks/{sm}/trackhub.tsv"
-    resources:
-        load=get_load,
-    threads: 4
-    conda:
-        conda
-    params:
-        ref=ref_name,
-    shell:
-        """
-        fibertools -v trackhub \
-          -r {params.ref} \
-          --sample {wildcards.sm} \
-          -t results/{wildcards.sm}/trackHub \
-          --average-coverage $(cat {input.cov}) \
-          {input.fai} \
-          --bw {input.acc} {input.link} {input.nuc} {input.bw} {input.fdr}
-        """
-
 
 rule binned_fdr_calls:
     input:
@@ -408,3 +366,62 @@ rule n_peaks:
         echo $MIN_FDR
         awk -v min_fdr=$MIN_FDR '$7 >= min_fdr' {input.bed} > {output.bed}
         """
+
+
+rule fire_bw:
+    input:
+        bed=rules.n_peaks.output.bed,
+        fai=ancient(f"{ref}.fai"),
+    output:
+        bw="results/{sm}/trackHub/bw/FIRE.bw",
+    threads: 8
+    conda:
+        conda
+    shell:
+        """
+        bedGraphToBigWig {input.bed} {input.fai} {output.bw}
+        """
+
+rule trackhub:
+    input:
+        fai=ancient(f"{ref}.fai"),
+        fire=rules.fire_bw.output.bw,
+        cov=rules.average_coverage.output.cov,
+        bed=expand(rules.merge_model_results.output.bed, hp=haps, allow_missing=True),
+        bw=expand(
+            rules.fdr_tracks.output.bw, hp=haps, fdr=[100], allow_missing=True
+        ),
+        fdr=expand(
+            rules.coverage_tracks.output.bw, hp=haps, types="fdr", allow_missing=True
+        ),
+        acc=expand(
+            rules.coverage_tracks.output.bw, hp=haps, types="acc", allow_missing=True
+        ),
+        link=expand(
+            rules.coverage_tracks.output.bw, hp=haps, types="link", allow_missing=True
+        ),
+        nuc=expand(
+            rules.coverage_tracks.output.bw, hp=haps, types="nuc", allow_missing=True
+        ),
+    output:
+        hub="results/{sm}/trackHub/hub.txt",
+    benchmark:
+        "benchmarks/{sm}/trackhub.tsv"
+    resources:
+        load=get_load,
+    threads: 4
+    conda:
+        conda
+    params:
+        ref=ref_name,
+    shell:
+        """
+        fibertools -v trackhub \
+          -r {params.ref} \
+          --sample {wildcards.sm} \
+          -t results/{wildcards.sm}/trackHub \
+          --average-coverage $(cat {input.cov}) \
+          {input.fai} \
+          --bw {input.acc} {input.link} {input.nuc} {input.bw} {input.fdr}
+        """
+
