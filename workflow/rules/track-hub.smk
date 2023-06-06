@@ -380,7 +380,7 @@ rule fire_bw:
         conda
     shell:
         """
-        cut -f 1-3 {input.bed} | grep -v AvgFDR > {output.bed}
+        grep -v AvgFDR {input.bed} | cut -f 1-3 > {output.bed}
         bedToBigBed {output.bed} {input.fai} {output.bb}
         """
 
