@@ -373,19 +373,21 @@ rule fire_bw:
         bed=rules.n_peaks.output.bed,
         fai=ancient(f"{ref}.fai"),
     output:
-        bw="results/{sm}/trackHub/bw/FIRE.bw",
+        bb="results/{sm}/trackHub/bb/FIRE.bb",
+        bed=temp("temp/{sm}/trackHub/bb/FIRE.temp.bed"),
     threads: 8
     conda:
         conda
     shell:
         """
-        bedGraphToBigWig {input.bed} {input.fai} {output.bw}
+        cut -f 1-3 {input.bed} > {output.bed}
+        bedToBigBed {output.bed} {input.fai} {output.bb}
         """
 
 rule trackhub:
     input:
         fai=ancient(f"{ref}.fai"),
-        fire=rules.fire_bw.output.bw,
+        fire=rules.fire_bw.output.bb,
         cov=rules.average_coverage.output.cov,
         bed=expand(rules.merge_model_results.output.bed, hp=haps, allow_missing=True),
         bw=expand(
