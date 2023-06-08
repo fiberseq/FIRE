@@ -92,8 +92,8 @@ scientific_10 <- function(x) {
 p_threshold=0.05
 in_file=snakemake@input[[1]]
 out_file_1=snakemake@output[[1]]
-out_file_2=snakemake@output[[1]]
-out_file_3=snakemake@output[[1]]
+out_file_2=snakemake@output[[2]]
+out_file_3=snakemake@output[[3]]
 
 df=fread(in_file) %>%
     mutate_at(
