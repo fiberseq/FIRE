@@ -93,7 +93,12 @@ in_file=snakemake@input[[1]]
 out_file_1=snakemake@output[[1]]
 out_file_2=snakemake@output[[1]]
 out_file_3=snakemake@output[[1]]
+
 df=fread(in_file)
+print(sapply(df, class))
+cols.num <- c("hap1_acc","hap2_acc","hap1_link","hap2_link","hap1_nuc","hap2_nuc")
+df[cols.num] <- sapply(df[cols.num], as.numeric)
+print(sapply(df, class))
 
 # continue 
 df$hap1_cov = df$hap1_acc + df$hap1_link + df$hap1_nuc
