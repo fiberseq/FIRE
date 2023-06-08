@@ -421,6 +421,7 @@ rule hap_differences:
         fig1="results/{sm}/hap1-vs-hap2/hap1-vs-hap2.pdf",
         fig2="results/{sm}/hap1-vs-hap2/hap1-vs-hap2-volcano.pdf",
         bed="results/{sm}/hap1-vs-hap2/FIRE.hap.differences.bed",
+        bed9="results/{sm}/hap1-vs-hap2/FIRE.hap.differences.bed9",
     threads: 8
     conda:
         "R"
@@ -430,7 +431,7 @@ rule hap_differences:
 
 rule hap_differences_track:
     input:
-        bed=rules.hap_differences.output.bed,
+        bed9=rules.hap_differences.output.bed9,
         fai=f"{ref}.fai",
     output:
         bed=temp("temp/{sm}/hap_differences/temp.bed"),
@@ -444,11 +445,9 @@ rule hap_differences_track:
         chrom=chroms[0],
     shell:
         """
-        printf "{params.chrom}\t0\t1\tfake\t100\t+\t0\t1\t230,230,230\n" > {output.bed}
-        cat {input.beds} | awk 'NF == 9' >> {output.bed}
+        bedtools sort -i {input.bed9} > {output.bed}
         bedToBigBed {output.bed} {input.fai} {output.bb}
         """
-
 
 
 rule trackhub:
