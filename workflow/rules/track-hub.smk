@@ -403,12 +403,12 @@ rule hap_peaks:
         printf "sample\tcov\\n" >> {output.bed}
         paste \
             <(bedmap --delim '\\t' --echo --max-element \
-                <(cut -f 1-3 {input.bed} | grep -v "#") \
-                <(zcat {input.h1} | grep -v "#") \
+                <(cut -f 1-3 {input.bed} | grep -v "#" | grep -v "^chromosome") \
+                <(zcat {input.h1} | grep -v "#" | grep -v "^chromosome") \
             ) \
             <(bedmap --max-element  \
-                <(cut -f 1-3 {input.bed} | grep -v "#") \
-                <(zcat {input.h2} | grep -v "#") \
+                <(cut -f 1-3 {input.bed} | grep -v "#" | grep -v "^chromosome") \
+                <(zcat {input.h2} | grep -v "#" | grep -v "^chromosome") \
             ) \
             | sed "s/$/\t{wildcards.sm}\t$COV/g" \
         >> {output.bed}
