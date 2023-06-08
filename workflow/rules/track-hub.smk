@@ -456,6 +456,7 @@ rule trackhub:
         fire=rules.fire_bw.output.bb,
         cov=rules.average_coverage.output.cov,
         hap_diffs=rules.hap_differences.output.bed,
+        hap_diffs2=rules.hap_differences_track.output.bb,
         bed=expand(rules.merge_model_results.output.bed, hp=haps, allow_missing=True),
         bw=expand(
             rules.fdr_tracks.output.bw, hp=haps, fdr=[100], allow_missing=True
