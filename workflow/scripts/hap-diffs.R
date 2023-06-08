@@ -200,5 +200,5 @@ p = tdf %>%
 my_ggsave(out_file_2, height=3, width=5)
 
 # save the table 
-fwrite(tdf[tdf$p_value <= p_threshold], out_file_3, sep="\t")
+fwrite(tdf[tdf$p_value <= 1], out_file_3, sep="\t")
 
