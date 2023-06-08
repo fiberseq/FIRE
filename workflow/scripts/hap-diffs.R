@@ -142,6 +142,7 @@ pdf = pdf %>%
         p_value=fisher.test(matrix(c(hap1_acc, hap1_nacc, hap2_acc, hap2_nacc),nrow=2))$p.value
     ) %>%
     # group_by(sample) %>%
+    ungroup() %>%
     mutate(
         p_adjust = p.adjust(p_value, method="BH"),
     ) %>%
