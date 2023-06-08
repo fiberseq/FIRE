@@ -445,7 +445,7 @@ rule hap_differences_track:
         chrom=chroms[0],
     shell:
         """
-        printf "{params.chrom}\t0\t1\tfake\t100\t+\t0\t1\t230,230,230\n" > {output.bed}
+        printf "{params.chrom}\t0\t1\tfake\t100\t+\t0\t1\t230,230,230\\n" > {output.bed}
         bedtools sort -i {input.bed9} >> {output.bed}
         bedToBigBed {output.bed} {input.fai} {output.bb}
         """
