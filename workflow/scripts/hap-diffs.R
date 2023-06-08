@@ -114,12 +114,15 @@ df[`#ct` == "chrX"]$autosome = "chrX"
 
 # filter by coverage
 sd = 3
+cov = unique(df$cov)
+my_min_cov = max(cov*0.5 - sd * sqrt(cov*0.5), 10)
+my_max_cov = cov*0.5 + sd * sqrt(cov*0.5)
 pdf = df %>%
     filter(hap1_cov > 0 & hap2_cov > 0) %>%
     mutate(
         id = seq(n()),
-        min_cov = pmax(cov/2 - sd * sqrt(cov/2), 10),
-        max_cov = cov/2 + sd * sqrt(cov/2),
+        min_cov = my_min_cov,
+        max_cov = my_max_cov,
     ) %>%
     filter(autosome != "chrY" ) %>%
     filter(hap1_cov > min_cov & hap2_cov > min_cov) %>%
