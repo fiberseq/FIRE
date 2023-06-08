@@ -391,7 +391,7 @@ rule hap_peaks:
         h1=expand(rules.merged_fdr_track.output.bed, hp="hap1", allow_missing=True),
         h2=expand(rules.merged_fdr_track.output.bed, hp="hap2", allow_missing=True),
     output:
-        bed=temp("temp/{sm}/trackHub/bb/FIRE.temp.bed"),
+        bed=temp("temp/{sm}/hap1-vs-hap2/FIRE.hap.peaks.bed"),
     threads: 8
     conda:
         conda
@@ -417,13 +417,25 @@ rule hap_peaks:
         >> {output.bed}
         """
 
-
+rule hap_differences:
+    input:
+        bed=rules.hap_peaks.output.bed,
+    output:
+        fig1="results/{sm}/hap1-vs-hap2/hap1-vs-hap2.pdf",
+        fig2="results/{sm}/hap1-vs-hap2/hap1-vs-hap2-volcano.pdf",
+        bed="results/{sm}/hap1-vs-hap2/FIRE.hap.differences.bed",
+    threads: 8
+    conda:
+        conda
+    script:
+        "../scripts/hap-diffs.R"
 
 rule trackhub:
     input:
         fai=ancient(f"{ref}.fai"),
         fire=rules.fire_bw.output.bb,
         cov=rules.average_coverage.output.cov,
+        hap_diffs=rules.hap_differences.output.bed,
         bed=expand(rules.merge_model_results.output.bed, hp=haps, allow_missing=True),
         bw=expand(
             rules.fdr_tracks.output.bw, hp=haps, fdr=[100], allow_missing=True
