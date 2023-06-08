@@ -104,6 +104,8 @@ df$autosome = "Autosome"
 df[`#ct` == "chrY"]$autosome = "chrY"
 df[`#ct` == "chrX"]$autosome = "chrX"
 
+print(head(df))
+
 # filter by coverage
 sd = 3
 pdf = df %>%
@@ -132,6 +134,8 @@ pdf = df %>%
         diff = hap1_frac_acc - hap2_frac_acc,
     ) %>%
     data.table()
+
+print(head(pdf))
 
 # make the plots
 tdf = pdf 
