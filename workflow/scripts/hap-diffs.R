@@ -200,3 +200,16 @@ my_ggsave(out_file_2, height=3, width=5)
 
 # save the table 
 fwrite(tdf[tdf$p_value <= 1], out_file_3, sep="\t")
+# save the bed9
+# 
+bed9 = tdf %>%
+    mutate(
+        score = pmin(round(1/p_value), 1000),
+        name = paste0(p_value, "_", round(100*hap1_frac_acc,2), "_", round(100*hap2_frac_acc,2)),
+        color = case_when(
+            hap1_acc > hap2_acc ~ "0,0,255",
+            hap2_acc > hap1_acc ~ "255,0,0",
+            TRUE ~ "0,255,0"
+        )
+    ) %>%
+    select(c("#ct", "start", "end", "p-value", "score", "strand")) %>%

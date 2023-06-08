@@ -243,9 +243,6 @@ rule merge_binned_fdr_calls:
         bedToBigBed {output.bed} {input.fai} {output.bb}
         """
 
-
-
-
 rule fire_sites:
     input:
         bed=expand(rules.merge_model_results.output.bed, hp="all", allow_missing=True),
@@ -429,6 +426,30 @@ rule hap_differences:
         "R"
     script:
         "../scripts/hap-diffs.R"
+
+
+rule hap_differences_track:
+    input:
+        bed=rules.hap_differences.output.bed,
+        fai=f"{ref}.fai",
+    output:
+        bed=temp("temp/{sm}/hap_differences/temp.bed"),
+        bb="results/{sm}/trackHub/bb/hap_differences.bb",
+    threads: 1
+    resources:
+        mem_mb=get_mem_mb,
+    conda:
+        conda
+    params:
+        chrom=chroms[0],
+    shell:
+        """
+        printf "{params.chrom}\t0\t1\tfake\t100\t+\t0\t1\t230,230,230\n" > {output.bed}
+        cat {input.beds} | awk 'NF == 9' >> {output.bed}
+        bedToBigBed {output.bed} {input.fai} {output.bb}
+        """
+
+
 
 rule trackhub:
     input:
