@@ -94,6 +94,7 @@ in_file=snakemake@input[[1]]
 out_file_1=snakemake@output[[1]]
 out_file_2=snakemake@output[[2]]
 out_file_3=snakemake@output[[3]]
+out_file_4=snakemake@output[[4]]
 
 df=fread(in_file) %>%
     mutate_at(
@@ -135,6 +136,7 @@ if(nrow(df)== 0){
     system(glue("touch {out_file_1}"))
     system(glue("touch {out_file_2}"))
     system(glue("touch {out_file_3}"))
+    system(glue("touch {out_file_4}"))
     quit()
 }
 
@@ -202,14 +204,21 @@ my_ggsave(out_file_2, height=3, width=5)
 fwrite(tdf[tdf$p_value <= 1], out_file_3, sep="\t")
 # save the bed9
 # 
-bed9 = tdf %>%
+tdf %>%
     mutate(
         score = pmin(round(1/p_value), 1000),
         name = paste0(p_value, "_", round(100*hap1_frac_acc,2), "_", round(100*hap2_frac_acc,2)),
+        tst=st,
+        ten=case_when(
+            p_value<=p_threshold ~ en,
+            TRUE ~ st+1
+        ),
+        strand=".",
         color = case_when(
             hap1_acc > hap2_acc ~ "0,0,255",
             hap2_acc > hap1_acc ~ "255,0,0",
             TRUE ~ "0,255,0"
         )
     ) %>%
-    select(c("#ct", "start", "end", "p-value", "score", "strand")) %>%
+    select(c("#ct", "st", "en", "name", "score", "strand", "tst", "ten", "color")) %>%
+    fwrite(out_file_4, sep="\t", quote=F, na=".", row.names=F)
