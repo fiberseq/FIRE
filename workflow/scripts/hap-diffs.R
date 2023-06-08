@@ -168,7 +168,7 @@ tdf %>%
     my_grid()
 my_ggsave(out_file_1, height=3, width=6)
 
-cor_p_threshold = max(tdf[p_adjust <= p_threshold]$p_value)
+cor_p_threshold = max(tdf[p_adjust <= p_threshold & !is.na(p_value) & !is.na(p_adjust) ]$p_value)
 print(cor_p_threshold)
 y_lim = ceiling(max(max(-log10(tdf$p_value)), max(-log10(tdf$p_adjust)))) 
 y_by = 1 
