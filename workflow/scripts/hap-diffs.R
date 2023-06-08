@@ -118,6 +118,10 @@ sd = 3
 cov = unique(df$cov)
 my_min_cov = max(cov*0.5 - sd * sqrt(cov*0.5), 10)
 my_max_cov = cov*0.5 + sd * sqrt(cov*0.5)
+
+print(head(df))
+print(glue("min_cov={my_min_cov} max_cov={my_max_cov} cov={cov}"))
+
 pdf = df %>%
     filter(hap1_cov > 0 & hap2_cov > 0) %>%
     mutate(
