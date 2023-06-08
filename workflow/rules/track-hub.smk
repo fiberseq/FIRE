@@ -405,7 +405,7 @@ rule hap_peaks:
         printf "hap2_fdr\thap2_acc\tthap2_link\thap2_nuc\t" >> {output.bed}
         printf "sample\tcov\\n" >> {output.bed}
         paste \
-            <(bedmap --delim '\t' --echo --max-element \
+            <(bedmap --delim '\\t' --echo --max-element \
                 <(cut -f 1-3 {input.bed}) \
                 <(zcat {input.h1} | grep -v "#") \
             ) \
