@@ -96,3 +96,4 @@ rule all:
         expand(rules.clustering_vs_null.output.bed, sm=data.index),
         expand(rules.percent_in_clusters.output, sm=data.index),
         expand(rules.n_peaks.output, sm=data.index),
+        expand(rules.hap_differences.output, sm=data.index),
