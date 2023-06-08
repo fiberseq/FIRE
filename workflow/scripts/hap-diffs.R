@@ -94,13 +94,12 @@ out_file_1=snakemake@output[[1]]
 out_file_2=snakemake@output[[1]]
 out_file_3=snakemake@output[[1]]
 
-df=fread(in_file)
-print(sapply(df, class))
-cols.num <- list("hap1_acc","hap2_acc","hap1_link","hap2_link","hap1_nuc","hap2_nuc")
-df[, cols.num := lapply(..cols.num, as.numeric)]
-#for (col in cols.num){
-#    df[..col] <- as.numeric(df[..col])
-#}
+df=fread(in_file) %>%
+    mutate_at(
+        c("hap1_acc","hap2_acc","hap1_link","hap2_link","hap1_nuc","hap2_nuc"),
+        as.numeric
+    ) %>%
+    data.table()
 print(sapply(df, class))
 
 # continue 
