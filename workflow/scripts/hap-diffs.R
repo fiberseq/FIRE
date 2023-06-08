@@ -110,7 +110,6 @@ df=fread(in_file) %>%
         !is.na(hap2_nuc),
     ) %>%
     data.table()
-print(sapply(df, class))
 
 # continue 
 df$hap1_cov = df$hap1_acc + df$hap1_link + df$hap1_nuc
@@ -127,7 +126,6 @@ cov = unique(df$cov)
 my_min_cov = max(cov*0.5 - sd * sqrt(cov*0.5), 10)
 my_max_cov = cov*0.5 + sd * sqrt(cov*0.5)
 
-print(head(df))
 print(glue("min_cov={my_min_cov} max_cov={my_max_cov} cov={cov}"))
 
 pdf = df %>%
