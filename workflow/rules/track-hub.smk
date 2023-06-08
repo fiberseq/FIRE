@@ -406,11 +406,11 @@ rule hap_peaks:
         printf "sample\tcov\\n" >> {output.bed}
         paste \
             <(bedmap --delim '\\t' --echo --max-element \
-                <(cut -f 1-3 {input.bed}) \
+                <(cut -f 1-3 {input.bed} | grep -v "#") \
                 <(zcat {input.h1} | grep -v "#") \
             ) \
             <(bedmap --max-element  \
-                <(cut -f 1-3 {input.bed}) \
+                <(cut -f 1-3 {input.bed} | grep -v "#") \
                 <(zcat {input.h2} | grep -v "#") \
             ) \
             | sed "s/$/\t{wildcards.sm}\t$COV/g" \
