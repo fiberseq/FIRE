@@ -112,8 +112,6 @@ df$autosome = "Autosome"
 df[`#ct` == "chrY"]$autosome = "chrY"
 df[`#ct` == "chrX"]$autosome = "chrX"
 
-print(head(df))
-
 # filter by coverage
 sd = 3
 pdf = df %>%
@@ -131,7 +129,12 @@ pdf = df %>%
         hap2_nacc = hap2_cov - hap2_acc,
     )
 
-print(head(pdf))
+if(nrow(df)== 0){
+    system(glue("touch {out_file_1}"))
+    system(glue("touch {out_file_2}"))
+    system(glue("touch {out_file_3}"))
+    quit()
+}
 
 pdf = pdf %>%
     rowwise() %>%
@@ -148,7 +151,6 @@ pdf = pdf %>%
     ) %>%
     data.table()
 
-print(head(pdf))
 
 # make the plots
 tdf = pdf 
