@@ -121,7 +121,11 @@ pdf = df %>%
     mutate(
         hap1_nacc = hap1_cov - hap1_acc,
         hap2_nacc = hap2_cov - hap2_acc,
-    ) %>%
+    )
+
+print(head(pdf))
+
+pdf = pdf %>%
     rowwise() %>%
     mutate(
         p_value=fisher.test(matrix(c(hap1_acc, hap1_nacc, hap2_acc, hap2_nacc),nrow=2))$p.value
