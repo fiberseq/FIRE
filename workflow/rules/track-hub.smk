@@ -398,6 +398,12 @@ rule hap_peaks:
     shell:
         """
         COV=$(cat {input.cov})
+        printf "#ct\tst\ten\t" > {output.bed}
+        printf "hap1_ct\thap1_st\thap1_en\t" >> {output.bed}
+        printf "hap1_fdr\thap1_acc\thap1_link\thap1_nuc\t" >> {output.bed}
+        printf "hap2_ct\thap2_st\thap2_en\t" >> {output.bed}
+        printf "hap2_fdr\thap2_acc\thap2_link\thap2_nuc\t" >> {output.bed}
+        printf "sample\tcov\n" >> {output.bed}
         paste \
             <(bedmap --delim '\t' --echo --max-element \
                 <(cut -f 1-3 {input.bed}) \
@@ -408,7 +414,7 @@ rule hap_peaks:
                 <(zcat {input.h2})\
             ) \
             | sed "s/$/\t{wildcards.sm}\t$COV/g" \
-        > {output.bed}
+        >> {output.bed}
         """
 
 
