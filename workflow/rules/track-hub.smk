@@ -426,7 +426,7 @@ rule hap_differences:
         bed="results/{sm}/hap1-vs-hap2/FIRE.hap.differences.bed",
     threads: 8
     conda:
-        conda
+        "R"
     script:
         "../scripts/hap-diffs.R"
 
