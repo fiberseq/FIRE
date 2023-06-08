@@ -98,7 +98,7 @@ df=fread(in_file)
 print(sapply(df, class))
 cols.num <- c("hap1_acc","hap2_acc","hap1_link","hap2_link","hap1_nuc","hap2_nuc")
 for (col in cols.num){
-    df[col] <- as.numeric(df[col])
+    df[[col]] <- as.numeric(df[[col]])
 }
 print(sapply(df, class))
 
