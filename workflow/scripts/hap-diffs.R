@@ -109,6 +109,7 @@ print(head(df))
 # filter by coverage
 sd = 3
 pdf = df %>%
+    filter(hap1_cov > 0 & hap2_cov > 0) %>%
     mutate(
         id = seq(n()),
         min_cov = pmax(cov/2 - sd * sqrt(cov/2), 10),
