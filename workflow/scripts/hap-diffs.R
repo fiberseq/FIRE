@@ -211,15 +211,21 @@ fwrite(tdf[tdf$p_value <= 1], out_file_3, sep="\t")
 tdf %>%
     mutate(
         score = pmin(round(1/p_value), 1000),
-        name = paste0(p_value, "_", round(100*hap1_frac_acc,2), "_", round(100*hap2_frac_acc,2)),
-        tst=st,
+        name = paste0(
+            round(p_value,5), "_",
+            round(100*hap1_frac_acc,2), "_",
+            round(100*hap2_frac_acc,2)
+        ),
+        tst=st+1,
         ten=case_when(
-            p_value<=p_threshold ~ en,
+            p_value<=p_threshold ~ en - 1,
             TRUE ~ st+1
         ),
         strand=".",
         color = case_when(
+            hap1_acc > hap2_acc & p_value > p_threshold ~ "0,0,100",
             hap1_acc > hap2_acc ~ "0,0,255",
+            hap2_acc > hap1_acc & p_value > p_threshold ~ "100,0,0",
             hap2_acc > hap1_acc ~ "255,0,0",
             TRUE ~ "0,255,0"
         )
