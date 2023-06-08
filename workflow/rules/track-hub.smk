@@ -384,6 +384,35 @@ rule fire_bw:
         bedToBigBed {output.bed} {input.fai} {output.bb}
         """
 
+rule hap_peaks:
+    input:
+        bed=rules.n_peaks.output.bed,
+        cov=rules.average_coverage.output.cov,
+        h1=expand(rules.merged_fdr_track.output.bed, hp="hap1", allow_missing=True),
+        h2=expand(rules.merged_fdr_track.output.bed, hp="hap2", allow_missing=True),
+    output:
+        bed=temp("temp/{sm}/trackHub/bb/FIRE.temp.bed"),
+    threads: 8
+    conda:
+        conda
+    shell:
+        """
+        COV=$(cat {input.cov})
+        paste \
+            <(bedmap --delim '\t' --echo --max-element \
+                <(cut -f 1-3 {input.bed}) \
+                <(zcat {input.h1})\
+            ) \
+            <(bedmap --max-element  \
+                <(cut -f 1-3 {input.bed}) \
+                <(zcat {input.h2})\
+            ) \
+            | sed "s/$/\t{wildcards.sm}\t$COV/g" \
+        > {output.bed}
+        """
+
+
+
 rule trackhub:
     input:
         fai=ancient(f"{ref}.fai"),
