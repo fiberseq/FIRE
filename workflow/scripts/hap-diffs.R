@@ -89,6 +89,7 @@ scientific_10 <- function(x) {
 # SCRIPT
 #
 #
+p_threshold=0.05
 in_file=snakemake@input[[1]]
 out_file_1=snakemake@output[[1]]
 out_file_2=snakemake@output[[1]]
