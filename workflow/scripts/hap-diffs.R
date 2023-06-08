@@ -167,7 +167,7 @@ tdf %>%
 my_ggsave(out_file_1, height=3, width=6)
 
 cor_p_threshold = max(tdf[p_adjust <= p_threshold]$p_value)
-y_lim = ceil( max(-log10(tdf$p_value)))
+y_lim = ceiling( max(-log10(tdf$p_value)))
 y_by = 1 
 if(y_lim > 10){
     y_by = 2
