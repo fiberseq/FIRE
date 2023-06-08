@@ -101,6 +101,14 @@ df=fread(in_file) %>%
         c("hap1_acc","hap2_acc","hap1_link","hap2_link","hap1_nuc","hap2_nuc"),
         as.numeric
     ) %>%
+    filter(
+        !is.na(hap1_acc),
+        !is.na(hap1_link),
+        !is.na(hap1_nuc),
+        !is.na(hap2_acc),
+        !is.na(hap2_link),
+        !is.na(hap2_nuc),
+    ) %>%
     data.table()
 print(sapply(df, class))
 
