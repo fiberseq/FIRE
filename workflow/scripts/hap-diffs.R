@@ -136,7 +136,7 @@ pdf = df %>%
         hap2_nacc = hap2_cov - hap2_acc,
     )
 
-if(nrow(df)== 0){
+if(nrow(pdf)== 0){
     system(glue("touch {out_file_1}"))
     system(glue("touch {out_file_2}"))
     system(glue("touch {out_file_3}"))
