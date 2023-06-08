@@ -120,7 +120,6 @@ my_max_cov = cov*0.5 + sd * sqrt(cov*0.5)
 pdf = df %>%
     filter(hap1_cov > 0 & hap2_cov > 0) %>%
     mutate(
-        id = seq(n()),
         min_cov = my_min_cov,
         max_cov = my_max_cov,
     ) %>%
@@ -201,4 +200,3 @@ my_ggsave(out_file_2, height=3, width=5)
 
 # save the table 
 fwrite(tdf[tdf$p_value <= 1], out_file_3, sep="\t")
-
