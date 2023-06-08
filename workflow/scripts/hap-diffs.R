@@ -223,11 +223,11 @@ tdf %>%
         ),
         strand=".",
         color = case_when(
-            hap1_acc > hap2_acc & p_value > p_threshold ~ "0,0,100",
-            hap1_acc > hap2_acc ~ "0,0,255",
-            hap2_acc > hap1_acc & p_value > p_threshold ~ "100,0,0",
-            hap2_acc > hap1_acc ~ "255,0,0",
-            TRUE ~ "0,255,0"
+            hap1_frac_acc > hap2_frac_acc & p_value > p_threshold ~ "0,0,100",
+            hap1_frac_acc > hap2_frac_acc ~ "0,0,255",
+            hap2_frac_acc > hap1_frac_acc & p_value > p_threshold ~ "100,0,0",
+            hap2_frac_acc > hap1_frac_acc ~ "255,0,0",
+            TRUE ~ "200,200,200"
         )
     ) %>%
     select(c("#ct", "st", "en", "name", "score", "strand", "tst", "ten", "color")) %>%
