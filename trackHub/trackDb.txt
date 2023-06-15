@@ -8,7 +8,7 @@ maxItems 100000
 
     track m6A_pat
     parent m6A
-    bigDataUrl bb/canu-plus-whatshap-paternal.txt.m6a.bb
+    bigDataUrl bb/2.m6a.bb
     shortLabel m6A_pat
     longLabel m6A_pat
     type bigBed 12 +
@@ -17,7 +17,7 @@ maxItems 100000
 
     track m6A_mat
     parent m6A
-    bigDataUrl bb/canu-plus-whatshap-maternal.txt.m6a.bb
+    bigDataUrl bb/1.m6a.bb
     shortLabel m6A_mat
     longLabel m6A_mat
     type bigBed 12 +
@@ -26,7 +26,7 @@ maxItems 100000
 
     track m6A_unk
     parent m6A
-    bigDataUrl bb/canu-plus-whatshap-unknown.txt.m6a.bb
+    bigDataUrl bb/unk.m6a.bb
     shortLabel m6A_unk
     longLabel m6A_unk
     type bigBed 12 +

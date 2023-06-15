@@ -1,0 +1,19 @@
+ref: /mmfs1/gscratch/stergachislab/assemblies/hg38.analysisSet.fa
+ref_name: hg38
+n_chunks: 100 # split bam file across x chunks
+#keep_chromosomes: chr20
+max_t: 4 # use X threaeds per chunk
+manifest: config/config.tbl # table with samples to process
+
+
+#model: results/GM12878_v0.1.5/model.dat # if not provided will train a new model
+
+#
+# only used in model training
+#
+dhs: config/annotations/GM12878_DHS.bed.gz # regions of suspected regulatory elements, can be anything if not traing a model
+excludes: # regions to not use when identifying null regions that should not have RE
+  - config/annotations/hg38.blacklist.ENCFF356LFX.bed.gz
+  - config/annotations/hg38.gap.bed
+  - config/annotations/SDs.merged.hg38.bed
+
