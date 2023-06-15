@@ -20,6 +20,7 @@ yes | pip uninstall fibertools && pip install git+ssh://git@github.com/mrvollger
 snakemake \
   --configfile config/config.yaml \
   --local-cores $(nproc) \
+  --cores $(nproc) \
   --rerun-triggers mtime \
   --rerun-incomplete \
   --scheduler greedy \
