@@ -5,7 +5,7 @@ A pipeline for calling Fiber-seq Implicated Regulatory Elements (FIREs) on singl
 See `config/config.yaml` and `config/config.tbl` for configuration options.
 
 ## Install
-Go to thg [fiberseq-smk repo](https://github.com/fiberseq/fiberseq-smk) and follow the instructions to install fiberseq-smk.
+Go to the [fiberseq-smk repo](https://github.com/fiberseq/fiberseq-smk) and follow the instructions to install fiberseq-smk.
 Then activate the env update for the latest copy of `fibertools-rs`:
 ```bash
 mamba install -c conda-forge -c bioconda fibertools-rs>=0.2.0 && ft --version
