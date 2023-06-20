@@ -4,8 +4,6 @@ channels:
   - defaults
 dependencies:
   - r-r.utils
-  - r-base
-  - r-essentials
   - r-tidyverse
   - r-scales
   - r-cowplot
