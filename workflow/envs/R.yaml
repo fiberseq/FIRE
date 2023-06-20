@@ -10,7 +10,6 @@ dependencies:
   - r-glue
   - r-data.table
   - r-ggrepel
-  - r-argparse
   - r-ggnewscale
   - r-ggforce
   - r-ggridges
