@@ -18,8 +18,8 @@ dependencies:
   - r-ggnewscale
   - r-svglite
   - r-ggforce
-  - r-knitr
   - r-ggridges
-  - r::r-zoo
-  - r-vroom
-  - r-tzdb
+  #- r-knitr
+  #- r::r-zoo
+  #- r-vroom
+  #- r-tzdb
