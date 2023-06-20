@@ -17,7 +17,7 @@ fai = pd.read_csv(f"{ref}.fai", sep="\t", names=["chr", "length", "x", "y", "z"]
 chroms = sorted([chrom for chrom in fai["chr"] if "_" not in chrom])
 genome_len = fai["length"].sum()
 window_size = int(genome_len / n_chunks) + 1
-conda = "fiberseq-smk"
+conda = config.get("env", "../envs/env.yaml")
 bins = list(range(1, max_bins + 1))
 data = pd.read_csv(config["manifest"], sep="\t", comment="#").set_index("sample")
 haps = ["all", "hap1", "hap2", "unk"]
