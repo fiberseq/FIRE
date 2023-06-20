@@ -134,7 +134,7 @@ maxItems 100000
 
     track CTCF_Xi_Act
     parent CTCF_Xi
-    bigDataUrl bb/color-coded_CTCF_pat_act.bed.bb
+    bigDataUrl bb/color-coded_CTCF_pat_act.bb
     shortLabel CTCF_Xi_Act
     longLabel CTCF Peak Paternal Xi
     type bigBed 6

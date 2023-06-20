@@ -15,5 +15,5 @@ fibertools -h
 
 To get the latest fibertools without rebuilding the whole env you can do:
 ```bash
-yes | pip uninstall fibertools && pip install git+ssh://git@github.com/mrvollger/fibertools.git; fibertools -h
+yes | pip uninstall fibertools && pip install git+ssh://git@github.com/fiberseq/fibertools.git && fibertools model -h
 ```
