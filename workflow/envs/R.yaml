@@ -8,6 +8,7 @@ dependencies:
   - r-ggrepel
   - r-ggforce
   - r-ggridges
+  - r-ggpubr
   #- r-knitr
   #- r::r-zoo
   #- r-vroom
