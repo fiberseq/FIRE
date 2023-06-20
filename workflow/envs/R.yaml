@@ -3,15 +3,13 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - r-r.utils
   - r-tidyverse
-  - r-scales
   - r-cowplot
   - r-glue
   - r-data.table
   - r-ggrepel
   - r-ggforce
-  - r-ggridges
+  #- r-ggridges
   #- r-knitr
   #- r::r-zoo
   #- r-vroom
