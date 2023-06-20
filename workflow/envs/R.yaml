@@ -1,0 +1,26 @@
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - r::r>=4.0
+  - r-r.utils
+  - r-base
+  - r-essentials
+  - r-tidyverse
+  - r-scales
+  - r-cowplot
+  - r-plotly
+  - r-glue
+  - r::r-rcolorbrewer
+  - r-data.table
+  - r-ggrepel
+  - r-argparse
+  - r-ggnewscale
+  - r-svglite
+  - r-ggforce
+  - r-knitr
+  - r-ggridges
+  - r::r-zoo
+  - r-vroom
+  - r-tzdb
