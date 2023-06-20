@@ -1,11 +1,10 @@
 channels:
-  - bioconda
   - conda-forge
   - defaults
 dependencies:
   - r-tidyverse
   - r-cowplot
-  - r-glue
+  #- r-glue
   - r-data.table
   - r-ggrepel
   - r-ggforce
