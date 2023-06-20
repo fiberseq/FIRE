@@ -17,3 +17,9 @@ To get the latest fibertools without rebuilding the whole env you can do:
 ```bash
 yes | pip uninstall fibertools && pip install git+https://github.com/fiberseq/fibertools && fibertools -h 
 ```
+
+## Model
+Unless directed otherwise it would be best to use this model for your data:
+```
+yes | pip uninstall fibertools && pip install git+https://github.com/fiberseq/fibertools && fibertools -h 
+```
