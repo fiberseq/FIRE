@@ -4,11 +4,10 @@ channels:
 dependencies:
   - r-tidyverse
   - r-cowplot
-  #- r-glue
   - r-data.table
   - r-ggrepel
   - r-ggforce
-  #- r-ggridges
+  - r-ggridges
   #- r-knitr
   #- r::r-zoo
   #- r-vroom
