@@ -4,7 +4,7 @@ n_chunks: 200
 max_t: 4
 dhs: config/annotations/GM12878_DHS.bed.gz # can be anything if not traing a model
 manifest: config/indata_t2t_v2.0.tbl
-model: results/GM12878/model.dat # if not provided will train a new model
+model: results/new_feats_GM12878/model.dat # if not provided will train a new model
 excludes:
   - config/annotations/hg38.blacklist.ENCFF356LFX.bed.gz
   - config/annotations/hg38.gap.bed
