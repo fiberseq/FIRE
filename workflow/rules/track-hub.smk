@@ -451,6 +451,33 @@ rule hap_differences_track:
         """
 
 
+rule fire_with_coverage:
+    input:
+        bed=rules.n_peaks.output.bed,
+        cov=rules.average_coverage.output.cov,
+        cov_bed=expand(rules.merged_fdr_track.output.bed, hp="all", allow_missing=True),
+    output:
+        bed="results/{sm}/FIRE.peaks.with.coverage.bed",
+    threads: 8
+    conda:
+        conda
+    shell:
+        """
+        COV=$(cat {input.cov})
+        printf "#ct\tst\ten\t" > {output.bed}
+        printf "peak_ct\tpeak_st\tpeak_en\t" >> {output.bed}
+        printf "peak_fdr\tpeak_acc\tpeak_link\tpeak_nuc\t" >> {output.bed}
+        printf "sample\tcov\\n" >> {output.bed}
+        paste \
+            <(bedmap --delim '\\t' --echo --max-element \
+                <(cut -f 1-3 {input.bed} | tail -n +2 ) \
+                <(zcat {input.cov_bed} | tail -n +2) \
+            ) \
+            | sed "s/$/\t{wildcards.sm}\t$COV/g" \
+        >> {output.bed}
+        """
+
+
 rule trackhub:
     input:
         fai=ancient(f"{ref}.fai"),
