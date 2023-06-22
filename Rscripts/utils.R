@@ -18,6 +18,7 @@ library(tools)
 library("purrr")
 library("reticulate")
 library(ggpubr)
+library(ggbeeswarm)
 library(weights)
 library(karyoploteR)
 library(zoo)
@@ -435,6 +436,14 @@ my_hgrid = function(...){
 my_vgrid = function(...){
     theme_minimal_vgrid(font_size=FONT_SIZE, ...)
 } 
+
+theme_no_x = function(...){
+    theme(
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()
+    )
+}
 
 
 reverselog_trans <- function(base = exp(1)) {
