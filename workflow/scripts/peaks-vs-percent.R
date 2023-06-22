@@ -1,11 +1,3 @@
----
-title: "R Notebook"
-output: html_notebook
-editor_options: 
-  chunk_output_type: console
----
-
-```{r, echo=FALSE}
 library(tidyverse)
 library(data.table)
 library(scales)
@@ -39,9 +31,7 @@ theme_no_x = function(...){
 }
 in_file=snakemake@input[[1]]
 out_file=snakemake@output[[1]]
-```
 
-```{r}
 df=fread(in_file)
 df$peak_cov = df$peak_acc + df$peak_nuc + df$peak_link
 df$acc_percent = df$peak_acc/df$peak_cov
@@ -60,10 +50,7 @@ df = df %>%
     mutate(
         min_percent_acc=min(acc_percent)
     )
-df
-```
 
-```{r}
 pecdf=df %>%
     #filter((n+1)%%100==0) %>%
     ggplot(aes(x=acc_percent, y=n)) +
@@ -134,4 +121,3 @@ p5hist=by_5_per %>%
 
 z=plot_grid(p5hist,pecdf, ncol=1, align="v", rel_heights=c(1,4))
 ggsave(out_file, height=3, width=5)
-```
