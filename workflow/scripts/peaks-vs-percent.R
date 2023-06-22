@@ -39,7 +39,6 @@ df = df %>%
     group_by(sample) %>%
     arrange(-acc_percent) %>%
     mutate(
-        n=seq(n()),
         min_cov = cov - 5*sqrt(cov),
         max_cov = cov + 5*sqrt(cov),
     ) %>%
@@ -48,6 +47,7 @@ df = df %>%
         peak_cov < max_cov,
     ) %>%
     mutate(
+        n=seq(n()),
         min_percent_acc=min(acc_percent)
     )
 
