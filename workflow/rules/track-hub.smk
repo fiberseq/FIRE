@@ -488,7 +488,7 @@ rule peaks_vs_percent:
     conda:
         "../envs/R.yaml"
     script:
-        "../scripts/peak-vs-percent.Rmd"
+        "../scripts/peak-vs-percent.R"
 
 
 rule trackhub:
