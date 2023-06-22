@@ -52,6 +52,7 @@ df = df %>%
     )
 
 pecdf=df %>%
+    arrange(-acc_percent, -n) %>%
     #filter((n+1)%%100==0) %>%
     ggplot(aes(x=acc_percent, y=n)) +
     geom_line()+
