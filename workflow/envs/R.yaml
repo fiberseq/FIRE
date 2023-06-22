@@ -9,6 +9,7 @@ dependencies:
   - r-ggforce
   - r-ggridges
   - r-ggpubr
+  - r-patchwork
   #- r-knitr
   #- r::r-zoo
   #- r-vroom
