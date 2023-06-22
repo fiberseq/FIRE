@@ -78,6 +78,7 @@ localrules:
     percent_in_clusters,
     n_peaks,
     hap_differences,
+    peaks_vs_percent,
 
 
 rule all:
