@@ -132,6 +132,6 @@ p5hist=by_5_per %>%
     theme_no_x()
 
 
-plot_grid(p5hist,pecdf, ncol=1, align="v", rel_heights=c(1,4))
-ggsave("Figures/peaks-vs-percent.pdf", height=3, width=5)
+z=plot_grid(p5hist,pecdf, ncol=1, align="v", rel_heights=c(1,4))
+ggsave(out_file, height=3, width=5)
 ```
