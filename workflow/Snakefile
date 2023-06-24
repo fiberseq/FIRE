@@ -19,7 +19,7 @@ genome_len = fai["length"].sum()
 window_size = int(genome_len / n_chunks) + 1
 conda = config.get("env", "../envs/env.yaml")
 bins = list(range(1, max_bins + 1))
-data = pd.read_csv(config["manifest"], sep="\t", comment="#").set_index("sample")
+data = pd.read_csv(config["manifest"], sep="\s+", comment="#").set_index("sample")
 haps = ["all", "hap1", "hap2", "unk"]
 not_all = ["hap1", "hap2", "unk"]
 not_unk = ["all", "hap1", "hap2"]
