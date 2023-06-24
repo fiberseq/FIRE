@@ -82,7 +82,7 @@ rule filter_model_input_by_coverage:
         min=$(echo "$median" | awk '{{print $1-3*sqrt($1)}}')
         max=$(echo "$median" | awk '{{print $1+3*sqrt($1)}}')
         echo $median $min $max 
-        bedmap --delim '\t' --echo --mean \
+        bedmap --ec --delim '\t' --echo --mean \
             <(zcat {input.bed} | sort -k 1,1 -k2,2n) \
             <(zcat {input.bg} | awk '{{print $1"\t"$2"\t"$3"\t"$4"\t"$4}}' | sort -k 1,1 -k2,2n) \
             | awk -v min="$min" -v max="$max" '$5 > min && $5 < max' \
