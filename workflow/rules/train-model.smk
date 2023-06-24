@@ -71,16 +71,18 @@ rule filter_model_input_by_coverage:
         d4=rules.genome_bedgraph.output.d4,
     output:
         bed="results/{sm}/dhs_with_null_cov_filtered.bed",
-    threads: 2
+    threads: 8
     conda:
         conda
+    params:
+        chrom=chroms[0],
     shell:
         """
-        d4tools stat -s median {input.d4} | grep -vw chr1 
+        median=$(d4tools stat -t {threads} -s median {input.d4} | grep -w {params.chrom} | cut -f 4)
         min=$(echo "$median" | awk '{{print $1-3*sqrt($1)}}')
         max=$(echo "$median" | awk '{{print $1+3*sqrt($1)}}')
         echo $median $min $max 
-        bedmap --delim '\t' --echo --max-element <(zcat {input.bed}) <(zcat {input.bg}) \
+        bedmap --delim '\t' --mean <(zcat {input.bed}) <(zcat {input.bg}) \
             | awk -v min="$min" -v max="$max" '$5 > min && $5 < max' \
             | cut -f 1-4 \
             | sort -k 1,1 -k2,2n \
