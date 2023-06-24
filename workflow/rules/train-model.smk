@@ -58,7 +58,7 @@ rule genome_bedgraph:
         conda
     shell:
         """ 
-        d4tools create -t {threads} -Azr {input.fai} {input.bam} {ouput.d4}
+        d4tools create -t {threads} -Azr {input.fai} {input.bam} {output.d4}
         d4tools view {output.d4} | bgzip -@ {threads} > {output.bg}
         """
 
