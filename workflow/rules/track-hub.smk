@@ -475,6 +475,7 @@ rule fire_with_coverage:
                 <(zcat {input.cov_bed} | tail -n +2) \
             ) \
             | sed "s/$/\t{wildcards.sm}\t$COV/g" \
+            | awk -v cov=$COV 'BEGIN{{limit=5*sqrt(cov); mmin=cov-limit; mmax=cov+limit}} {{if ($7>mmin && $7<mmax) print $0}}' \
         >> {output.bed}
         """
 
