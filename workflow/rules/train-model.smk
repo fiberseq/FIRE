@@ -46,11 +46,28 @@ rule model_bam:
         """
 
 
+rule genome_bedgraph:
+    input:
+        bam=ancient(lambda wc: data.loc[wc.sm, "bam"]),
+        fai=ancient(f"{ref}.fai"),
+    output:
+        d4="results/{sm}/coverage/{sm}.d4",
+        bg="results/{sm}/coverage/{sm}.bed.gz",
+    threads: 16
+    conda:
+        conda
+    shell:
+        """ 
+        d4tools create -t {threads} -Azr {input.fai} {input.bam} {ouput.d4}
+        d4tools view {output.d4} | bgzip -@ {threads} > {output.bg}
+        """
+
 rule filter_model_input_by_coverage:
     input:
         fai=ancient(f"{ref}.fai"),
         bed=rules.dhs_null.output.bed,
         bam=rules.model_bam.output.bam,
+        bg=rules.genome_bedgraph.output.bg,
     output:
         bed="results/{sm}/dhs_with_null_cov_filtered.bed",
     threads: 2
@@ -72,6 +89,7 @@ rule filter_model_input_by_coverage:
             > {output.bed}
         head {output.bed}
         """
+
 
 
 rule model_input:
