@@ -68,6 +68,7 @@ rule filter_model_input_by_coverage:
         bed=rules.dhs_null.output.bed,
         bam=rules.model_bam.output.bam,
         bg=rules.genome_bedgraph.output.bg,
+        d4=rules.genome_bedgraph.output.d4,
     output:
         bed="results/{sm}/dhs_with_null_cov_filtered.bed",
     threads: 2
@@ -75,14 +76,11 @@ rule filter_model_input_by_coverage:
         conda
     shell:
         """
-        median=$(samtools depth {input.bam} -r chr1:30000000-40000000 | datamash median 3)
+        d4tools stat -s median {input.d4} | grep -vw chr1 
         min=$(echo "$median" | awk '{{print $1-3*sqrt($1)}}')
         max=$(echo "$median" | awk '{{print $1+3*sqrt($1)}}')
         echo $median $min $max 
-        bedtools coverage -mean -sorted \
-                -g {input.fai} \
-                -a <(zcat {input.bed} | sort -V -k1,1 -k2,2 | grep -v "_") \
-                -b {input.bam} \
+        bedmap --delim '\t' --echo --max-element <(zcat {input.bed}) <(zcat {input.bg}) \
             | awk -v min="$min" -v max="$max" '$5 > min && $5 < max' \
             | cut -f 1-4 \
             | sort -k 1,1 -k2,2n \
