@@ -10,6 +10,7 @@ dependencies:
   - r-ggridges
   - r-ggpubr
   - r-patchwork
+  - r-hexbin
   #- r-knitr
   #- r::r-zoo
   #- r-vroom
