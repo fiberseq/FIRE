@@ -48,7 +48,7 @@ df = df %>%
     ) %>%
     group_by(sample) %>%
     mutate(
-        count=seq(n()),
+        count=row_number(),
         min_percent_acc=min(acc_percent)
     )
 
