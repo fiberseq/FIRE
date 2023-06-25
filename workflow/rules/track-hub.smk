@@ -465,6 +465,8 @@ rule fire_with_coverage:
     shell:
         """
         COV=$(cat {input.cov})
+        MIN=$(echo "$COV" | awk '{{print $1-5*sqrt($1)}}')
+        MAX=$(echo "$COV" | awk '{{print $1+5*sqrt($1)}}')
         printf "#ct\tst\ten\t" > {output.bed}
         printf "peak_ct\tpeak_st\tpeak_en\t" >> {output.bed}
         printf "peak_fdr\tpeak_acc\tpeak_link\tpeak_nuc\t" >> {output.bed}
@@ -475,7 +477,7 @@ rule fire_with_coverage:
                 <(zcat {input.cov_bed} | tail -n +2) \
             ) \
             | sed "s/$/\t{wildcards.sm}\t$COV/g" \
-            | awk -v cov=$COV 'BEGIN{{limit=5*sqrt(cov); mmin=cov-limit; mmax=cov+limit}} {{if ($7>mmin && $7<mmax) print $0}}' \
+            | awk -v cov=$COV -v MIN=$MIN -v MAX=$MAX '$7 > MIN && $7 < MAX' \
         >> {output.bed}
         """
 
