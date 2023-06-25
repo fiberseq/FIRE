@@ -102,12 +102,14 @@ rule model_input:
     threads: 16
     params:
         n=500_000,
+        sample_rate=0.05,
     conda:
         conda
     shell:
         """ 
-        (samtools view -F 2308 -u -M -L {input.dhs} -@ {threads} {input.bam} \
-          | samtools view -@ {threads} -s 0.25 -u \
+        (samtools view -F 2308 -u -M -@ {threads} \
+                -L {input.dhs} \
+                {input.bam} -s {params.sample_rate} \
           | ft -t {threads} extract --all - \
           | bgzip -@ {threads} \
           > {output.bed} ) || echo "random head error"
