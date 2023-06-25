@@ -46,15 +46,16 @@ df = df %>%
         peak_cov > min_cov,
         peak_cov < max_cov,
     ) %>%
+    group_by(sample) %>%
     mutate(
-        n=seq(n()),
+        count=seq(n()),
         min_percent_acc=min(acc_percent)
     )
 
 pecdf=df %>%
-    arrange(-acc_percent, -n) %>%
+    arrange(-acc_percent, -count) %>%
     #filter((n+1)%%100==0) %>%
-    ggplot(aes(x=acc_percent, y=n)) +
+    ggplot(aes(x=acc_percent, y=count)) +
     geom_line()+
     geom_text_repel(
         data = df %>% tail(1),
@@ -62,7 +63,7 @@ pecdf=df %>%
             x=min_percent_acc,
             label=paste(
                 "limit of detection:", percent(min_percent_acc, accuracy=0.01),
-                "\n# peaks", comma(n)
+                "\n# peaks", comma(count)
             ),
         ),
         min.segment.length=0,
@@ -91,16 +92,16 @@ by_5_per = df %>%
     ) %>%
     filter(group %% 5 == 0) %>%
     group_by(group) %>%
-    slice_max(order_by = n, n = 1)
+    slice_max(order_by = count, n = 1)
 
 p5hist=by_5_per %>%
-    ggplot(aes(x=acc_percent, y=n)) +
+    ggplot(aes(x=acc_percent, y=count)) +
     geom_bar(stat="identity")+
     geom_text_repel(
         aes(
             x=acc_percent,
             label=paste(
-                comma(n)
+                comma(count)
             ),
         ),
         min.segment.length=0,
