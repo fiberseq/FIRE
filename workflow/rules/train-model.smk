@@ -66,7 +66,7 @@ rule filter_model_input_by_coverage:
     input:
         fai=ancient(f"{ref}.fai"),
         bed=rules.dhs_null.output.bed,
-        bam=rules.model_bam.output.bam,
+        bam=lambda wc: data.loc[wc.sm, "bam"],
         bg=rules.genome_bedgraph.output.bg,
         d4=rules.genome_bedgraph.output.d4,
     output:
@@ -95,7 +95,7 @@ rule filter_model_input_by_coverage:
 
 rule model_input:
     input:
-        bam=rules.model_bam.output.bam,
+        bam=lambda wc: data.loc[wc.sm, "bam"],
         dhs=rules.filter_model_input_by_coverage.output.bed,
     output:
         bed=temp("temp/{sm}/small.extract.all.bed.gz"),
