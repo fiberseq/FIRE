@@ -14,7 +14,6 @@ keep_chrs = config.get("keep_chromosomes", ".*")
 
 
 fai = pd.read_csv(f"{ref}.fai", sep="\t", names=["chr", "length", "x", "y", "z"])
-chroms = sorted([chrom for chrom in fai["chr"] if "_" not in chrom])
 genome_len = fai["length"].sum()
 window_size = int(genome_len / n_chunks) + 1
 conda = config.get("env", "../envs/env.yaml")
@@ -55,11 +54,12 @@ wildcard_constraints:
     fdr="\d+",
     hp="|".join(haps),
 
-
+include: "rules/common.smk"
 include: "rules/train-model.smk"
 include: "rules/apply-model.smk"
 include: "rules/track-hub.smk"
 
+chroms = get_chroms()
 
 localrules:
     bed_chunks,
