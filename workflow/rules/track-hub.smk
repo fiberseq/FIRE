@@ -92,7 +92,7 @@ rule coverage_tracks:
     input:
         beds=expand(
             rules.chromosome_coverage_tracks.output.bed,
-            chrom=chroms,
+            chrom=get_chroms(),
             allow_missing=True,
         ),
         fai=ancient(f"{ref}.fai"),
@@ -115,7 +115,7 @@ rule merged_fdr_track:
     input:
         beds=expand(
             rules.fdr_bed.output.bed,
-            chrom=chroms,
+            chrom=get_chroms(),
             allow_missing=True,
         ),
         fai=ancient(f"{ref}.fai"),
@@ -153,7 +153,7 @@ rule chromosome_fdr_tracks:
 rule fdr_tracks:
     input:
         beds=expand(
-            rules.chromosome_fdr_tracks.output.bed, chrom=chroms, allow_missing=True
+            rules.chromosome_fdr_tracks.output.bed, chrom=get_chroms(), allow_missing=True
         ),
         fai=ancient(f"{ref}.fai"),
     output:
@@ -183,7 +183,7 @@ rule average_coverage:
     conda:
         conda
     params:
-        chrom=chroms[0],
+        chrom=get_chroms()[0],
         first_n=1_000_000_000,
     shell:
         """
@@ -222,7 +222,7 @@ rule binned_fdr_calls:
 rule merge_binned_fdr_calls:
     input:
         beds=expand(
-            "temp/{sm}/{hp}/{chrom}.bin.{bin}.bed", chrom=chroms, allow_missing=True
+            "temp/{sm}/{hp}/{chrom}.bin.{bin}.bed", chrom=get_chroms(), allow_missing=True
         ),
         fai=f"{ref}.fai",
     output:
@@ -234,7 +234,7 @@ rule merge_binned_fdr_calls:
     conda:
         conda
     params:
-        chrom=chroms[0],
+        chrom=get_chroms()[0],
     shell:
         """
         printf "{params.chrom}\t0\t1\tfake\t100\t+\t0\t1\t230,230,230\n" > {output.bed}
@@ -313,7 +313,7 @@ rule merge_peak_calls:
     input:
         beds=expand(
             rules.peak_calls_per_chromosome.output.bed,
-            chrom=chroms,
+            chrom=get_chroms(),
             allow_missing=True,
         ),
     output:
@@ -443,7 +443,7 @@ rule hap_differences_track:
     conda:
         conda
     params:
-        chrom=chroms[0],
+        chrom=get_chroms()[0],
     shell:
         """
         printf "{params.chrom}\t0\t1\tfake\t100\t+\t0\t1\t230,230,230\\n" > {output.bed}
