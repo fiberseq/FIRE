@@ -62,7 +62,6 @@ rule genome_bedgraph:
         d4tools view {output.d4} | bgzip -@ {threads} > {output.bg}
         """
 
-
 rule filter_model_input_by_coverage:
     input:
         fai=ancient(f"{ref}.fai"),
@@ -76,7 +75,7 @@ rule filter_model_input_by_coverage:
     conda:
         conda
     params:
-        chrom=chroms[0],
+        chrom=get_chroms()[0],
     shell:
         """
         median=$(d4tools stat -t {threads} -s median {input.d4} | grep -w {params.chrom} | cut -f 4)
@@ -91,6 +90,7 @@ rule filter_model_input_by_coverage:
             > {output.bed}
         head {output.bed}
         """
+
 
 
 rule model_input:
