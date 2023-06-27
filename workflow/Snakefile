@@ -45,6 +45,15 @@ def get_load(wc):
     return 50
 
 
+include: "rules/common.smk"
+include: "rules/train-model.smk"
+include: "rules/apply-model.smk"
+include: "rules/track-hub.smk"
+
+
+chroms = get_chroms()
+
+
 wildcard_constraints:
     chrom="|".join(chroms),
     call="|".join(["msp", "m6a"]),
@@ -54,12 +63,6 @@ wildcard_constraints:
     fdr="\d+",
     hp="|".join(haps),
 
-include: "rules/common.smk"
-include: "rules/train-model.smk"
-include: "rules/apply-model.smk"
-include: "rules/track-hub.smk"
-
-chroms = get_chroms()
 
 localrules:
     bed_chunks,

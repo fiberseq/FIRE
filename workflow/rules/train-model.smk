@@ -62,6 +62,7 @@ rule genome_bedgraph:
         d4tools view {output.d4} | bgzip -@ {threads} > {output.bg}
         """
 
+
 rule filter_model_input_by_coverage:
     input:
         fai=ancient(f"{ref}.fai"),
@@ -90,7 +91,6 @@ rule filter_model_input_by_coverage:
             > {output.bed}
         head {output.bed}
         """
-
 
 
 rule model_input:
