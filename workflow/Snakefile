@@ -29,22 +29,6 @@ types = ["fdr", "acc", "link", "nuc"]
 types_to_col = {"fdr": 4, "acc": 5, "link": 6, "nuc": 7}
 
 
-def get_mem_mb(wildcards, attempt):
-    if attempt < 3:
-        return attempt * 1024 * 32
-    return attempt * 1024 * 48
-
-
-def get_large_mem_mb(wildcards, attempt):
-    return attempt * 1024 * 64
-
-
-def get_load(wc):
-    if "all" in wc.sm:
-        return 100
-    return 50
-
-
 include: "rules/common.smk"
 include: "rules/train-model.smk"
 include: "rules/apply-model.smk"
@@ -104,3 +88,4 @@ rule all:
         expand(rules.hap_differences_track.output.bb, sm=data.index),
         expand(rules.fire_with_coverage.output, sm=data.index),
         expand(rules.peaks_vs_percent.output, sm=data.index),
+        expand(rules.average_coverage.output, sm=data.index),
