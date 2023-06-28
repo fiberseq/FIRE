@@ -153,7 +153,9 @@ rule chromosome_fdr_tracks:
 rule fdr_tracks:
     input:
         beds=expand(
-            rules.chromosome_fdr_tracks.output.bed, chrom=get_chroms(), allow_missing=True
+            rules.chromosome_fdr_tracks.output.bed,
+            chrom=get_chroms(),
+            allow_missing=True,
         ),
         fai=ancient(f"{ref}.fai"),
     output:
@@ -174,25 +176,11 @@ rule fdr_tracks:
 
 rule average_coverage:
     input:
-        bam=ancient(lambda wc: data.loc[wc.sm, "bam"]),
+        median=rules.genome_bedgraph.output.median,
     output:
-        cov="results/{sm}/average.coverage.txt",
-    threads: 16
-    resources:
-        mem_mb=get_mem_mb,
-    conda:
-        conda
-    params:
-        chrom=get_chroms()[0],
-        first_n=1_000_000_000,
-    shell:
-        """
-        samtools depth -@ {threads} {input.bam} -r {params.chrom} \
-            | head -n {params.first_n} \
-            | cut -f 3 \
-            | datamash median 1 \
-            > {output.cov}
-        """
+        cov="results/{sm}/coverage/{sm}.median.coverage.txt",
+    run:
+        find_median_coverage(input["median"], outfile=output["cov"])
 
 
 rule binned_fdr_calls:
@@ -222,7 +210,9 @@ rule binned_fdr_calls:
 rule merge_binned_fdr_calls:
     input:
         beds=expand(
-            "temp/{sm}/{hp}/{chrom}.bin.{bin}.bed", chrom=get_chroms(), allow_missing=True
+            "temp/{sm}/{hp}/{chrom}.bin.{bin}.bed",
+            chrom=get_chroms(),
+            allow_missing=True,
         ),
         fai=f"{ref}.fai",
     output:

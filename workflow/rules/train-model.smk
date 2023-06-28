@@ -53,14 +53,17 @@ rule genome_bedgraph:
     output:
         d4="results/{sm}/coverage/{sm}.d4",
         bg="results/{sm}/coverage/{sm}.bed.gz",
+        median="results/{sm}/coverage/{sm}.median.chromosome.coverage.bed",
     threads: 16
     conda:
         conda
     shell:
         """ 
         d4tools create -t {threads} -Azr {input.fai} {input.bam} {output.d4}
-        d4tools view {output.d4} | bgzip -@ {threads} > {output.bg}
+        d4tools view -t {threads} {output.d4} | bgzip -@ {threads} > {output.bg}
+        d4tools stat -t {threads} -s median {output.d4} > {output.median}
         """
+
 
 rule filter_model_input_by_coverage:
     input:
@@ -90,7 +93,6 @@ rule filter_model_input_by_coverage:
             > {output.bed}
         head {output.bed}
         """
-
 
 
 rule model_input:
