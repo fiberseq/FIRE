@@ -60,7 +60,7 @@ rule genome_bedgraph:
     shell:
         """ 
         d4tools create -t {threads} -Azr {input.fai} {input.bam} {output.d4}
-        d4tools view -t {threads} {output.d4} | bgzip -@ {threads} > {output.bg}
+        d4tools view {output.d4} | bgzip -@ {threads} > {output.bg}
         d4tools stat -t {threads} -s median {output.d4} > {output.median}
         """
 
