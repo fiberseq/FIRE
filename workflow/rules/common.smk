@@ -33,5 +33,5 @@ def find_median_coverage(file, outfile=None):
     total = (df.end - df.start).sum()
     coverage = (df.coverage * (df.end - df.start)).sum() / total
     if outfile is not None:
-        open(outfile, "w").write(str(round(coverage)))
+        open(outfile, "w").write(str(round(coverage)) + "\n")
     return round(coverage)
