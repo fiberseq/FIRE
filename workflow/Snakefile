@@ -9,7 +9,7 @@ chunks = [f"{i+1}-of-{n_chunks}" for i in range(n_chunks)]
 excludes = config["excludes"]
 dhs = config["dhs"]
 max_t = config.get("max_t", 4)
-max_bins = config.get("bins", 75)
+max_bins = config.get("max_bins", 75)
 keep_chrs = config.get("keep_chromosomes", ".*")
 
 
