@@ -8,11 +8,15 @@ tdf = pdf %>%
     filter(sample==SM) %>%
     mutate(
         col=case_when(diff < 0 ~ "darkred", TRUE ~ "darkblue"),
-        case=case_when(diff < 0 ~ -1, TRUE ~ 1)
+        case=case_when(diff < 0 ~ -1, TRUE ~ 1),
+        ct=chrom,
+        st=start,
+        en=end,
     )
 
+single_out_chr = "chr14"
 my_comparisons <- list( 
-    c("chr12", "other"),
+    c(single_out_chr, "other"),
     c("left of chr13 BP", "right of chr13 BP"),
     c("other", "left of chr13 BP"),
     c("other", "right of chr13 BP")
@@ -23,11 +27,22 @@ chr13.df=tdf %>%
     ) %>%
     mutate(
         location=case_when(
-            ct == "chr12" ~ "chr12",
+            ct == single_out_chr ~ single_out_chr,
             ct == "chrX" ~ "chrX",
             ct == "chr13" & st > 35480297 ~ "right of chr13 BP",
             ct == "chr13" & en < 35480297 ~ "left of chr13 BP",
             TRUE ~ "other"
+        ),
+        bin=case_when(
+            ct == "chrX" ~ "chrX",
+            ct != "chr13" ~ "other",
+            en < 35480297 ~ "left of chr13 BP",
+            en < 35480297 + 1*19.72e6 ~ "bin 1",
+            en < 35480297 + 2*19.72e6 ~ "bin 2",
+            en < 35480297 + 3*19.72e6 ~ "bin 3",
+            en < 35480297 + 4*19.72e6 ~ "bin 4",
+            en < 35480297 + 75e6 ~ "bin 5",
+            en < 35480297 + 80e6 ~ "bin 6",
         )
     ) %>%
     mutate(
@@ -39,13 +54,13 @@ chr13.df=tdf %>%
     filter(imprinted==0.0)
 
 
-chr13.df %>%
+summary_diff = chr13.df %>%
     group_by(location) %>%
     summarise(
-        100*(1-sum(hap1_acc)/sum(hap2_acc)),
-        100*(1-sum(hap1_cov)/sum(hap2_cov))
+        per_diff=100*median(diff),
+        n=n(),
     )
-
+summary_diff
 p = chr13.df %>%
     ggviolin(y = "diff", x="location",
         draw_quantiles = 0.5,
@@ -55,18 +70,25 @@ p = chr13.df %>%
     ) +
     stat_compare_means(
         #label="{p.format}{p.signif}",
-        label.y = c(0.9, 0.9, 1, 1.1),
+        #label.y = c(0.9, 0.9, 1, 1.1),
         comparisons=my_comparisons,
         method="wilcox.test",
         size=2,
         method.args=list(alternative="greater"),
     ) +
     geom_text(
-        data = . %>% group_by(location) %>% summarise(label=comma(n())),
-        aes(x=location, y=-1, label=paste0("n = ", label)),
+        data = summary_diff,
+        aes(
+            x=location,
+            y=-0.8,
+            label=paste0(
+                " n = ", comma(n), "\n ",
+                round(per_diff,2), "%"
+            )
+        ),
         vjust=1,
         hjust=0,
-        size=2
+        size=1.75
     ) +
     scale_y_continuous("Difference between paternal and maternal accessibility", labels=percent) +
     scale_fill_manual(
@@ -83,6 +105,60 @@ p = chr13.df %>%
 
 #ggadjust_pvalue(p,label = "{p.adj.format}{p.adj.signif}")
 my_ggsave("Figures/{SM}_violin_hap1_vs_hap2.pdf", height=3, width=5)
+
+summary_diff = chr13.df %>%
+    group_by(bin) %>%
+    summarise(
+        per_diff=100*median(diff),
+        n=n(),
+    )
+
+bins = unique(chr13.df$bin); bins
+
+my_comparisons= list(
+    c("other", "bin 1"),
+    c("other", "bin 2"),
+    c("other", "bin 3"),
+    c("other", "bin 4"),
+    c("left of chr13 BP", "bin 1"),
+    c("left of chr13 BP", "bin 2"),
+    c("left of chr13 BP", "bin 3"),
+    c("left of chr13 BP", "bin 4")
+)
+
+chr13.df %>%
+    ggviolin(y = "diff", x="bin",
+        draw_quantiles = 0.5,
+        rug = FALSE,
+        fill="bin",
+        alpha=0.5,
+    ) +
+    stat_compare_means(
+        #label="{p.format}{p.signif}",
+        #label.y = c(0.9, 0.9, 1, 1.1),
+        comparisons=my_comparisons,
+        method="wilcox.test",
+        size=2,
+        method.args=list(alternative="greater"),
+    ) + my_grid() +
+     geom_text(
+        data = summary_diff,
+        aes(
+            x=bin,
+            y=-0.8,
+            label=paste0(
+                " n = ", comma(n), "\n ",
+                round(per_diff,3), "%"
+            )
+        ),
+        vjust=1,
+        hjust=0,
+        size=1.75
+    ) +
+    scale_y_continuous("Difference between paternal and maternal accessibility", labels=percent) +
+    my_grid() +
+    theme(legend.position="none")
+my_ggsave("Figures/{SM}_all_violin_hap1_vs_hap2.pdf")
 ```
 
 
@@ -98,7 +174,7 @@ tdf_sum = tdf %>%
     arrange(ct, st)
 
 ideo_pdf = glue("Figures/{SM}-ideogram-hap1-hap2.pdf")
-chrs=c("chr8", "chr12", "chr13", "chrX") # "chr10", "chr11",
+chrs=c("chr8", "chr13", single_out_chr, "chrX") # "chr10", "chr11",
 pdf(ideo_pdf, height=3, width=6)
 kp <- plotKaryotype(genome = "hg38", chromosomes=chrs)
 
@@ -109,7 +185,7 @@ kpSegments(kp, chr=tdf$ct, x0=tdf$st, x1=tdf$en,
 )
 
 # add breakpoints
-x="ct,st,en,col
+x="chrom,st,en,col
 chrX,0,24535843,orange
 chrX,24535843,156e6,cyan
 chr13,0,35480297,orange
@@ -117,7 +193,7 @@ chr13,35480297,114.5e6,cyan
 "
 x=fread(x)
 kpRect(kp, 
-    chr=x$ct, x0=x$st, x1=x$en, col=x$col,
+    chr=x$chrom, x0=x$st, x1=x$en, col=x$col,
     y0=-0.20, y1=-0.01,
     border=NA,
     lwd=2,

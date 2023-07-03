@@ -464,3 +464,9 @@ scientific_10 <- function(x) {
     rtn = parse(text=text)
     rtn
 }
+
+my_read_bed = function(...){
+    df=fread(...)
+    colnames(df)[1:3]=c("chrom", "start", "end")
+    df
+}

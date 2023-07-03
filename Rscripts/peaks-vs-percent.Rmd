@@ -1,0 +1,272 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, echo=FALSE}
+source("Rscripts/utils.R")
+library(tidyverse)
+library(data.table)
+library(scales)
+library(ggforce)
+library(cowplot)
+library(dplyr)
+library(ggrepel)
+library(glue)
+library(patchwork)
+library(ggpubr)
+library(valr)
+
+
+FONT_SIZE=6
+my_grid = function(...){
+    theme_minimal_grid(font_size=FONT_SIZE, ...)
+} 
+
+my_hgrid = function(...){
+    theme_minimal_hgrid(font_size=FONT_SIZE, ...)
+} 
+
+my_vgrid = function(...){
+    theme_minimal_vgrid(font_size=FONT_SIZE, ...)
+} 
+
+theme_no_x = function(...){
+    theme(
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()
+    )
+}
+
+my_read_bed = function(...){
+    df=fread(...)
+    colnames(df)[1:3]=c("chrom", "start", "end")
+    df
+}
+
+in_file="results/GM12878_130X/FIRE.peaks.with.coverage.bed"
+out_file="Figures/peaks-vs-percentage.pdf"
+encode=my_read_bed("data/ENCODE3_consensus_DHS_ENCFF503GCK.tsv")
+sds=my_read_bed("data/T2T_SDs.bed")
+tss=my_read_bed("data/gencode.v42.annotation_TSS.gff3")
+```
+
+```{r}
+dnase=my_read_bed("compare_fdr_and_dnase/ucsc/ENCFF960FMM.bedGraph")
+colnames(dnase)[4] = "dnase_sig"
+dnase
+```
+
+
+```{r}
+df=my_read_bed(in_file)
+df$peak_cov = df$peak_acc + df$peak_nuc + df$peak_link
+df$acc_percent = df$peak_acc/df$peak_cov
+df = df %>%
+    group_by(sample) %>%
+    arrange(-acc_percent) %>%
+    mutate(
+        min_cov = cov - 5*sqrt(cov),
+        max_cov = cov + 5*sqrt(cov),
+    ) %>%
+    filter(
+        peak_cov > min_cov,
+        peak_cov < max_cov,
+    ) %>%
+    mutate(
+        n=seq(n()),
+        min_percent_acc=min(acc_percent)
+    ) %>%
+    arrange(-n) %>%
+    mutate(
+        Mbp=cumsum(end-start)/1e6,
+        group = floor(acc_percent * 20) / 20
+    ) %>%
+    bed_map(encode, encode_count=length(core_end)) %>%
+    bed_map(sds, sd_count=length(V4)) %>%
+    bed_map(dnase, dnase_max=max(dnase_sig)) %>%
+    bed_map(tss, TSS=length(V4)) %>%
+    replace_na(list(encode_count = 0, sd_count=0, TSS=0)) %>%
+    arrange(-acc_percent, -n)
+head(df)
+tail(df)
+```
+
+```{r}
+percent_encode = df %>% 
+    group_by(group) %>%
+    summarise(
+        `% in\nENCODE` = 100*mean(encode_count>0),
+        `% in\nSDs`=100*mean(sd_count>0),
+        `% in\nTSS`=100*mean(TSS>0),
+        #`% of genome\n(c)`=100*sum(end-start)/3.1e9,
+        `% of\ngenome\n(cumulative)`=100*max(Mbp*1e6)/3.1e9,
+        `# of\npeaks`=n(),
+        acc_percent=unique(group)+0.025,
+        Mbp = sum(end-start)/1e6,
+    ) %>%
+    filter(`# of\npeaks` > 2)
+cur_colors = c(
+            `% in\nSDs`="darkred",
+            `% in\nTSS`="darkblue",
+            `% in\nENCODE`="darkgreen",
+            `% of\ngenome\n(cumulative)`="darkgray",
+            `# of\npeaks`="darkcyan"
+            )
+cur_colors
+percent_encode_long = percent_encode %>%
+    pivot_longer(
+        cols=names(cur_colors)
+        )
+
+percent_encode_long
+
+percent_plots = percent_encode_long %>%
+    mutate(
+        name=factor(name, levels=unique(name))
+    ) %>%
+    ggplot(aes(x=acc_percent, y=value, group=name, fill=name)) +
+    geom_bar(stat="identity", color="black")+
+    geom_text(
+        aes(
+            x=acc_percent,
+            label=sub("\\.0+$", "", comma(value, accuracy=0.01)),
+        ),
+        #min.segment.length=1,
+        #direction="y",
+        #alpha=0.5,
+        vjust=-0.3,
+        #color="white",
+        #nudge_y=0.01,
+        size=1
+    ) +
+    scale_y_continuous("", label=comma) +
+    scale_x_continuous(
+        "",
+        breaks=seq(5,100,5)/100,
+        label=rep("",20),
+    )+
+    scale_fill_manual(values=cur_colors) + 
+    facet_col(~name, scales="free_y", strip.position = "right") + 
+    my_grid() +
+    coord_cartesian(xlim=c(0,1), clip=FALSE)+
+    theme_no_x() +
+    theme(legend.position="None")
+
+my_ggsave("Figures/peaks-vs-percent.pdf", height=3, width=5)
+```
+
+```{r}
+by_5_per = df %>%
+    group_by(group) %>%
+    slice_max(order_by = n, n = 1)
+
+lookup=df$Mbp
+names(lookup)=df$n
+#lookup
+my_scale_function=function(x){
+    lookup[x]
+}
+
+pecdf=df %>%
+    arrange(-acc_percent, -n) %>%
+    #filter((n+1)%%100==0) %>%
+    ggplot(aes(x=acc_percent, y=n)) +
+    geom_line()+
+    geom_text_repel(
+        data = df %>% filter(n==max(n)),
+        aes(
+            x=min_percent_acc,
+            label=paste(
+                "Limit of detection", percent(min_percent_acc, accuracy=0.01),
+                "\n# peaks", comma(n)
+            ),
+        ),
+        min.segment.length=0,
+        segment.size=0.2,
+        direction="y",
+        size=1.5,
+        nudge_y=-1.0,
+        #nudge_x=0.1,
+    ) +
+    geom_text_repel(
+        data=by_5_per,
+        aes(
+            x=acc_percent,
+            label=paste(
+                comma(n)
+            ),
+        ),
+        min.segment.length=0,
+        direction="x",
+        nudge_x=0.1,
+        segment.size=0.1,
+        size=1
+    ) +
+    scale_y_continuous(
+        "# of regulatory elements\nin the genome",
+        trans="log10",
+        label=comma,
+         # Add a second axis and specify its features
+       #sec.axis = sec_axis(
+       #     ~my_scale_function(.),
+       #     name="Mbp",
+       #     label=comma,
+        #)
+    ) + 
+    annotation_logticks(side="l")+
+    scale_x_continuous(
+        "Minimum % of fibers that are accessible",
+        breaks=seq(5,100,5)/100,
+        label=percent,
+        #guide = guide_axis(n.dodge = 2),
+    ) +
+    my_grid() +
+    coord_cartesian(xlim=c(0,1), ylim=c(100,NA)) 
+
+
+
+p = percent_plots / pecdf
+my_ggsave("Figures/peaks-vs-percent.pdf", height=4, width=6)
+```
+
+
+#dnase
+```{r}
+df %>%
+    filter(dnase_max > 0) %>%
+    ggplot(aes(x=peak_acc, y=dnase_max+1)) +
+    geom_hex(bins=30) +
+    scale_fill_distiller("", palette = "Spectral", trans="log10") +
+    stat_cor()+
+    geom_smooth(method="lm", se=F) +
+    #facet_wrap(~autosome, ncol=2)+
+    #facet_wrap(~group)+
+    scale_x_continuous(
+        "FIRE peak score",
+        labels=comma,
+        trans="log10",
+    ) +
+    scale_y_continuous(
+        "DNase signal",
+        labels=comma,
+        trans="log10",
+    ) + 
+    my_grid()
+my_ggsave("Figures/DNase-vs-FIRE.pdf", height=3*3, width=4*3)
+```
+
+
+```{r}
+genome=fread("~/assemblies/hg38.analysisSet.fa.fai")
+colnames(genome)[1:2] = c("chrom", "size")
+fire_dnase = bed_intersect(bed_slop(df, genome, both=30), dnase)
+```
+
+# number of regulatory elements per cell
+```{r}
+comma(sum(df$acc_percent)*2)
+```
