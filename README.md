@@ -38,13 +38,13 @@ And modify as needed for distributed execution.
 ___ FIRE.bed.gz # Every FIRE element on every fiber
 ___ FIRE.peaks.with.coverage.bed # Every FIRE peak in the genome, filtered for coverage
 ___ percent-in-clusters.txt # Percent of FIREs that are in clusters (QC metric)
-___ test.peaks-vs-percent.pdf # Plot of of the above
+___ {sample name}.peaks-vs-percent.pdf # Plot of of the above
 ___ clustering-vs-null.bed.gz # A null distribution of FIRE.bed.gz for measuring clustering
 ___ coverage # Whole genome coverage tracks
-_  ___ test.bed.gz # bed graph of coverage
-_  ___ test.d4 # bed graph of coverage in d4 format
-_  ___ test.median.chromosome.coverage.bed # median coverage per chromosome
-_  ___ test.median.coverage.txt # median coverage across the genome
+_  ___ {sample name}.bed.gz # bed graph of coverage
+_  ___ {sample name}.d4 # bed graph of coverage in d4 format
+_  ___ {sample name}.median.chromosome.coverage.bed # median coverage per chromosome
+_  ___ {sample name}.median.coverage.txt # median coverage across the genome
 ___ all # results for all fibers
 _  ___ acc.model.results.bed.gz # All nucleosomes and MSPs with their FIRE scores for all fibers
 _  ___ acc.model.results.bed.gz.tbi # index for above
