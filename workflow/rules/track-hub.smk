@@ -342,7 +342,7 @@ rule n_peaks:
         txt=rules.percent_in_clusters.output.txt,
         bed=expand(rules.merge_peak_calls.output.bed, hp="all", allow_missing=True),
     output:
-        bed="results/{sm}/FIRE.peaks.bed",
+        bed=temp("temp/{sm}/FIRE.peaks.bed"),
     threads: 8
     conda:
         conda
@@ -353,10 +353,40 @@ rule n_peaks:
         awk -v min_fdr=$MIN_FDR '$7 >= min_fdr' {input.bed} > {output.bed}
         """
 
+rule fire_with_coverage:
+    input:
+        bed=rules.n_peaks.output.bed,
+        cov=rules.average_coverage.output.cov,
+        cov_bed=expand(rules.merged_fdr_track.output.bed, hp="all", allow_missing=True),
+    output:
+        bed="results/{sm}/FIRE.peaks.with.coverage.bed",
+    threads: 8
+    conda:
+        conda
+    shell:
+        """
+        COV=$(cat {input.cov})
+        MIN=$(echo "$COV" | awk '{{print $1-5*sqrt($1)}}')
+        MAX=$(echo "$COV" | awk '{{print $1+5*sqrt($1)}}')
+        printf "#ct\tst\ten\t" > {output.bed}
+        printf "peak_ct\tpeak_st\tpeak_en\t" >> {output.bed}
+        printf "peak_fdr\tpeak_acc\tpeak_link\tpeak_nuc\t" >> {output.bed}
+        printf "sample\tcov\\n" >> {output.bed}
+        paste \
+            <(bedmap --delim '\\t' --echo --max-element \
+                <(cut -f 1-3 {input.bed} | tail -n +2 ) \
+                <(zcat {input.cov_bed} | tail -n +2) \
+            ) \
+            | sed "s/$/\t{wildcards.sm}\t$COV/g" \
+            | awk -v cov=$COV -v MIN=$MIN -v MAX=$MAX '$8+$9+$10 > MIN && $8+$9+$10 < MAX' \
+        >> {output.bed}
+        """
+
+
 
 rule fire_bw:
     input:
-        bed=rules.n_peaks.output.bed,
+        bed=rules.fire_with_coverage.output.bed,
         fai=ancient(f"{ref}.fai"),
     output:
         bb="results/{sm}/trackHub/bb/FIRE.bb",
@@ -373,7 +403,7 @@ rule fire_bw:
 
 rule hap_peaks:
     input:
-        bed=rules.n_peaks.output.bed,
+        bed=rules.fire_with_coverage.output.bed,
         cov=rules.average_coverage.output.cov,
         h1=expand(rules.merged_fdr_track.output.bed, hp="hap1", allow_missing=True),
         h2=expand(rules.merged_fdr_track.output.bed, hp="hap2", allow_missing=True),
@@ -439,36 +469,6 @@ rule hap_differences_track:
         printf "{params.chrom}\t0\t1\tfake\t100\t+\t0\t1\t230,230,230\\n" > {output.bed}
         bedtools sort -i {input.bed9} >> {output.bed}
         bedToBigBed {output.bed} {input.fai} {output.bb}
-        """
-
-
-rule fire_with_coverage:
-    input:
-        bed=rules.n_peaks.output.bed,
-        cov=rules.average_coverage.output.cov,
-        cov_bed=expand(rules.merged_fdr_track.output.bed, hp="all", allow_missing=True),
-    output:
-        bed="results/{sm}/FIRE.peaks.with.coverage.bed",
-    threads: 8
-    conda:
-        conda
-    shell:
-        """
-        COV=$(cat {input.cov})
-        MIN=$(echo "$COV" | awk '{{print $1-5*sqrt($1)}}')
-        MAX=$(echo "$COV" | awk '{{print $1+5*sqrt($1)}}')
-        printf "#ct\tst\ten\t" > {output.bed}
-        printf "peak_ct\tpeak_st\tpeak_en\t" >> {output.bed}
-        printf "peak_fdr\tpeak_acc\tpeak_link\tpeak_nuc\t" >> {output.bed}
-        printf "sample\tcov\\n" >> {output.bed}
-        paste \
-            <(bedmap --delim '\\t' --echo --max-element \
-                <(cut -f 1-3 {input.bed} | tail -n +2 ) \
-                <(zcat {input.cov_bed} | tail -n +2) \
-            ) \
-            | sed "s/$/\t{wildcards.sm}\t$COV/g" \
-            | awk -v cov=$COV -v MIN=$MIN -v MAX=$MAX '$8+$9+$10 > MIN && $8+$9+$10 < MAX' \
-        >> {output.bed}
         """
 
 

@@ -27,8 +27,8 @@ min_fdr = -10.0 * np.log10(0.01 / n_tests)
 n_peaks = cov[cov.fdr >= min_fdr].shape[0]
 
 
-rtn = f"""percent-of-MSPs-preferentially-clustered-along-the-genome\tn_peaks\tmin_fdr
-{over_expected/real_bp:%}\t{n_peaks}\t{min_fdr}
+rtn = f"""percent-of-MSPs-preferentially-clustered-along-the-genome\tmin_fdr
+{over_expected/real_bp:%}\t{min_fdr}
 """
 out = sys.argv[3]
 open(out, "w").write(rtn)
