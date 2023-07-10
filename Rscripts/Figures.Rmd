@@ -10,7 +10,7 @@ system("mkdir -p Figures")
 system("mkdir -p Tables")
 source('Rscripts/utils.R')
 ```
-
+# IGNORE
 ```{r}
 df=fread("Tables/raw-hap1-vs-hap2-accessability.tsv")
 # fix the mat pat flipped haps
@@ -62,6 +62,44 @@ pdf = df %>%
         diff = hap1_frac_acc - hap2_frac_acc,
     ) %>%
     data.table()
+```
+
+
+```{r}
+library(valr)
+f="results/GM12878_130X/hap1-vs-hap2/FIRE.hap.differences.bed"
+a=my_read_bed(f)
+f="results/UDN318336/hap1-vs-hap2/FIRE.hap.differences.bed"
+b=my_read_bed(f)
+f="results/GM12878_pacbiome/hap1-vs-hap2/FIRE.hap.differences.bed"
+c=my_read_bed(f)
+f="results/HG002_pacbiome/hap1-vs-hap2/FIRE.hap.differences.bed"
+d=my_read_bed(f)
+imprinted=my_read_bed("data/lcl_dmr_coordinates_Akbari.bed")
+pdf=bind_rows(
+    list(a,b,c,d)
+    ) %>%
+    bed_map(imprinted, imprinted=(length(V4) > 0)) %>%
+    replace_na(list(imprinted=FALSE)) %>%
+    group_by(sample)%>%
+    mutate(
+        #p_cor = p_value * n(),
+        p_adjust = p.adjust(p_value, method="BH"),
+    ) %>%
+    data.table()
+
+tdf = copy(pdf)
+cond = pdf$sample !="UDN318336"
+h1=grep("hap1", colnames(pdf))
+h2=grep("hap2", colnames(pdf))
+for(i in seq(length(h1))){
+    c1 = h1[i]
+    c2 = h2[i]
+    pdf[cond][[c1]] = tdf[cond][[c2]]
+    pdf[cond][[c2]] = tdf[cond][[c1]]
+}
+
+pdf
 ```
 
 ```{r}
