@@ -62,7 +62,7 @@ localrules:
     average_coverage,
     clustering_vs_null,
     percent_in_clusters,
-    n_peaks,
+    fire_peaks,
     hap_differences,
     peaks_vs_percent,
 
