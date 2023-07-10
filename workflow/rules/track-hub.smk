@@ -353,6 +353,7 @@ rule n_peaks:
         awk -v min_fdr=$MIN_FDR '$7 >= min_fdr' {input.bed} > {output.bed}
         """
 
+
 rule fire_with_coverage:
     input:
         bed=rules.n_peaks.output.bed,
@@ -381,7 +382,6 @@ rule fire_with_coverage:
             | awk -v cov=$COV -v MIN=$MIN -v MAX=$MAX '$8+$9+$10 > MIN && $8+$9+$10 < MAX' \
         >> {output.bed}
         """
-
 
 
 rule fire_bw:
