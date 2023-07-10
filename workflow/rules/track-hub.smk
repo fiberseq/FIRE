@@ -337,7 +337,7 @@ rule percent_in_clusters:
         """
 
 
-rule n_peaks:
+rule fire_peaks:
     input:
         txt=rules.percent_in_clusters.output.txt,
         bed=expand(rules.merge_peak_calls.output.bed, hp="all", allow_missing=True),
@@ -356,7 +356,7 @@ rule n_peaks:
 
 rule fire_with_coverage:
     input:
-        bed=rules.n_peaks.output.bed,
+        bed=rules.fire_peaks.output.bed,
         cov=rules.average_coverage.output.cov,
         cov_bed=expand(rules.merged_fdr_track.output.bed, hp="all", allow_missing=True),
     output:
