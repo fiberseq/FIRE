@@ -15,11 +15,14 @@ rule make_fdr_d4:
         conda
     shell:
         """
-        printf "{wildcards.chrom}\t0\t1\tfake\t100\t+\t0\t1\t147,112,219\t1.0\n" > {output.bed}
-        printf "{wildcards.chrom}\t0\t1\tfake\t3\t+\t0\t1\t255,0,0\t0.03\n" >> {output.bed}
-        printf '{wildcards.chrom}\t0\t%s\tfake\t100\t+\t0\t1\t230,230,230\t1.0\n' {{0..999}} >> {output.bed}
-        tail {output.bed}
+        ( \
+          printf '{wildcards.chrom}\t0\t%s\tfake\t3\t+\t0\t1\t255,0,0\t0.03\n' {{1..10000}}; \
+          printf '{wildcards.chrom}\t0\t%s\tfake\t100\t+\t0\t1\t147,112,219\t1.0\n' {{1..10000}}; \
+          printf '{wildcards.chrom}\t0\t%s\tfake\t100\t+\t0\t1\t230,230,230\t1.0\n' {{1..10000}}; \
+        ) > {output.bed}
         tabix {input.bed} {wildcards.chrom} >> {output.bed}
+        head {output.bed}
+        tail {output.bed}
         
         fibertools -v bed2d4 \
             --chromosome {wildcards.chrom} \
