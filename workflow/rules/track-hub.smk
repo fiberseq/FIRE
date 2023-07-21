@@ -172,8 +172,8 @@ rule fdr_tracks:
         mem_mb=get_mem_mb,
     shell:
         """
-        head -n 1 {input.fai} | awk '{{print $1"\t0\t1\t0"}}' > {output.bed}
-        cat {input.beds} | awk 'NF > 2'  >> {output.bed}
+        #head -n 1 {input.fai} | awk '{{print $1"\t0\t1\t0"}}' > {output.bed}
+        cat {input.beds} | awk 'NF > 2' | awk 'BEGIN {OFS="\t"} {if(NR==1 && $2!=0) {print $1,0,1,0} print}' > {output.bed}
         bedGraphToBigWig {output.bed} {input.fai} {output.bw}
         """
 
