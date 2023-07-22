@@ -16,9 +16,18 @@ rule make_fdr_d4:
     shell:
         """
         ( \
-          printf '{wildcards.chrom}\t0\t%s\tfake\t3\t+\t0\t1\t255,0,0\t0.03\n' {{1..10000}}; \
-          printf '{wildcards.chrom}\t0\t%s\tfake\t100\t+\t0\t1\t147,112,219\t1.0\n' {{1..10000}}; \
-          printf '{wildcards.chrom}\t0\t%s\tfake\t100\t+\t0\t1\t230,230,230\t1.0\n' {{1..10000}}; \
+          printf '{wildcards.chrom}\t0\t%s\tfake\t0\t+\t0\t1\t255,0,0\t0.00\n' {{1..1000}}; \
+          printf '{wildcards.chrom}\t0\t%s\tfake\t1\t+\t0\t1\t255,0,0\t0.01\n' {{1..1000}}; \
+          printf '{wildcards.chrom}\t0\t%s\tfake\t2\t+\t0\t1\t255,0,0\t0.02\n' {{1..1000}}; \
+          printf '{wildcards.chrom}\t0\t%s\tfake\t3\t+\t0\t1\t255,0,0\t0.03\n' {{1..1000}}; \
+          printf '{wildcards.chrom}\t0\t%s\tfake\t4\t+\t0\t1\t255,0,0\t0.04\n' {{1..1000}}; \
+          printf '{wildcards.chrom}\t0\t%s\tfake\t5\t+\t0\t1\t255,0,0\t0.05\n' {{1..1000}}; \
+          printf '{wildcards.chrom}\t0\t%s\tfake\t6\t+\t0\t1\t255,0,0\t0.06\n' {{1..1000}}; \
+          printf '{wildcards.chrom}\t0\t%s\tfake\t7\t+\t0\t1\t255,0,0\t0.07\n' {{1..1000}}; \
+          printf '{wildcards.chrom}\t0\t%s\tfake\t8\t+\t0\t1\t255,0,0\t0.08\n' {{1..1000}}; \
+          printf '{wildcards.chrom}\t0\t%s\tfake\t9\t+\t0\t1\t255,0,0\t0.09\n' {{1..1000}}; \
+          printf '{wildcards.chrom}\t0\t%s\tfake\t100\t+\t0\t1\t147,112,219\t1.0\n' {{1..1000}}; \
+          printf '{wildcards.chrom}\t0\t%s\tfake\t100\t+\t0\t1\t230,230,230\t1.0\n' {{1..1000}}; \
         ) > {output.bed}
         tabix {input.bed} {wildcards.chrom} >> {output.bed}
         head {output.bed}
