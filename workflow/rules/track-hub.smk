@@ -28,7 +28,9 @@ rule make_fdr_d4:
           printf '{wildcards.chrom}\t0\t%s\tfake\t9\t+\t0\t1\t255,0,0\t0.09\n' {{1..1000}}; \
           printf '{wildcards.chrom}\t0\t%s\tfake\t100\t+\t0\t1\t147,112,219\t1.0\n' {{1..1000}}; \
           printf '{wildcards.chrom}\t0\t%s\tfake\t100\t+\t0\t1\t230,230,230\t1.0\n' {{1..1000}}; \
-        ) > {output.bed}
+        ) \
+            | bedtools sort \ 
+            > {output.bed}
         tabix {input.bed} {wildcards.chrom} >> {output.bed}
         head {output.bed}
         tail {output.bed}
