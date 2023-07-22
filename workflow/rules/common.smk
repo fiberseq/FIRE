@@ -34,7 +34,7 @@ def find_median_coverage(file, outfile=None):
     coverage = (df.coverage * (df.end - df.start)).sum() / total
 
     if coverage <= 0.0:
-        raise ValueError("Median coverage is 0.0! Did you use the correct reference, or is data missing from most of your genome. If so consider the keep_chromosomes parameter in config.yaml")
+        raise ValueError(f"Median coverage is {coverage}! Did you use the correct reference, or is data missing from most of your genome. If so consider the keep_chromosomes parameter in config.yaml")
 
     if outfile is not None:
         open(outfile, "w").write(str(round(coverage)) + "\n")
