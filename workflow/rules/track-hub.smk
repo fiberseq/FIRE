@@ -183,11 +183,13 @@ rule fdr_tracks:
         mem_mb=get_mem_mb,
     shell:
         """
-        #head -n 1 {input.fai} | awk '{{print $1"\t0\t1\t0"}}' > {output.bed}
         cat {input.beds} | awk 'NF > 2' | awk 'BEGIN {{OFS="\t"}} {{if(NR==1 && $2!=0) {{print $1,0,1,0}} print}}' > {output.bed}
-        bedGraphToBigWig {output.bed} {input.fai} {output.bw}
+        if [[-s {output.bed}]]; then
+            bedGraphToBigWig {output.bed} {input.fai} {output.bw}
+        else
+            touch {output.bw}
+        fi
         """
-
 
 rule average_coverage:
     input:
@@ -412,9 +414,12 @@ rule fire_bw:
     shell:
         """
         grep -v AvgFDR {input.bed} | cut -f 1-3 > {output.bed}
-        bedToBigBed {output.bed} {input.fai} {output.bb}
+        if [[-s {output.bed}]]; then
+            bedToBigBed {output.bed} {input.fai} {output.bb}
+        else
+          touch {output.bb}
+        fi
         """
-
 
 rule hap_peaks:
     input:
