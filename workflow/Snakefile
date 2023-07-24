@@ -11,6 +11,7 @@ dhs = config["dhs"]
 max_t = config.get("max_t", 4)
 max_bins = config.get("max_bins", 75)
 keep_chrs = config.get("keep_chromosomes", ".*")
+force_coverage = config.get("force_coverage", None)
 
 
 fai = pd.read_csv(f"{ref}.fai", sep="\t", names=["chr", "length", "x", "y", "z"])

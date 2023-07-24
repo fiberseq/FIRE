@@ -25,13 +25,16 @@ def get_load(wc):
 
 
 def find_median_coverage(file, outfile=None):
-    df = pd.read_csv(
-        file, sep="\t", header=None, names=["chr", "start", "end", "coverage"]
-    )
-    df = df[df.coverage > 0]
-    df = df[df["chr"].isin(get_chroms())]
-    total = (df.end - df.start).sum()
-    coverage = (df.coverage * (df.end - df.start)).sum() / total
+    if force_coverage is not None:
+        coverage=force_coverage
+    else:
+        df = pd.read_csv(
+            file, sep="\t", header=None, names=["chr", "start", "end", "coverage"]
+        )
+        df = df[df.coverage > 0]
+        df = df[df["chr"].isin(get_chroms())]
+        total = (df.end - df.start).sum()
+        coverage = (df.coverage * (df.end - df.start)).sum() / total
 
     if coverage <= 1:
         raise ValueError(f"Median coverage is {coverage}! Did you use the correct reference, or is data missing from most of your genome. If so consider the keep_chromosomes parameter in config.yaml")

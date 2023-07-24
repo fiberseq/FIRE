@@ -5,6 +5,9 @@ n_chunks: 100 # split bam file across x chunks
 max_t: 4 # use X threaeds per chunk
 manifest: config/config.tbl # table with samples to process
 
+# Force a read coverage instead of calulating it genome wide from the bam file.
+# This can be useful if only a subset of the genome has reads. 
+# force_coverage: 30
 
 #model: results/GM12878_v0.1.5/model.dat # if not provided will train a new model
 
