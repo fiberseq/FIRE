@@ -89,3 +89,4 @@ rule all:
         expand(rules.fire_with_coverage.output, sm=data.index),
         expand(rules.peaks_vs_percent.output, sm=data.index),
         expand(rules.average_coverage.output, sm=data.index),
+        expand(rules.percent_accessible.output.bw, sm=data.index, hp=not_unk),

@@ -148,6 +148,31 @@ rule merged_fdr_track:
         tabix -p bed {output.bed}
         """
 
+rule percent_accessible:
+    input:
+        bed=rules.merged_fdr_track.output.bed,
+        fai=ancient(f"{ref}.fai"),
+    output:
+        tmp=temp("results/{sm}/{hp}/percent.accessible.bed"),
+        bw="results/{sm}/trackHub/bw/{hp}.percent.accessible.bw",
+        bed="results/{sm}/{hp}/percent.accessible.bed.gz",
+        tbi="results/{sm}/{hp}/percent.accessible.bed.gz.tbi",
+    threads: 4
+    conda:
+        conda
+    resources:
+        mem_mb=get_mem_mb,
+    shell:
+        """
+        bgzip -@{threads} -cd {input.bed} \
+            | awk -v OFS='\t' '{{print $1,$2,$3,$5/($5+$6+$7)}}' \
+        > {output.tmp}
+        
+        bedGraphToBigWig {output.tmp} {input.fai} {output.bw}
+        
+        bgzip -@{threads} -c {output.tmp} > {output.bed}
+        tabix -p bed {output.bed}
+        """
 
 rule chromosome_fdr_tracks:
     input:
