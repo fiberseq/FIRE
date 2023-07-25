@@ -166,7 +166,7 @@ rule percent_accessible:
     shell:
         """
         bgzip -@{threads} -cd {input.bed} \
-            | awk -v OFS='\t' '{{print $1,$2,$3,$5/($5+$6+$7)}}' \
+            | awk -v OFS='\t' '{{print $1,$2,$3,100*$5/($5+$6+$7)}}' \
         > {output.tmp}
         
         bedGraphToBigWig {output.tmp} {input.fai} {output.bw}
