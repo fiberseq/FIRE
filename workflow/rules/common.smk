@@ -26,7 +26,7 @@ def get_load(wc):
 
 def find_median_coverage(file, outfile=None):
     if force_coverage is not None:
-        coverage=force_coverage
+        coverage = force_coverage
     else:
         df = pd.read_csv(
             file, sep="\t", header=None, names=["chr", "start", "end", "coverage"]
@@ -37,7 +37,9 @@ def find_median_coverage(file, outfile=None):
         coverage = (df.coverage * (df.end - df.start)).sum() / total
 
     if coverage <= 1:
-        raise ValueError(f"Median coverage is {coverage}! Did you use the correct reference, or is data missing from most of your genome. If so consider the keep_chromosomes parameter in config.yaml")
+        raise ValueError(
+            f"Median coverage is {coverage}! Did you use the correct reference, or is data missing from most of your genome. If so consider the keep_chromosomes parameter in config.yaml"
+        )
 
     if outfile is not None:
         open(outfile, "w").write(str(round(coverage)) + "\n")

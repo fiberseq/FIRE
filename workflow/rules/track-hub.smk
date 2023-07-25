@@ -148,6 +148,7 @@ rule merged_fdr_track:
         tabix -p bed {output.bed}
         """
 
+
 rule percent_accessible:
     input:
         bed=rules.merged_fdr_track.output.bed,
@@ -173,6 +174,7 @@ rule percent_accessible:
         bgzip -@{threads} -c {output.tmp} > {output.bed}
         tabix -p bed {output.bed}
         """
+
 
 rule chromosome_fdr_tracks:
     input:
@@ -215,6 +217,7 @@ rule fdr_tracks:
             touch {output.bw}
         fi
         """
+
 
 rule average_coverage:
     input:
@@ -445,6 +448,7 @@ rule fire_bw:
           touch {output.bb}
         fi
         """
+
 
 rule hap_peaks:
     input:
