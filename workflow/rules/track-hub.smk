@@ -154,7 +154,7 @@ rule percent_accessible:
         bed=rules.merged_fdr_track.output.bed,
         fai=ancient(f"{ref}.fai"),
     output:
-        tmp=temp("results/{sm}/{hp}/percent.accessible.bed"),
+        tmp=temp("temp/{sm}/{hp}/percent.accessible.bed"),
         bw="results/{sm}/trackHub/bw/{hp}.percent.accessible.bw",
         bed="results/{sm}/{hp}/percent.accessible.bed.gz",
         tbi="results/{sm}/{hp}/percent.accessible.bed.gz.tbi",
