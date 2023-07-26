@@ -23,8 +23,7 @@ Unless directed otherwise it would be best to use this model for your data:
 snakemake \
   --configfile config/config.yaml \
   --profile profiles/compute \
-  --local-cores $(nproc) \
-  --cores $(nproc) 
+  --local-cores $(nproc) -k
 ```
 And modify as needed for distributed execution. 
 
