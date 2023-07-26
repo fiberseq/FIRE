@@ -22,14 +22,9 @@ Unless directed otherwise it would be best to use this model for your data:
 ```bash
 snakemake \
   --configfile config/config.yaml \
+  --profile profiles/compute \
   --local-cores $(nproc) \
-  --cores $(nproc) \
-  --rerun-triggers mtime \
-  --rerun-incomplete \
-  --scheduler greedy \
-  --resources load=1000 \
-  --show-failed-logs \
-  -p 
+  --cores $(nproc) 
 ```
 And modify as needed for distributed execution. 
 
