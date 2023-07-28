@@ -15,7 +15,7 @@ Then snakemake should install all the additional requirements as a conda env in 
 ## Model
 Unless directed otherwise it would be best to use this model for your data:
 ```bash
-/mmfs1/gscratch/stergachislab/mvollger/projects/GM12878_aCRE_2022-08-16/results/new_feats_GM12878/model.dat
+models/model.dat
 ```
 
 ## Run
