@@ -61,7 +61,7 @@ rule genome_bedgraph:
         """ 
         d4tools create -t {threads} -Azr {input.fai} {input.bam} {output.d4}
         d4tools view {output.d4} | bgzip -@ {threads} > {output.bg}
-        zcat test/coverage/test.bed.gz \
+        zcat {output.bg} \
             | awk '$4>0' \
             | datamash -g 1 min 2 max 3 median 4 \
         > {output.median}
