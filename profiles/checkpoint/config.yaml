@@ -1,8 +1,3 @@
-default-resources:
-  - disk_mb=4096
-  - mem_mb=16096
-  - time=120
-  - gpus=0
 cluster:
   mkdir -p cluster_logs/{rule} &&
   sbatch
@@ -19,15 +14,8 @@ cluster:
     --export=all
     --parsable # Required to pass job IDs to scancel
 jobs: 1000
-rerun-incomplete: True
-rerun-triggers: mtime 
 cluster-cancel: scancel
 cluster-cancel-nargs: 500 # cancel 500 jobs at a time, all will still be canceled
-restart-times: 3
-printshellcmds: True
-reason: True
-use-conda: True
-show-failed-logs: True 
 latency-wait: 60
 max-jobs-per-second: 50
 cluster-status: status-sacct.sh
