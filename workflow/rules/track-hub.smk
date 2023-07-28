@@ -53,6 +53,7 @@ rule fdr_bed:
     output:
         #d4="temp/{sm}/{hp}/{chrom}.fdr.peaks.d4",
         bed="results/{sm}/{hp}/chromosomes/{chrom}.fdr.peaks.and.coverages.bed.gz",
+        tmp=temp("temp/{sm}/{hp}/chromosomes/{chrom}.fdr.peaks.and.coverages.bed.gz"),
     benchmark:
         "benchmarks/{sm}/{hp}/{chrom}.fdr.peaks.tsv"
     threads: 4
@@ -62,11 +63,12 @@ rule fdr_bed:
         conda
     shell:
         """
+        d4tools view {input.d4} {wildcards.chrom} | bgzip -@ {threads} > {output.tmp}
         fibertools -v bed2d4 \
             --chromosome {wildcards.chrom} \
             -g {input.fai} \
             -c score \
-            -q {input.d4} {output.bed}
+            -q {output.tmp} {output.bed}
         """
 
 '''
