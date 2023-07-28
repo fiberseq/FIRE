@@ -63,7 +63,10 @@ rule fdr_bed:
             --chromosome {wildcards.chrom} \
             -g {input.fai} \
             -c score \
-            -q {output.tmp} {output.bed}
+            -q {output.tmp} \
+            - \
+            | bgzip -@ {threads} \
+            > {output.bed}
         """
 
 
