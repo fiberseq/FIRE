@@ -42,6 +42,7 @@ rule make_fire_d4:
             {output.bed} {output.d4}
         """
 
+
 rule fire_bed:
     input:
         fai=ancient(f"{ref}.fai"),
@@ -425,7 +426,7 @@ rule fire_bw:
     shell:
         """
         grep -v AvgFDR {input.bed} | cut -f 1-3 > {output.bed}
-        if [[-s {output.bed}]]; then
+        if [[ -s {output.bed} ]]; then
             bedToBigBed {output.bed} {input.fai} {output.bb}
         else
           touch {output.bb}
