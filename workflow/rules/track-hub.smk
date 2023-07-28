@@ -47,7 +47,7 @@ rule fdr_bed:
         fai=ancient(f"{ref}.fai"),
         d4=rules.make_fdr_d4.output.d4,
     output:
-        bed=temp("temp/{sm}/{hp}/chromosomes/{chrom}.fdr.peaks.and.coverages.bed.gz"),
+        bed=temp("temp/{sm}/{hp}/chromosomes/{chrom}.fdr.peaks.and.coverages.bed"),
         tmp=temp("temp/{sm}/{hp}/chromosomes/{chrom}.fdr.coverages.bed.gz"),
     benchmark:
         "benchmarks/{sm}/{hp}/{chrom}.fdr.peaks.tsv"
@@ -64,9 +64,7 @@ rule fdr_bed:
             -g {input.fai} \
             -c score \
             -q {output.tmp} \
-            - \
-            | bgzip -@ {threads} \
-            > {output.bed}
+            {output.bed}
         """
 
 
