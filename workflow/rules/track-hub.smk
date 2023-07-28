@@ -82,7 +82,7 @@ rule chromosome_coverage_tracks:
         mem_mb=get_mem_mb,
     shell:
         """
-        bgzip -cd -@ {threads} {input.bed} | cut -f 1,2,3,{params.col} > {output.bed}
+        cut -f 1,2,3,{params.col} {input.bed} > {output.bed}
         """
 
 
@@ -120,14 +120,14 @@ rule merged_fdr_track:
     output:
         bed="results/{sm}/{hp}/fdr.peaks.and.coverages.bed.gz",
         tbi="results/{sm}/{hp}/fdr.peaks.and.coverages.bed.gz.tbi",
-    threads: 4
+    threads: 8
     conda:
         conda
     resources:
         mem_mb=get_mem_mb,
     shell:
         """
-        cat {input.beds} > {output.bed}
+        cat {input.beds} | bgzip -@ {threads} > {output.bed}
         tabix -p bed {output.bed}
         """
 
@@ -171,7 +171,7 @@ rule chromosome_fdr_tracks:
         mem_mb=get_mem_mb,
     shell:
         """
-        bgzip -cd -@ {threads} {input.bed} | cut -f 1-4 | awk '$4 > {wildcards.fdr}' > {output.bed}
+        cut -f 1-4 {input.bed} | awk '$4 > {wildcards.fdr}' > {output.bed}
         """
 
 
