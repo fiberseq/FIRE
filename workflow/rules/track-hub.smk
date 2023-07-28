@@ -386,7 +386,7 @@ rule fire_with_coverage:
     input:
         bed=rules.fire_peaks.output.bed,
         cov=rules.average_coverage.output.cov,
-        cov_bed=expand(rules.merged_fdr_track.output.bed, hp="all", allow_missing=True),
+        cov_bed=expand(rules.merged_fire_track.output.bed, hp="all", allow_missing=True),
     output:
         bed="results/{sm}/FIRE.peaks.with.coverage.bed",
     threads: 8
