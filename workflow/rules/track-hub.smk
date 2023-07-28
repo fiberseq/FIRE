@@ -51,9 +51,8 @@ rule fdr_bed:
         fai=ancient(f"{ref}.fai"),
         d4=rules.make_fdr_d4.output.d4,
     output:
-        #d4="temp/{sm}/{hp}/{chrom}.fdr.peaks.d4",
-        bed="results/{sm}/{hp}/chromosomes/{chrom}.fdr.peaks.and.coverages.bed.gz",
-        tmp=temp("temp/{sm}/{hp}/chromosomes/{chrom}.fdr.peaks.and.coverages.bed.gz"),
+        bed=temp("temp/{sm}/{hp}/chromosomes/{chrom}.fdr.peaks.and.coverages.bed.gz"),
+        tmp=temp("temp/{sm}/{hp}/chromosomes/{chrom}.fdr.coverages.bed.gz"),
     benchmark:
         "benchmarks/{sm}/{hp}/{chrom}.fdr.peaks.tsv"
     threads: 4
@@ -71,24 +70,6 @@ rule fdr_bed:
             -q {output.tmp} {output.bed}
         """
 
-'''
-rule unused_fdr_bed:
-    input:
-        peaks=rules.make_fdr_peaks.output.d4,
-    output:
-        bed="results/{sm}/{hp}/chromosomes/{chrom}.fdr.peaks.and.coverages.bed.gz",
-    threads: 4
-    resources:
-        mem_mb=get_mem_mb,
-    conda:
-        conda
-    shell:
-        """
-        d4tools view {input.peaks} {wildcards.chrom} \
-          | bgzip -@ {threads} \
-        > {output.bed}
-        """
-'''
 
 rule chromosome_coverage_tracks:
     input:
