@@ -85,14 +85,21 @@ df = df %>%
         Mbp=cumsum(end-start)/1e6,
         group = floor(acc_percent * 20) / 20
     ) %>%
-    bed_map(encode, encode_count=length(core_end)) %>%
+    bed_map(encode,
+        encode_count=length(core_end),
+        encode_anno = paste0(unique(component), collapse=";")
+    ) %>%
     bed_map(sds, sd_count=length(V4)) %>%
     bed_map(dnase, dnase_max=max(dnase_sig)) %>%
     bed_map(tss, TSS=length(V4)) %>%
     replace_na(list(encode_count = 0, sd_count=0, TSS=0)) %>%
-    arrange(-acc_percent, -n)
+    arrange(-acc_percent, -n) %>%
+    data.table()
 head(df)
 tail(df)
+dim(df)
+df %>%
+    group_by(encode_anno) %>% summarise(n())
 ```
 
 ```{r}
@@ -109,10 +116,11 @@ percent_encode = df %>%
         Mbp = sum(end-start)/1e6,
     ) %>%
     filter(`# of\npeaks` > 2)
+
 cur_colors = c(
-            `% in\nSDs`="darkred",
-            `% in\nTSS`="darkblue",
             `% in\nENCODE`="darkgreen",
+            `% in\nTSS`="darkblue",
+            `% in\nSDs`="darkred",
             `% of\ngenome\n(cumulative)`="darkgray",
             `# of\npeaks`="darkcyan"
             )
@@ -126,7 +134,7 @@ percent_encode_long
 
 percent_plots = percent_encode_long %>%
     mutate(
-        name=factor(name, levels=unique(name))
+        name=factor(name, levels=names(cur_colors))
     ) %>%
     ggplot(aes(x=acc_percent, y=value, group=name, fill=name)) +
     geom_bar(stat="identity", color="black")+
@@ -158,6 +166,76 @@ percent_plots = percent_encode_long %>%
 
 my_ggsave("Figures/peaks-vs-percent.pdf", height=3, width=5)
 ```
+
+```{r}
+library(pals)
+x = df %>% 
+    separate_rows(encode_anno, sep=";") %>%
+    group_by(group, encode_anno) %>%
+    summarise(
+        count=n()   
+    ) %>%
+    group_by(
+        group
+    ) %>%
+    filter(sum(count)>10) %>%
+    mutate(
+        percent=100*count/sum(count)
+    )
+encode %>%
+    group_by(component) %>%
+    summarise(count=n(),percent = sum(end-start)/1e6) %>%
+    mutate(
+        #group="control",
+        encode_anno=component,
+        percent = percent/sum(percent)*100
+    ) %>%
+    arrange(percent) %>%
+    merge(x, by="encode_anno") %>%
+    filter(count.y>300) %>%
+    data.table() %>%
+    mutate(
+        lfc = log2(percent.y) - log2(percent.x)
+    ) %>%
+    arrange(-lfc)
+
+
+plot_encode_anno=x %>% 
+    filter(!is.na(encode_anno)) %>%
+    ggplot(
+        aes(
+            x=group+0.025,
+            weight=count,
+            fill=encode_anno,
+        )
+    ) +
+    geom_bar(
+        position="fill",
+        width=0.0495,
+    ) +
+    scale_x_continuous(
+        "",
+        breaks=seq(5,100,5)/100,
+        label=rep("",20),
+    )+
+    scale_y_continuous("")+
+    scale_fill_manual(
+        "", 
+        values=as.vector(glasbey(length(unique(encode$component)))),
+        guide=guide_legend(nrow=2)
+    )+
+    coord_cartesian(xlim=c(0,1))+
+    my_grid()+
+    theme(
+        legend.text=element_text(size=3),
+        legend.key.size=unit(1, "mm"),
+        legend.position="top",
+        plot.margin = unit(c(0, 0, 0, 0), "cm"),
+    )
+kk=p+plot_spacer()+percent_plots+plot_layout(heights = c(1,-0.3, 3))
+my_ggsave("Figures/peaks-vs-encode-annotations.pdf", height=4, width=6, plot=kk)
+```
+
 
 ```{r}
 by_5_per = df %>%
@@ -229,8 +307,8 @@ pecdf=df %>%
 
 
 
-p = percent_plots / pecdf
-my_ggsave("Figures/peaks-vs-percent.pdf", height=4, width=6)
+p=plot_encode_anno+plot_spacer()+percent_plots+pecdf+plot_layout(heights = c(1,-0.5, 3, 2))
+my_ggsave("Figures/peaks-vs-percent.pdf", height=4, width=5)
 ```
 
 
@@ -269,4 +347,115 @@ fire_dnase = bed_intersect(bed_slop(df, genome, both=30), dnase)
 # number of regulatory elements per cell
 ```{r}
 comma(sum(df$acc_percent)*2)
+```
+
+
+```{r}
+bp = fread("data/bedgraph_annotations/bo.10bp.bed.gz", nThread=8)
+
+bp
+bp[, c("chrom", "start", "end") := tstrsplit(key, "_", fixed=TRUE, type.convert=TRUE)]
+bp$mid = floor((bp$start + bp$end)/2)
+bp$position = bp$st - bp$mid
+dim(bp)/1e6
+
+df_bp = merge(bp, df[, c("chrom", "start", "end", "group")], by=c("chrom", "start", "end")) %>%
+    replace_na(list(ENCFF658WKQ_DNase = 0)) %>%
+    pivot_longer(
+        cols = starts_with("EN", ignore.case = FALSE),
+        names_to= "exp",
+        values_to="coverage",
+    ) %>%
+    filter(!is.na(coverage)) %>%
+    data.table
+df_bp
+```
+```{r}
+width=500
+width=1000
+smooth=10
+#df_bp %>% group_by(group) %>% summarise(length(unique((key))))
+p.df = df_bp %>% 
+    filter(position > -width & position < width) %>%
+    mutate(
+        position = smooth * floor(position/smooth),
+    ) %>%
+    group_by(position, exp, group) %>%
+    summarise(
+        n_sites = length(unique(key)),
+        value = sum(coverage),
+    ) %>%
+    group_by(group, exp) %>%
+    mutate(
+        n_sites=mean(n_sites),
+        value2 = value/mean(n_sites),
+    ) %>%
+    filter(n_sites>100) %>%
+    arrange(exp, group, position)
+
+z = p.df %>% 
+    ggplot(
+        aes(
+            x=position, 
+            y=value2,
+            #weight=coverage,
+            #color=factor(`group`),
+            color=`group`-0.5,
+            fill=NULL, 
+            group=group
+        )
+    ) +
+    geom_line(linewidth=0.2)+
+    #geom_density(alpha=0.8, linewidth=.3) +
+    facet_wrap(~exp, scales="free")+
+    scale_x_continuous("Relative position") +
+    scale_y_continuous("count", trans="log10") + annotation_logticks(side="l")+
+    scale_colour_steps2(n.breaks=20, nice.breaks=TRUE) +
+    my_grid() +
+    theme(
+        legend.key.size=unit(0.3, "inch")
+    )
+my_ggsave("Figures/DNase-over-FIRE-peaks.pdf", height=3, width=5)
+```
+
+```{r}
+smooth = 10
+z=df_bp %>%
+    filter(group == 0.20) %>%
+    #head(1e6) %>%
+    #filter(group > 0.50) %>%
+    filter(!is.na(coverage)) %>%
+    filter(position > -width & position < width) %>%
+    #group_by(group, position, exp) %>%
+    #summarise(
+    #    n_sites = length(unique(key)),
+    #    coverage = sum(coverage),
+    #) %>%
+    ggplot(
+        aes(
+            x=position, 
+            y=coverage,
+            #weight=coverage,
+            #color=factor(`group`),
+            #color=`group`-0.5,
+        )
+    ) +
+    #geom_line(alpha=0.1)+
+    geom_hex(bins=300) + scale_fill_distiller("", palette = "Spectral", trans="log10")+
+    #geom_density(alpha=0.8, linewidth=.3) +
+    facet_wrap(~exp, scales="free")+
+    scale_x_continuous("Relative position") +
+    #scale_y_continuous("Relative position", trans="log10") +
+    scale_y_continuous("Relative position", limits=c(0,50)) +
+    #scale_colour_steps2(n.breaks=20, nice.breaks=TRUE) +
+    my_grid() 
+my_ggsave("Figures/Other-DNase-over-FIRE-peaks.pdf", height=3, width=5)
+```
+
+```{r}
+p.df[p.df$position==-width& p.df$exp=="ENCFF658WKQ_DNase",]
+p.df[p.df$position==width-smooth& p.df$exp=="ENCFF658WKQ_DNase",]
+
+df_bp %>%
+    filter(group == 0.05) 
 ```
