@@ -63,7 +63,7 @@ rule fdr_bed:
         conda
     shell:
         """
-        d4tools view {input.d4} {wildcards.chrom} | bgzip -@ {threads} > {output.tmp}
+        d4tools view --header {input.d4} {wildcards.chrom} | bgzip -@ {threads} > {output.tmp}
         fibertools -v bed2d4 \
             --chromosome {wildcards.chrom} \
             -g {input.fai} \
