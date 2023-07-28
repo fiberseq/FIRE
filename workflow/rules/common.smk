@@ -44,3 +44,10 @@ def find_median_coverage(file, outfile=None):
     if outfile is not None:
         open(outfile, "w").write(str(round(coverage)) + "\n")
     return round(coverage)
+
+
+def get_median_coverage(wc):
+    if force_coverage is not None:
+        return force_coverage
+    median_coverages = expand(rules.genome_bedgraph.output.median, sm=sm.wc)
+    return find_median_coverage(median_coverages)

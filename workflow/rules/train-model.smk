@@ -61,7 +61,11 @@ rule genome_bedgraph:
         """ 
         d4tools create -t {threads} -Azr {input.fai} {input.bam} {output.d4}
         d4tools view {output.d4} | bgzip -@ {threads} > {output.bg}
-        d4tools stat -t {threads} -s median {output.d4} > {output.median}
+        zcat test/coverage/test.bed.gz \
+            | awk '$4>0' \
+            | datamash -g 1 min 2 max 3 median 4 \
+        > {output.median}
+        #d4tools stat -t {threads} -s median {output.d4} > {output.median}
         """
 
 
@@ -79,9 +83,10 @@ rule filter_model_input_by_coverage:
         conda
     params:
         chrom=get_chroms()[0],
+        coverage=get_median_coverage,
     shell:
         """
-        median=$(d4tools stat -t {threads} -s median {input.d4} | grep -w {params.chrom} | cut -f 4)
+        median={params.coverage}
         min=$(echo "$median" | awk '{{print $1-3*sqrt($1)}}')
         max=$(echo "$median" | awk '{{print $1+3*sqrt($1)}}')
         echo $median $min $max 
