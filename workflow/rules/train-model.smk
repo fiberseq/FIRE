@@ -75,7 +75,6 @@ rule filter_model_input_by_coverage:
         bed=rules.dhs_null.output.bed,
         bam=lambda wc: data.loc[wc.sm, "bam"],
         bg=rules.genome_bedgraph.output.bg,
-        d4=rules.genome_bedgraph.output.d4,
     output:
         bed="results/{sm}/dhs_with_null_cov_filtered.bed",
     threads: 8
