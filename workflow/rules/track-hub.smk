@@ -43,9 +43,6 @@ rule make_fdr_d4:
             {output.bed} {output.d4}
         """
 
-#
-# TODO fix this rule, OSError, memory map must have a non-zero length
-#
 rule fdr_bed:
     input:
         fai=ancient(f"{ref}.fai"),
