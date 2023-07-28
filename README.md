@@ -56,5 +56,5 @@ ___ hap1-vs-hap2.pdf # Scatter plot of FIREs and their percent accessibility for
 trackHub/ # a trackhub directory that can be loaded into the UCSC browser
 ```
 
-# Test data
+## Test data
 You can find input data to test against at [this url](https://s3-us-west-2.amazonaws.com/stergachis-public1/index.html?prefix=Projects/Phased-GM12878/fire-test/).
