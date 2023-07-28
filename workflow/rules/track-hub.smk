@@ -104,7 +104,7 @@ rule coverage_tracks:
         mem_mb=get_mem_mb,
     shell:
         """
-        cat {input.beds} > {output.bed}
+        cat {input.beds} | grep -v '^#' > {output.bed}
         bedGraphToBigWig {output.bed} {input.fai} {output.bw}
         """
 
@@ -127,7 +127,7 @@ rule merged_fdr_track:
         mem_mb=get_mem_mb,
     shell:
         """
-        cat {input.beds} | bgzip -@ {threads} > {output.bed}
+        cat {input.beds} | grep -v '^#' | bgzip -@ {threads} > {output.bed}
         tabix -p bed {output.bed}
         """
 
