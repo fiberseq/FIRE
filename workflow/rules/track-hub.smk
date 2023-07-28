@@ -1,13 +1,13 @@
-rule make_fdr_d4:
+rule make_fire_d4:
     input:
         fai=ancient(f"{ref}.fai"),
         bed=rules.merge_model_results.output.bed,
         tbi=rules.index_model_results.output.tbi,
     output:
-        d4=temp("temp/{sm}/{hp}/{chrom}.fdr.coverages.d4"),
-        bed=temp("temp/{sm}/{hp}/{chrom}.fdr.coverages.bed"),
+        d4=temp("temp/{sm}/{hp}/{chrom}.fire.coverages.d4"),
+        bed=temp("temp/{sm}/{hp}/{chrom}.fire.coverages.bed"),
     benchmark:
-        "benchmarks/{sm}/{hp}/{chrom}.fdr.d4.tsv"
+        "benchmarks/{sm}/{hp}/{chrom}.fire.d4.tsv"
     threads: 4
     resources:
         mem_mb=get_mem_mb,
@@ -42,15 +42,15 @@ rule make_fdr_d4:
             {output.bed} {output.d4}
         """
 
-rule fdr_bed:
+rule fire_bed:
     input:
         fai=ancient(f"{ref}.fai"),
-        d4=rules.make_fdr_d4.output.d4,
+        d4=rules.make_fire_d4.output.d4,
     output:
-        bed=temp("temp/{sm}/{hp}/chromosomes/{chrom}.fdr.peaks.and.coverages.bed"),
-        tmp=temp("temp/{sm}/{hp}/chromosomes/{chrom}.fdr.coverages.bed.gz"),
+        bed=temp("temp/{sm}/{hp}/chromosomes/{chrom}.fire.peaks.and.coverages.bed"),
+        tmp=temp("temp/{sm}/{hp}/chromosomes/{chrom}.fire.coverages.bed.gz"),
     benchmark:
-        "benchmarks/{sm}/{hp}/{chrom}.fdr.peaks.tsv"
+        "benchmarks/{sm}/{hp}/{chrom}.fire.peaks.tsv"
     threads: 4
     resources:
         mem_mb=get_mem_mb,
@@ -70,7 +70,7 @@ rule fdr_bed:
 
 rule chromosome_coverage_tracks:
     input:
-        bed=rules.fdr_bed.output.bed,
+        bed=rules.fire_bed.output.bed,
     output:
         bed=temp("temp/{sm}/{hp}/trackHub/bw/{chrom}.{types}.cov.bed"),
     threads: 4
@@ -109,17 +109,17 @@ rule coverage_tracks:
         """
 
 
-rule merged_fdr_track:
+rule merged_fire_track:
     input:
         beds=expand(
-            rules.fdr_bed.output.bed,
+            rules.fire_bed.output.bed,
             chrom=get_chroms(),
             allow_missing=True,
         ),
         fai=ancient(f"{ref}.fai"),
     output:
-        bed="results/{sm}/{hp}/fdr.peaks.and.coverages.bed.gz",
-        tbi="results/{sm}/{hp}/fdr.peaks.and.coverages.bed.gz.tbi",
+        bed="results/{sm}/{hp}/fire.peaks.and.coverages.bed.gz",
+        tbi="results/{sm}/{hp}/fire.peaks.and.coverages.bed.gz.tbi",
     threads: 8
     conda:
         conda
@@ -134,7 +134,7 @@ rule merged_fdr_track:
 
 rule percent_accessible:
     input:
-        bed=rules.merged_fdr_track.output.bed,
+        bed=rules.merged_fire_track.output.bed,
         fai=ancient(f"{ref}.fai"),
     output:
         tmp=temp("temp/{sm}/{hp}/percent.accessible.bed"),
@@ -159,11 +159,11 @@ rule percent_accessible:
         """
 
 
-rule chromosome_fdr_tracks:
+rule chromosome_fire_tracks:
     input:
-        bed=rules.fdr_bed.output.bed,
+        bed=rules.fire_bed.output.bed,
     output:
-        bed=temp("temp/{sm}/{hp}/trackHub/bw/{chrom}.fdr.{fdr}.bed"),
+        bed=temp("temp/{sm}/{hp}/trackHub/bw/{chrom}.fire.{fdr}.bed"),
     threads: 4
     conda:
         conda
@@ -175,17 +175,17 @@ rule chromosome_fdr_tracks:
         """
 
 
-rule fdr_tracks:
+rule fire_tracks:
     input:
         beds=expand(
-            rules.chromosome_fdr_tracks.output.bed,
+            rules.chromosome_fire_tracks.output.bed,
             chrom=get_chroms(),
             allow_missing=True,
         ),
         fai=ancient(f"{ref}.fai"),
     output:
-        bw="results/{sm}/trackHub/bw/fdr.{hp}.{fdr}.bw",
-        bed=temp("temp/{sm}/{hp}/trackHub/bw/fdr.{fdr}.bed"),
+        bw="results/{sm}/trackHub/bw/fire.{hp}.{fdr}.bw",
+        bed=temp("temp/{sm}/{hp}/trackHub/bw/fire.{fdr}.bed"),
     threads: 4
     conda:
         conda
@@ -211,7 +211,7 @@ rule average_coverage:
         find_median_coverage(input["median"], outfile=output["cov"])
 
 
-rule binned_fdr_calls:
+rule binned_fire_calls:
     input:
         bed=rules.merge_model_results.output.bed,
         tbi=rules.index_model_results.output.tbi,
@@ -222,7 +222,7 @@ rule binned_fdr_calls:
             )
         ),
     benchmark:
-        "benchmarks/{sm}/{hp}/{chrom}.fdr.d4.tsv"
+        "benchmarks/{sm}/{hp}/{chrom}.fire.d4.tsv"
     threads: 4
     resources:
         mem_mb=get_large_mem_mb,
@@ -235,7 +235,7 @@ rule binned_fdr_calls:
         """
 
 
-rule merge_binned_fdr_calls:
+rule merge_binned_fire_calls:
     input:
         beds=expand(
             "temp/{sm}/{hp}/{chrom}.bin.{bin}.bed",
@@ -307,8 +307,8 @@ rule clustering_vs_null:
 # peak calling
 rule peak_calls_per_chromosome:
     input:
-        bed=rules.merged_fdr_track.output.bed,
-        tbi=rules.merged_fdr_track.output.tbi,
+        bed=rules.merged_fire_track.output.bed,
+        tbi=rules.merged_fire_track.output.tbi,
     output:
         bed="temp/{sm}/{hp}/{chrom}.peak.calls.bed",
     benchmark:
@@ -351,7 +351,7 @@ rule merge_peak_calls:
 rule percent_in_clusters:
     input:
         bed=rules.clustering_vs_null.output.bed,
-        fdr=expand(rules.merged_fdr_track.output.bed, hp="all", allow_missing=True),
+        fire=expand(rules.merged_fire_track.output.bed, hp="all", allow_missing=True),
     output:
         txt="results/{sm}/percent-in-clusters.txt",
     threads: 8
@@ -361,7 +361,7 @@ rule percent_in_clusters:
         script=workflow.source_path("../scripts/percent-in-clusters.py"),
     shell:
         """
-        python {params.script} {input.bed} {input.fdr} {output.txt}
+        python {params.script} {input.bed} {input.fire} {output.txt}
         """
 
 
@@ -437,8 +437,8 @@ rule hap_peaks:
     input:
         bed=rules.fire_with_coverage.output.bed,
         cov=rules.average_coverage.output.cov,
-        h1=expand(rules.merged_fdr_track.output.bed, hp="hap1", allow_missing=True),
-        h2=expand(rules.merged_fdr_track.output.bed, hp="hap2", allow_missing=True),
+        h1=expand(rules.merged_fire_track.output.bed, hp="hap1", allow_missing=True),
+        h2=expand(rules.merged_fire_track.output.bed, hp="hap2", allow_missing=True),
     output:
         bed=temp("temp/{sm}/hap1-vs-hap2/FIRE.hap.peaks.bed"),
     threads: 8
@@ -524,7 +524,7 @@ rule trackhub:
         hap_diffs=rules.hap_differences.output.bed,
         hap_diffs2=rules.hap_differences_track.output.bb,
         bed=expand(rules.merge_model_results.output.bed, hp=haps, allow_missing=True),
-        bw=expand(rules.fdr_tracks.output.bw, hp=haps, fdr=[100], allow_missing=True),
+        bw=expand(rules.fire_tracks.output.bw, hp=haps, fdr=[100], allow_missing=True),
         fdr=expand(
             rules.coverage_tracks.output.bw, hp=haps, types="fdr", allow_missing=True
         ),

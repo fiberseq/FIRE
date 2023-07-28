@@ -56,10 +56,9 @@ localrules:
     make_model,
     merge_model_results,
     model_bam,
-    #fdr_bed,
     trackhub,
     coverage_tracks,
-    fdr_tracks,
+    fire_tracks,
     average_coverage,
     clustering_vs_null,
     percent_in_clusters,
@@ -73,10 +72,10 @@ rule all:
         expand("results/{sm}/{hp}/acc.model.results.bed.gz", sm=data.index, hp=haps),
         expand("results/{sm}/trackHub/hub.txt", sm=data.index),
         expand(
-            "results/{sm}/{hp}/fdr.peaks.and.coverages.bed.gz", sm=data.index, hp=haps
+            "results/{sm}/{hp}/fire.peaks.and.coverages.bed.gz", sm=data.index, hp=haps
         ),
         expand(
-            rules.merge_binned_fdr_calls.output.bb,
+            rules.merge_binned_fire_calls.output.bb,
             sm=data.index,
             bin=bins,
             hp=not_all,
