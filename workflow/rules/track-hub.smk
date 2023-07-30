@@ -194,12 +194,8 @@ rule fire_tracks:
         mem_mb=get_mem_mb,
     shell:
         """
-        cat {input.beds} | awk 'NF > 2' | awk 'BEGIN {{OFS="\t"}} {{if(NR==1 && $2!=0) {{print $1,0,1,0}} print}}' > {output.bed}
-        if [[-s {output.bed}]]; then
-            bedGraphToBigWig {output.bed} {input.fai} {output.bw}
-        else
-            touch {output.bw}
-        fi
+        cat {input.beds} | awk 'NF > 2' | awk 'BEGIN {{OFS="\t"}} {{if(NR==1 && $1!~/^#/ && $2!=0) {{print $1,0,1,0}} print}}' > {output.bed}
+        bedGraphToBigWig {output.bed} {input.fai} {output.bw}
         """
 
 
@@ -359,10 +355,10 @@ rule percent_in_clusters:
     conda:
         conda
     params:
-        script=workflow.source_path("../scripts/percent-in-clusters.py"),
+        script=workflow.source_path("../scripts/percent-in-clusters.sh"),
     shell:
         """
-        python {params.script} {input.bed} {input.fire} {output.txt}
+        bash {params.script} {input.bed} {input.fire} {output.txt}
         """
 
 
