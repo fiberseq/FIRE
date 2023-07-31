@@ -2,6 +2,8 @@
 # author : sjn
 # date : July.2023
 
+set -euox pipefail
+
 if [[ $# != 3 ]]; then
     printf "Expect $0 <clustering-vs-null.bed.gz> <fire.peaks.and.coverages.bed.gz> <outfile>\n"
     exit 1
