@@ -192,6 +192,7 @@ rule fire_tracks:
         conda
     resources:
         mem_mb=get_mem_mb,
+    params:
         chrom=get_chroms()[0],
     shell:
         """
