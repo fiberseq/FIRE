@@ -1,6 +1,8 @@
 import pandas as pd
 import sys
 import os
+from snakemake.utils import min_version
+min_version("7.30.0")
 
 ref = config["ref"]
 ref_name = config["ref_name"]

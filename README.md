@@ -1,4 +1,5 @@
 # 🔥 **FIRE**: <ins>F</ins>iber-seq <ins>I</ins>nferred <ins>R</ins>egulatory <ins>E</ins>lements
+
 A Snakemake workflow for calling Fiber-seq Inferred Regulatory Elements (FIREs) on single molecules.
 
 ## Configuring
@@ -6,28 +7,36 @@ A Snakemake workflow for calling Fiber-seq Inferred Regulatory Elements (FIREs) 
 See `config/config.yaml` and `config/config.tbl` for configuration options.
 
 ## Install
+
 Add a snakemake conda prefix to your `bashrc`, e.g. in the Stergachis lab add:
+
 ```bash
 export SNAKEMAKE_CONDA_PREFIX=/mmfs1/gscratch/stergachislab/snakemake-conda-envs
 ```
-Then snakemake should install all the additional requirements as a conda env in that directory. 
+
+Then snakemake should install all the additional requirements as a conda env in that directory.
 
 ## Model
+
 Unless directed otherwise it would be best to use this model for your data:
+
 ```bash
 models/model.dat
 ```
 
 ## Run
+
 ```bash
 snakemake \
   --configfile config/config.yaml \
   --profile profiles/compute \
   --local-cores $(nproc) -k
 ```
-And modify as needed for distributed execution. 
+
+And modify as needed for distributed execution.
 
 # Outputs
+
 ```bash
 FIRE.bed.gz # Every FIRE element on every fiber
 FIRE.peaks.with.coverage.bed # Every FIRE peak in the genome, filtered for coverage
@@ -42,8 +51,8 @@ ___ {sample name}.median.coverage.txt # median coverage across the genome ignori
 all/ # results for all fibers
 ___ acc.model.results.bed.gz # All nucleosomes and MSPs with their FIRE scores for all fibers
 ___ acc.model.results.bed.gz.tbi # index for above
-___ peak.calls.bed # FIRE peaks without coverage or significance filtering 
-___ fire.peaks.and.coverages.bed.gz # FIRE peaks with coverage but no significance filtering 
+___ peak.calls.bed # FIRE peaks without coverage or significance filtering
+___ fire.peaks.and.coverages.bed.gz # FIRE peaks with coverage but no significance filtering
 ___ fire.peaks.and.coverages.bed.gz.tbi # index for above
 hap1/ # results for hap1 fibers, same structure as the all directory
 hap2/ # results for hap2 fibers, same structure as the all directory
@@ -57,4 +66,5 @@ trackHub/ # a trackhub directory that can be loaded into the UCSC browser
 ```
 
 ## Test data
+
 You can find input data to test against at [this url](https://s3-us-west-2.amazonaws.com/stergachis-public1/index.html?prefix=Projects/Phased-GM12878/fire-test/).
