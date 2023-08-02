@@ -172,7 +172,7 @@ rule chromosome_fire_tracks:
         mem_mb=get_mem_mb,
     shell:
         """
-        cut -f 1-4 {input.bed} | awk '$4 > {wildcards.fdr}' > {output.bed}
+        cut -f 1-4 {input.bed} | awk '$4 > {wildcards.fdr} && !/^#/' > {output.bed}
         """
 
 
