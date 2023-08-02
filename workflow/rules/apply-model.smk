@@ -89,7 +89,10 @@ rule sort_model:
         mem_mb=get_mem_mb,
     shell:
         """
-        sort --parallel={threads} -S 2G -k1,1 -k2,2n -k3,3n -k4,4 {input.bed} -o {output.bed}
+        LC_ALL=C sort \
+            --parallel={threads} -S 2G \
+            -k1,1 -k2,2n -k3,3n -k4,4 \
+            {input.bed} -o {output.bed}
         """
 
 
