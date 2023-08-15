@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+# check for conda location
+if [[ -z "${SNAKEMAKE_CONDA_PREFIX}" ]]; then
+    printf "Warning:\n\tSNAKEMAKE_CONDA_PREFIX is not set. Please set this env variable to the location of your group's shared snakemke conda enviroments.\n\tSee --conda-prefix at https://snakemake.readthedocs.io/en/stable/executing/cli.html#conda for more information.\n\n"
+fi
+
+set -euo pipefail
+SRC_DIR=$(
+    cd "$(dirname "${BASH_SOURCE[0]}")"
+    pwd -P
+)
+
+ARGS=$(echo "$@")
+
+# check for required arguments
+has_config=false
+while test $# -gt 0; do
+    case "$1" in
+    --configfile)
+        has_config=true
+        ;;
+    esac
+    shift
+done
+
+if [[ "${has_config}" == false ]]; then
+    printf "Error:\n\t--configfile argument required.\n"
+    exit 1
+fi
+
+# check for executables
+for x in snakemake modwt; do
+    if [[ ! $(type -P "${x}") ]]; then
+        echo "Error: ${x} not found in PATH, but required for FIRE."
+        exit 1
+    fi
+done
+
+#echo "Arguments passed to snakemake: ${ARGS}"
+snakemake \
+    -s "${SRC_DIR}/workflow/Snakefile" \
+    --cores 16 \
+    ${ARGS}
