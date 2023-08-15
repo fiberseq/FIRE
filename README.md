@@ -26,14 +26,32 @@ models/model.dat
 
 ## Run
 
+We have a run script that executes the FIRE snakemake called `fire`, and any extra parameters are passed directly to snakemake. For example:
+
+```bash
+./fire --configfile config/config.yaml
+```
+
+If you want to do a dry run:
+
+```bash
+./fire --configfile config/config.yaml -n
+```
+
+If you want to execute across a cluster (modify `profiles/compute` as needed for distributed execution):
+
+```bash
+./fire --configfile config/config.yaml --profile profiles/compute
+```
+
+You can also run snakemake directly, e.g.:
+
 ```bash
 snakemake \
   --configfile config/config.yaml \
   --profile profiles/compute \
-  --local-cores $(nproc) -k
+  --local-cores 8 -k
 ```
-
-And modify as needed for distributed execution.
 
 # Outputs
 

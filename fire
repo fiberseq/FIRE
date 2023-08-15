@@ -32,13 +32,16 @@ fi
 # check for executables
 for x in snakemake modwt; do
     if [[ ! $(type -P "${x}") ]]; then
-        echo "Error: ${x} not found in PATH, but required for FIRE."
+        echo "Error: ${x} not found in PATH, but it is required for FIRE."
         exit 1
     fi
 done
 
+# n cpus
+CPUS=$(getconf _NPROCESSORS_ONLN 2>/dev/null)
+
 #echo "Arguments passed to snakemake: ${ARGS}"
 snakemake \
     -s "${SRC_DIR}/workflow/Snakefile" \
-    --cores 16 \
+    --local-cores "${CPUS}" \
     ${ARGS}
