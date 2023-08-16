@@ -25,7 +25,7 @@ def get_large_mem_mb(wildcards, attempt):
 
 
 def get_mem_mb_small(wildcards, attempt):
-    return attempt * 1024 * 4
+    return attempt * 1024 * 8
 
 
 def get_load(wc):
