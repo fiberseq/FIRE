@@ -86,7 +86,7 @@ rule sort_model:
     conda:
         conda
     resources:
-        mem_mb=get_mem_mb,
+        mem_mb=get_mem_mb_small,
     shell:
         """
         LC_ALL=C sort \
