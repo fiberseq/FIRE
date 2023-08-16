@@ -3,7 +3,8 @@ import re
 
 def get_chroms():
     chroms = fai["chr"]
-    chroms = sorted([chrom for chrom in fai["chr"] if "_" not in chrom])
+    chroms = sorted([chrom for chrom in fai["chr"] if "chrUn_" not in chrom])
+    chroms = [chrom for chrom in chroms if "_random" not in chrom]
     chroms = [chrom for chrom in chroms if re.fullmatch(keep_chrs, chrom)]
     return chroms
 
