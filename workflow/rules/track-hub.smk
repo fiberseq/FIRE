@@ -17,6 +17,7 @@ make_fake_bed = """
     > {output.bed}
 """
 
+
 rule make_fire_d4:
     input:
         fai=ancient(f"{ref}.fai"),

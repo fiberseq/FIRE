@@ -69,6 +69,7 @@ rule apply_model:
         mem_mb=get_mem_mb,
     conda:
         conda
+    priority: 0
     shell:
         """
         fibertools -v model -m {input.model} {input.bed} \
@@ -87,6 +88,7 @@ rule sort_model:
         conda
     resources:
         mem_mb=get_mem_mb_small,
+    priority: 10
     shell:
         """
         LC_ALL=C sort \
@@ -108,6 +110,7 @@ rule merge_model_results:
         conda
     params:
         n_chunks=n_chunks + 10,
+    priority: 20
     shell:
         """
         LC_ALL=C sort \
