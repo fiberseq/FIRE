@@ -30,7 +30,7 @@ rule make_fire_d4:
         "benchmarks/{sm}/{hp}/{chrom}.fire.d4.tsv"
     threads: 4
     resources:
-        mem_mb=get_mem_mb,
+        mem_mb=get_large_mem_mb,
     conda:
         conda
     shell:

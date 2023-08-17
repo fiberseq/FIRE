@@ -4,9 +4,9 @@ default-resources:
   - time=120
   - gpus=0
 rerun-incomplete: True
-rerun-triggers: mtime 
+rerun-triggers: mtime
 restart-times: 2
 printshellcmds: True
 reason: True
 use-conda: True
-show-failed-logs: True 
+show-failed-logs: True
