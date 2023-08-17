@@ -18,14 +18,31 @@ make_fake_bed = """
 """
 
 
-rule make_fire_d4:
+rule input_make_fire_d4: 
     input:
-        fai=ancient(f"{ref}.fai"),
         bed=rules.merge_model_results.output.bed,
         tbi=rules.index_model_results.output.tbi,
     output:
-        d4=temp("temp/{sm}/{hp}/{chrom}.fire.coverages.d4"),
         bed=temp("temp/{sm}/{hp}/{chrom}.fire.coverages.bed"),
+    threads: 1
+    resources:
+        mem_mb=get_mem_mb,
+    conda:
+        conda
+    priority: 0
+    shell:
+        """
+        tabix {input.bed} {wildcards.chrom} > {output.bed}
+        head {output.bed}
+        tail {output.bed}
+        """
+ 
+rule make_fire_d4:
+    input:
+        fai=ancient(f"{ref}.fai"),
+        bed=rules.input_make_fire_d4.output.bed,
+    output:
+        d4=temp("temp/{sm}/{hp}/{chrom}.fire.coverages.d4"),
     benchmark:
         "benchmarks/{sm}/{hp}/{chrom}.fire.d4.tsv"
     threads: 4
@@ -33,17 +50,14 @@ rule make_fire_d4:
         mem_mb=get_large_mem_mb,
     conda:
         conda
+    priority: 100
     shell:
         """ 
-        tabix {input.bed} {wildcards.chrom} > {output.bed}
-        head {output.bed}
-        tail {output.bed}
-        
         fibertools -v bed2d4 \
             --chromosome {wildcards.chrom} \
             -g {input.fai} \
             -c score \
-            {output.bed} {output.d4}
+            {input.bed} {output.d4}
         """
 
 
