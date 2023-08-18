@@ -25,6 +25,8 @@ library(scales)
 library(ggplot2)
 library(ggforce)
 library(grid)
+options(scipen = 999)
+
 
 Red="#c1272d"
 Indigo="#0000a7"
