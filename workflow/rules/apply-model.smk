@@ -19,7 +19,7 @@ rule bed_chunks:
     shell:
         """
         fibertools split \
-          -g <(grep -w '{params.keep_chrs}' {input.fai} | sort -k1,1 -k2,2n -k3,3n -k4,4) \
+          -g <(grep -Pw '{params.keep_chrs}' {input.fai} | sort -k1,1 -k2,2n -k3,3n -k4,4) \
           -o {output.beds}
         """
 
