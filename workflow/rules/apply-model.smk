@@ -15,7 +15,7 @@ rule bed_chunks:
         conda
     params:
         window_size=window_size,
-        keep_chrs=keep_chrs,
+        keep_chrs="|".join(get_chroms()),
     shell:
         """
         fibertools split \
