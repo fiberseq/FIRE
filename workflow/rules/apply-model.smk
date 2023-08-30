@@ -14,7 +14,6 @@ rule bed_chunks:
     conda:
         conda
     params:
-        window_size=window_size,
         keep_chrs="|".join(get_chroms()),
     shell:
         """

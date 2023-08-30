@@ -18,8 +18,6 @@ force_coverage = config.get("force_coverage", None)
 
 
 fai = pd.read_csv(f"{ref}.fai", sep="\t", names=["chr", "length", "x", "y", "z"])
-genome_len = fai["length"].sum()
-window_size = int(genome_len / n_chunks) + 1
 conda = config.get("env", "../envs/env.yaml")
 bins = list(range(1, max_bins + 1))
 data = pd.read_csv(config["manifest"], sep="\s+", comment="#").set_index("sample")
