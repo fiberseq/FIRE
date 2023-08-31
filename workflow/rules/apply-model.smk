@@ -23,24 +23,30 @@ rule bed_chunks:
         """
 
 
-rule fiber_locations:
+rule fiber_locations_chromosome:
     input:
         bam=lambda wc: data.loc[wc.sm, "bam"],
         coverage=rules.genome_bedgraph.output.bg,
         fai=ancient(f"{ref}.fai"),
     output:
-        bed="results/{sm}/coverage/fiber-locations.bed.gz",
-        shuffled="results/{sm}/coverage/fiber-locations-shuffled.bed.gz",
-    threads: 8
+        bed=temp("temp/{sm}/coverage/{chrom}.fiber-locations.bed.gz"),
+        bg=temp("temp/{sm}/coverage/{chrom}.fiber-locations.bg.gz"),
+        shuffled=temp("temp/{sm}/coverage/{chrom}.fiber-locations-shuffled.bed.gz"),
+    threads: 4
     conda:
         conda
     shell:
         """
-        samtools view -@ {threads} -F 2308 -u {input.bam} \
+        # get fiber locations
+        samtools view -@ {threads} -F 2308 -u {input.bam} {wildcards.chrom} \
             | bedtools bamtobed -i - \
             | bgzip -@ {threads} \
         > {output.bed}
 
+        # get bedgraph
+        bedtools genomecov -bg -i {output.bed} -g {input.fai} | bgzip -@ {threads} > {output.bg}
+
+        # make shuffled fiber locations
         bedtools shuffle -chrom \
             -excl <(zcat {input.coverage} | '$4 == 0') \
             -i {output.bed} \
@@ -48,6 +54,34 @@ rule fiber_locations:
             | bgzip -@ {threads} \
         > {output.shuffled}
         """
+
+
+rule fiber_locations_chromosome:
+    input:
+        fibers=expand(
+            rules.fiber_locations_chromosome.output.bed,
+            chrom=get_chroms(),
+            allow_missing=True,
+        ),
+        shuffled=expand(
+            rules.fiber_locations_chromosome.output.shuffled,
+            chrom=get_chroms(),
+            allow_missing=True,
+        ),
+    output:
+        bed="results/{sm}/coverage/fiber-locations.bed.gz",
+        shuffled="results/{sm}/coverage/fiber-locations-shuffled.bed.gz",
+    threads: 4
+    conda:
+        conda
+    shell:
+        """
+        cat {input.fibers} > {output.bed}
+        tabix -p bed {output.bed}
+        cat {input.shuffled} > {output.shuffled}
+        tabix -p bed {output.shuffled}
+        """
+
 
 rule extract_and_split:
     input:

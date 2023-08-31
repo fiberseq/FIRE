@@ -1,4 +1,4 @@
-rule input_make_fire_d4: 
+rule input_make_fire_d4:
     input:
         bed=rules.merge_model_results.output.bed,
         tbi=rules.index_model_results.output.tbi,
@@ -33,7 +33,8 @@ rule input_make_fire_d4:
             > {output.bed}
         fi
         """
- 
+
+
 rule make_fire_d4:
     input:
         fai=ancient(f"{ref}.fai"),
@@ -321,6 +322,7 @@ rule clustering_vs_null:
             | bgzip -@ {threads} \
         > {output.bed}
         """
+
 
 # peak calling
 rule peak_calls_per_chromosome:
