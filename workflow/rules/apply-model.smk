@@ -72,7 +72,7 @@ rule fiber_locations:
         bed="results/{sm}/coverage/fiber-locations.bed.gz",
         bed_tbi="results/{sm}/coverage/fiber-locations.bed.gz.tbi",
         shuffled="results/{sm}/coverage/fiber-locations-shuffled.bed.gz",
-        shuffled_tbi="results/{sm}/coverage/fiber-locations-shuffled.bed.gz.tbi"",
+        shuffled_tbi="results/{sm}/coverage/fiber-locations-shuffled.bed.gz.tbi",
     threads: 4
     conda:
         conda
