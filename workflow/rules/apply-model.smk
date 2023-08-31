@@ -70,16 +70,18 @@ rule fiber_locations:
         ),
     output:
         bed="results/{sm}/coverage/fiber-locations.bed.gz",
+        bed_tbi="results/{sm}/coverage/fiber-locations.bed.gz.tbi",
         shuffled="results/{sm}/coverage/fiber-locations-shuffled.bed.gz",
+        shuffled_tbi="results/{sm}/coverage/fiber-locations-shuffled.bed.gz.tbi"",
     threads: 4
     conda:
         conda
     shell:
         """
         cat {input.fibers} > {output.bed}
-        tabix -p bed {output.bed}
+        tabix -f -p bed {output.bed}
         cat {input.shuffled} > {output.shuffled}
-        tabix -p bed {output.shuffled}
+        tabix -f -p bed {output.shuffled}
         """
 
 
