@@ -56,7 +56,7 @@ rule fiber_locations_chromosome:
         """
 
 
-rule fiber_locations_chromosome:
+rule fiber_locations:
     input:
         fibers=expand(
             rules.fiber_locations_chromosome.output.bed,
