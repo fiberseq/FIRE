@@ -192,7 +192,7 @@ rule chromosome_fire_tracks:
         """
 
 
-rule fire_tracks:
+rule bw_fire_tracks:
     input:
         beds=expand(
             rules.chromosome_fire_tracks.output.bed,
@@ -525,7 +525,7 @@ rule trackhub:
         hap_diffs=rules.hap_differences.output.bed,
         hap_diffs2=rules.hap_differences_track.output.bb,
         bed=expand(rules.merge_model_results.output.bed, hp=haps, allow_missing=True),
-        bw=expand(rules.fire_tracks.output.bw, hp=haps, fdr=[100], allow_missing=True),
+        bw=expand(rules.bw_fire_tracks.output.bw, hp=haps, fdr=[100], allow_missing=True),
         fdr=expand(
             rules.coverage_tracks.output.bw, hp=haps, types="fdr", allow_missing=True
         ),
