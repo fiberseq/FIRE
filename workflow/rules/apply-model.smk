@@ -48,7 +48,7 @@ rule fiber_locations_chromosome:
 
         # make shuffled fiber locations
         bedtools shuffle -chrom \
-            -excl <(zcat {input.coverage} | '$4 == 0') \
+            -excl <(zcat {input.coverage} | awk '$4 == 0') \
             -i {output.bed} \
             -g {input.fai} \
             | bgzip -@ {threads} \
