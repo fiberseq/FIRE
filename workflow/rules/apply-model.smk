@@ -23,6 +23,32 @@ rule bed_chunks:
         """
 
 
+rule fiber_locations:
+    input:
+        bam=lambda wc: data.loc[wc.sm, "bam"],
+        coverage=rules.genome_bedgraph.output.bg,
+        fai=ancient(f"{ref}.fai"),
+    output:
+        bed="results/coverage/fiber-locations.bed.gz",
+        shuffled="results/coverage/fiber-locations-shuffled.bed.gz",
+    threads: 8
+    conda:
+        conda
+    shell:
+        """
+        samtools view -@ {threads} -F 2308 -u {input.bam} \
+            | bedtools bamtobed -i - \
+            | bgzip -@ {threads} \
+        > {output.bed}
+
+        bedtools shuffle -chrom \
+            -excl <(zcat {input.coverage} | '$4 == 0') \
+            -i {output.bed} \
+            -g {input.fai} \
+            | bgzip -@ {threads} \
+        > {output.shuffled}
+        """
+
 rule extract_and_split:
     input:
         bam=ancient(lambda wc: data.loc[wc.sm, "bam"]),

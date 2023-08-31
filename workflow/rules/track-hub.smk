@@ -322,7 +322,6 @@ rule clustering_vs_null:
         > {output.bed}
         """
 
-
 # peak calling
 rule peak_calls_per_chromosome:
     input:

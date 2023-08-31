@@ -81,6 +81,7 @@ rule all:
             bin=bins,
             hp=not_all,
         ),
+        expand(rules.fiber_locations.output, sm=data.index),
         expand(rules.clustering_vs_null.output.bed, sm=data.index),
         expand(rules.percent_in_clusters.output, sm=data.index),
         expand(rules.hap_differences.output, sm=data.index),
