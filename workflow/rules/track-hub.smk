@@ -281,25 +281,6 @@ rule merge_binned_fire_calls:
         """
 
 
-rule fire_sites:
-    input:
-        bed=expand(rules.merge_model_results.output.bed, hp="all", allow_missing=True),
-    output:
-        bed="results/{sm}/FIRE.bed.gz",
-    threads: 8
-    conda:
-        conda
-    params:
-        min_fdr=min_fire_fdr,
-    shell:
-        """
-        bgzip -cd -@{threads} {input.bed} \
-            | awk '$5<={params.min_fdr}' \
-            | bgzip -@{threads} \
-            > {output.bed}
-        """
-
-
 rule clustering_vs_null:
     input:
         bed=rules.fire_sites.output.bed,

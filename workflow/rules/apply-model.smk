@@ -196,3 +196,44 @@ rule index_model_results:
         """
         tabix -p bed {input.bed}
         """
+
+
+
+rule fire_sites:
+    input:
+        bed=expand(rules.merge_model_results.output.bed, hp="all", allow_missing=True),
+    output:
+        bed="results/{sm}/FIRE.bed.gz",
+    threads: 8
+    conda:
+        conda
+    params:
+        min_fdr=min_fire_fdr,
+    shell:
+        """
+        bgzip -cd -@{threads} {input.bed} \
+            | awk '$5<={params.min_fdr}' \
+            | bgzip -@{threads} \
+            > {output.bed}
+        """
+
+
+rule fire_tracks:
+    input:
+        fire=rules.fire_sites.output.bed,
+        fiber_locations=rules.fiber_locations.output.bed,
+        shuffled=rules.fiber_locations.output.shuffled,
+    output:
+        bed="results/{sm}/FIRE.track.bed.gz",
+    threads: 8
+    conda:
+        conda
+    params:
+        script=workflow.source_path("../scripts/fire-null-distribution.py")
+    shell:
+        """
+        python {params.script} -v 1 \
+            {input.fire} \
+            {input.fiber_locations} \
+            {input.shuffled} \
+        """

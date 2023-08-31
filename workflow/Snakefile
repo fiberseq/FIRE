@@ -24,7 +24,7 @@ data = pd.read_csv(config["manifest"], sep="\s+", comment="#").set_index("sample
 haps = ["all", "hap1", "hap2", "unk"]
 not_all = ["hap1", "hap2", "unk"]
 not_unk = ["all", "hap1", "hap2"]
-min_fire_fdr = config.get("min_fire_fdr", 5)
+min_fire_fdr = config.get("min_fire_fdr", 10)
 print(data.index)
 
 types = ["fdr", "acc", "link", "nuc"]
@@ -82,6 +82,7 @@ rule all:
             hp=not_all,
         ),
         expand(rules.fiber_locations.output, sm=data.index),
+        expand(rules.fire_tracks.output, sm=data.index),
         expand(rules.clustering_vs_null.output.bed, sm=data.index),
         expand(rules.percent_in_clusters.output, sm=data.index),
         expand(rules.hap_differences.output, sm=data.index),
