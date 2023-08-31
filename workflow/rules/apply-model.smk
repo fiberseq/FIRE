@@ -29,8 +29,8 @@ rule fiber_locations:
         coverage=rules.genome_bedgraph.output.bg,
         fai=ancient(f"{ref}.fai"),
     output:
-        bed="results/coverage/fiber-locations.bed.gz",
-        shuffled="results/coverage/fiber-locations-shuffled.bed.gz",
+        bed="results/{sm}/coverage/fiber-locations.bed.gz",
+        shuffled="results/{sm}/coverage/fiber-locations-shuffled.bed.gz",
     threads: 8
     conda:
         conda
