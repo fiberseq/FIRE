@@ -51,6 +51,7 @@ rule fiber_locations_chromosome:
             -excl <(zcat {input.coverage} | awk '$4 == 0') \
             -i {output.bed} \
             -g {input.fai} \
+            |  sort -k1,1 -k2,2n -k3,3n -k4,4 \
             | bgzip -@ {threads} \
         > {output.shuffled}
         """
