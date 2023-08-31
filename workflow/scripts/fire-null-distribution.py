@@ -24,18 +24,44 @@ FIRE_COLUMNS = [
 ]
 
 
+def rle(inarray):
+    """run length encoding. Partial credit to R rle function.
+    Multi datatype arrays catered for including non Numpy
+    returns: tuple (runlengths, startpositions, values)"""
+    ia = np.asarray(inarray)  # force numpy
+    if ia.size == 0:
+        return (ia, ia, ia)
+    else:
+        n = ia.shape[0]
+        y = ia[1:] != ia[:-1]  # pairwise unequal (string safe)
+        i = np.append(np.where(y), n - 1)  # must include last element posi
+        z = np.diff(np.append(-1, i))  # run lengths
+        p = np.cumsum(np.append(0, z))[:-1]  # positions
+        return (z, p, ia[i])
+
+
+def bed_rle(inarray):
+    run_lengths, starts, scores = rle(inarray)
+    starts = starts.astype(int)
+    ends = starts + run_lengths.astype(int)
+    return np.array([starts, ends, scores]).transpose()
+
+
 @njit
 def fire_scores_per_chrom(
     starts, ends, q_values, chrom_length, coverage_array, max_add=20
 ):
     fire_scores = np.zeros(chrom_length, dtype=np.float64)
-    q_values_t = -10.0 * np.log10(q_values)
+    q_values_t = -50.0 * np.log10(q_values)
     for start, end, q in zip(starts, ends, q_values_t):
         if end >= chrom_length:
             continue
         fire_scores[start:end] += min(q, max_add)
     # correct for regions with high coverage
-    fire_scores = fire_scores / (coverage_array + 1)
+    coverage_array[coverage_array == 0] = 1
+    fire_scores = fire_scores / coverage_array
+    # min score, if only one fiber supports a region give it a score of zero
+    fire_scores[fire_scores <= max_add / coverage_array] = 0
     return fire_scores
 
 
@@ -43,12 +69,12 @@ def fire_scores_per_chrom(
 def fdr_from_fire_scores(fire_scores, null_fire_scores, thresholds):
     Rs = np.zeros(thresholds.shape[0], dtype=np.int64)
     Vs = np.zeros(thresholds.shape[0], dtype=np.int64)
-    for score in fire_scores:
-        Rs += score > thresholds
-    for score in null_fire_scores:
-        Vs += score > thresholds
-    fdrs = Vs / Rs
-    return (fdrs, Vs, Rs)
+    for data, result in zip([fire_scores, null_fire_scores], [Rs, Vs]):
+        for start, end, score in data:
+            result += ((score > thresholds) * (end - start)).astype(np.int64)
+    FDRs = Vs / Rs
+    FDRs[FDRs > 1] = 1
+    return (FDRs, Vs, Rs)
 
 
 @njit
@@ -67,10 +93,23 @@ def make_coverage_array(starts, ends, chrom_length):
     return coverage_array
 
 
-def fire_tracks(fire):
+def write_bed(chrom, rle_scores, out):
+    df = pd.DataFrame(
+        {
+            "chrom": chrom,
+            "st": rle_scores[:, 0],
+            "en": rle_scores[:, 1],
+            "score": rle_scores[:, 2],
+        }
+    )
+    df.to_csv(out, mode="a", header=False, index=False, sep="\t")
+
+
+def fire_tracks(fire, outfile, build_fdr=False):
     null_s = []
     fire_s = []
     for chrom, g in fire.groupby("chrom", maintain_order=True):
+        logging.info(f"Processing {chrom}")
         # fibers for this chromosome
         fibers = (
             g[
@@ -97,6 +136,7 @@ def fire_tracks(fire):
         null_coverage_array = make_coverage_array(
             fibers.null_fiber_start.values, fibers.null_fiber_end.values, chrom_length
         )
+        expected_median_coverage = np.median(null_coverage_array)
 
         # find offset to use based on the shuffled fiber
         g["offset"] = g.null_fiber_start - g.fiber_start
@@ -104,51 +144,64 @@ def fire_tracks(fire):
         g["null_end"] = g.end + g.offset
 
         #
-        fire_scores = fire_scores_per_chrom(
-            g.start.values,
-            g.end.values,
-            g.fdr.values,
-            g.length.max(),
-            coverage_array,
+        rle_fire_scores = bed_rle(
+            fire_scores_per_chrom(
+                g.start.values,
+                g.end.values,
+                g.fdr.values,
+                g.length.max(),
+                coverage_array,
+            )
         )
-        null_fire_scores = fire_scores_per_chrom(
-            g.null_start.values,
-            g.null_end.values,
-            g.fdr.values,
-            g.length.max(),
-            null_coverage_array,
+        rle_null_scores = bed_rle(
+            fire_scores_per_chrom(
+                g.null_start.values,
+                g.null_end.values,
+                g.fdr.values,
+                g.length.max(),
+                null_coverage_array,
+            )
         )
+        write_bed(chrom, rle_fire_scores, outfile)
 
         logging.info(
-            f"{chrom}:{fire_scores.shape[0]:,}\t"
-            f"Max real FIRE score: {fire_scores.max():,.8}\t"
-            f"Max null FIRE score: {null_fire_scores.max():,.8}"
+            f"{chrom}: {rle_fire_scores.shape[0]:,}\t"
+            f"Max real FIRE score: {rle_fire_scores[:,2].max():,.8}\t"
+            f"Max null FIRE score: {rle_null_scores[:,2].max():,.8}\t"
+            f"Expected median coverage: {expected_median_coverage}"
         )
-        null_s.append(null_fire_scores)
-        fire_s.append(fire_scores)
+        fire_s.append(rle_fire_scores)
+        null_s.append(rle_null_scores)
 
     # all data
     fire_scores = np.concatenate(fire_s)
     null_fire_scores = np.concatenate(null_s)
+    logging.debug(f"rle fire score shape: {fire_scores.shape}")
 
     # Calculate FDR thresholds
-    qs = np.arange(0.95, 1.0, 0.001)
-    thresholds = np.quantile(fire_scores, qs)
+    thresholds = np.arange(5, 25)  # np.quantile(fire_scores, qs)
     FDRs, Vs, Rs = fdr_from_fire_scores(fire_scores, null_fire_scores, thresholds)
     results = pd.DataFrame(
-        {"threshold": thresholds, "FDR": FDRs, "shuffled_peaks": Vs, "peaks": Rs}
+        {
+            "threshold": thresholds,
+            "FDR": FDRs,
+            "shuffled_peaks": Vs,
+            "peaks": Rs,
+        }
     )
-    logging.info(f"\n{results}")
     logging.info(
-        f"all:{fire_scores.shape[0]:,}\t{fire_scores.max():,.8}\t{null_fire_scores.max():,.8}"
+        f"all: {fire_scores.shape[0]:,}\t"
+        f"Max real FIRE score: {fire_scores[:,2].max():,.8}\t"
+        f"Max null FIRE score: {null_fire_scores[:,2].max():,.8}"
     )
+    logging.info(f"FDR results\n{results}")
 
 
-def analysis(fire, fibers):
+def analysis(fire, fibers, outfile):
     logging.info("Starting analysis")
     fire = fire.join(fibers, on=["chrom", "fiber"])
     logging.debug(f"Joined fibers\n{fire}")
-    fire_tracks(fire)
+    fire_tracks(fire, outfile)
     return 0
 
 
@@ -157,7 +210,8 @@ def main(
     fiber_locations_file: Path,
     shuffled_locations_file: Path,
     genome_file: Path,
-    outfile: Optional[Path] = None,
+    outfile: Path,
+    xoutfile: Optional[Path] = None,
     *,
     n_rows: Optional[int] = None,
     verbose: int = 0,
@@ -214,7 +268,7 @@ def main(
         batch_size=100_000,
         n_rows=n_rows,
     )
-    analysis(fire, fibers)
+    analysis(fire, fibers, outfile)
     return 0
 
 

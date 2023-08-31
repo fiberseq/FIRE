@@ -1,3 +1,147 @@
+#
+# Coverage calculations
+#
+rule genome_bedgraph:
+    input:
+        bam=ancient(lambda wc: data.loc[wc.sm, "bam"]),
+        fai=ancient(f"{ref}.fai"),
+    output:
+        d4="results/{sm}/coverage/{sm}.d4",
+        bg="results/{sm}/coverage/{sm}.bed.gz",
+        median="results/{sm}/coverage/{sm}.median.chromosome.coverage.bed",
+    threads: 16
+    conda:
+        conda
+    shell:
+        """ 
+        d4tools create -F 2308 -t {threads} -Azr {input.fai} {input.bam} {output.d4}
+        d4tools view {output.d4} | bgzip -@ {threads} > {output.bg}
+        zcat {output.bg} \
+            | awk '$4>0' \
+            | datamash -g 1 min 2 max 3 median 4 \
+        > {output.median}
+        """
+
+
+rule average_coverage:
+    input:
+        median=rules.genome_bedgraph.output.median,
+    output:
+        cov="results/{sm}/coverage/{sm}.median.coverage.txt",
+    run:
+        find_median_coverage(input["median"], outfile=output["cov"])
+
+
+#
+# fiber locations and coverages
+#
+rule fiber_locations_chromosome:
+    input:
+        bam=lambda wc: data.loc[wc.sm, "bam"],
+        fai=ancient(f"{ref}.fai"),
+    output:
+        bed=temp("temp/{sm}/coverage/{chrom}.fiber-locations.bed.gz"),
+    threads: 4
+    conda:
+        conda
+    shell:
+        """
+        # get fiber locations
+        samtools view -@ {threads} -F 2308 -u {input.bam} {wildcards.chrom} \
+            | bedtools bamtobed -i - \
+            | bgzip -@ {threads} \
+        > {output.bed}
+
+        # get bedgraph
+        bedtools genomecov -bg -i {output.bed} -g {input.fai} | bgzip -@ {threads} > {output.bg}
+        """
+
+
+rule fiber_locations:
+    input:
+        fibers=expand(
+            rules.fiber_locations_chromosome.output.bed,
+            chrom=get_chroms(),
+            allow_missing=True,
+        ),
+    output:
+        bed="results/{sm}/coverage/fiber-locations.bed.gz",
+        bed_tbi="results/{sm}/coverage/fiber-locations.bed.gz.tbi",
+    threads: 1
+    conda:
+        conda
+    shell:
+        """
+        cat {input.fibers} > {output.bed}
+        tabix -f -p bed {output.bed}
+        """
+
+
+rule filtered_and_shuffled_fiber_locations_chromosome:
+    input:
+        bed=rules.fiber_locations_chromosome.output.bed,
+        # required for the coverage function to work
+        bg=rules.genome_bedgraph.output.bg,
+    output:
+        bed=temp("temp/{sm}/coverage/{chrom}.fiber-locations-filtered.bed.gz"),
+        bg=temp("temp/{sm}/coverage/{chrom}.fiber-locations-filtered.coverage.bed.gz"),
+        shuffled=temp("temp/{sm}/coverage/{chrom}.fiber-locations-shuffled.bed.gz"),
+    threads: 4
+    params:
+        min_coverage=get_min_coverage,
+    conda:
+        conda
+    shell:
+        """
+        # get fiber locations
+        bedtools intersect -v -f 0.2 \
+            -a {input.bed} \
+            -b <(zcat {input.bg} | awk '$4 <= {params.min_coverage}') \
+        | bgzip -@ {threads} \
+        > {output.bed}
+
+        # get bedgraph
+        bedtools genomecov -bg -i {output.bed} -g {input.fai} | bgzip -@ {threads} > {output.bg}
+
+        # make shuffled fiber locations
+        bedtools shuffle -chrom \
+            -excl <(zcat {output.bg} | awk '$4 == 0') \
+            -i {output.bed} \
+            -g {input.fai} \
+            |  sort -k1,1 -k2,2n -k3,3n -k4,4 \
+            | bgzip -@ {threads} \
+        > {output.shuffled}
+        """
+
+
+rule filtered_and_shuffled_fiber_locations:
+    input:
+        bed=expand(
+            rules.filtered_and_shuffled_fiber_locations_chromosome.output.bed,
+            chrom=get_chroms(),
+            allow_missing=True,
+        ),
+        shuffled=expand(
+            rules.filtered_and_shuffled_fiber_locations_chromosome.output.shuffled,
+            chrom=get_chroms(),
+            allow_missing=True,
+        ),
+    output:
+        bed="results/{sm}/coverage/filtered-for-fdr/fiber-locations.bed.gz",
+        shuffled="results/{sm}/coverage/filtered-for-fdr/fiber-locations-shuffled.bed.gz",
+    threads: 1
+    conda:
+        conda
+    shell:
+        """
+        cat {input.bed} > {output.bed}
+        cat {input.shuffled} > {output.shuffled}
+        """
+
+
+#
+# Applying the model
+#
 rule bed_chunks:
     input:
         ref=ref,
@@ -20,69 +164,6 @@ rule bed_chunks:
         fibertools split \
           -g <(grep -Pw '{params.keep_chrs}' {input.fai} | sort -k1,1 -k2,2n -k3,3n -k4,4) \
           -o {output.beds}
-        """
-
-
-rule fiber_locations_chromosome:
-    input:
-        bam=lambda wc: data.loc[wc.sm, "bam"],
-        coverage=rules.genome_bedgraph.output.bg,
-        fai=ancient(f"{ref}.fai"),
-    output:
-        bed=temp("temp/{sm}/coverage/{chrom}.fiber-locations.bed.gz"),
-        bg=temp("temp/{sm}/coverage/{chrom}.fiber-locations.bg.gz"),
-        shuffled=temp("temp/{sm}/coverage/{chrom}.fiber-locations-shuffled.bed.gz"),
-    threads: 4
-    conda:
-        conda
-    shell:
-        """
-        # get fiber locations
-        samtools view -@ {threads} -F 2308 -u {input.bam} {wildcards.chrom} \
-            | bedtools bamtobed -i - \
-            | bgzip -@ {threads} \
-        > {output.bed}
-
-        # get bedgraph
-        bedtools genomecov -bg -i {output.bed} -g {input.fai} | bgzip -@ {threads} > {output.bg}
-
-        # make shuffled fiber locations
-        bedtools shuffle -chrom \
-            -excl <(zcat {input.coverage} | awk '$4 == 0') \
-            -i {output.bed} \
-            -g {input.fai} \
-            |  sort -k1,1 -k2,2n -k3,3n -k4,4 \
-            | bgzip -@ {threads} \
-        > {output.shuffled}
-        """
-
-
-rule fiber_locations:
-    input:
-        fibers=expand(
-            rules.fiber_locations_chromosome.output.bed,
-            chrom=get_chroms(),
-            allow_missing=True,
-        ),
-        shuffled=expand(
-            rules.fiber_locations_chromosome.output.shuffled,
-            chrom=get_chroms(),
-            allow_missing=True,
-        ),
-    output:
-        bed="results/{sm}/coverage/fiber-locations.bed.gz",
-        bed_tbi="results/{sm}/coverage/fiber-locations.bed.gz.tbi",
-        shuffled="results/{sm}/coverage/fiber-locations-shuffled.bed.gz",
-        shuffled_tbi="results/{sm}/coverage/fiber-locations-shuffled.bed.gz.tbi",
-    threads: 4
-    conda:
-        conda
-    shell:
-        """
-        cat {input.fibers} > {output.bed}
-        tabix -f -p bed {output.bed}
-        cat {input.shuffled} > {output.shuffled}
-        tabix -f -p bed {output.shuffled}
         """
 
 
@@ -198,7 +279,6 @@ rule index_model_results:
         """
 
 
-
 rule fire_sites:
     input:
         bed=expand(rules.merge_model_results.output.bed, hp="all", allow_missing=True),
@@ -229,7 +309,7 @@ rule fire_tracks:
     conda:
         conda
     params:
-        script=workflow.source_path("../scripts/fire-null-distribution.py")
+        script=workflow.source_path("../scripts/fire-null-distribution.py"),
     shell:
         """
         python {params.script} -v 1 \

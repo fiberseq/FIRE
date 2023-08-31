@@ -61,3 +61,16 @@ def get_median_coverage(wc):
         return force_coverage
     median_coverages = expand(rules.genome_bedgraph.output.median, sm=sm.wc)
     return find_median_coverage(median_coverages)
+
+
+def get_min_coverage(wc):
+    median = get_median_coverage(wc)
+    sd = math.sqrt(median)
+    mmin = median - coverage_within_n_sd * sd
+    return max(mmin, min_coverage)
+
+
+def get_max_coverage(wc):
+    median = get_median_coverage(wc)
+    sd = math.sqrt(median)
+    return median + coverage_within_n_sd * sd

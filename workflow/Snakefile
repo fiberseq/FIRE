@@ -1,4 +1,5 @@
 import pandas as pd
+import math
 import sys
 import os
 from snakemake.utils import min_version
@@ -16,7 +17,11 @@ max_bins = config.get("max_bins", 75)
 keep_chrs = config.get("keep_chromosomes", ".*")
 force_coverage = config.get("force_coverage", None)
 
+# coverage requirements
+min_coverage = config.get("min_coverage", 4)
+coverage_within_n_sd = config.get("coverage_within_n_sd", 5)
 
+# sample, haplotype, and chromosome wildcard building
 fai = pd.read_csv(f"{ref}.fai", sep="\t", names=["chr", "length", "x", "y", "z"])
 conda = config.get("env", "../envs/env.yaml")
 bins = list(range(1, max_bins + 1))
@@ -82,6 +87,7 @@ rule all:
             hp=not_all,
         ),
         expand(rules.fiber_locations.output, sm=data.index),
+        expand(rules.filtered_and_shuffled_fiber_locations.output, sm=data.index),
         expand(rules.fire_tracks.output, sm=data.index),
         expand(rules.clustering_vs_null.output.bed, sm=data.index),
         expand(rules.percent_in_clusters.output, sm=data.index),
