@@ -323,10 +323,5 @@ rule fire_tracks:
         script=workflow.source_path("../scripts/fire-null-distribution.py"),
     shell:
         """
-        python {params.script} -v 1 \
-            {input.fire} \
-            {input.fiber_locations} \
-            {input.fai} \
-            -s {input.shuffled} \
-            {output.tbl}
+        python {params.script} -v 1 {input.fire} {input.fiber_locations} {input.fai} -s {input.shuffled} {output.tbl}
         """
