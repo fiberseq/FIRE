@@ -211,6 +211,9 @@ def fire_tracks(fire, outfile):
     )
     # simplify the results a little, don't want 100,000s of thresholds
     results = results.groupby("FDR", sort=False).tail(1).reset_index(drop=True)
+    results = (
+        results.groupby("shuffled_peaks", sort=False).tail(1).reset_index(drop=True)
+    )
     results["threshold"] = results["threshold"].round(2)
     results = results.groupby("threshold", sort=False).tail(1).reset_index(drop=True)
     logging.info(f"FDR results\n{results}")
