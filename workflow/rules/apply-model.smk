@@ -302,7 +302,7 @@ rule fire_sites:
     shell:
         """
         bgzip -cd -@{threads} {input.bed} \
-            | awk '$5<={params.min_fdr}' \
+            | awk '$10<={params.min_fdr}' \
             | bgzip -@{threads} \
             > {output.bed}
         """

@@ -29,7 +29,7 @@ data = pd.read_csv(config["manifest"], sep="\s+", comment="#").set_index("sample
 haps = ["all", "hap1", "hap2", "unk"]
 not_all = ["hap1", "hap2", "unk"]
 not_unk = ["all", "hap1", "hap2"]
-min_fire_fdr = config.get("min_fire_fdr", 10)
+min_fire_fdr = config.get("min_fire_fdr", 0.10)
 print(data.index)
 
 types = ["fdr", "acc", "link", "nuc"]
