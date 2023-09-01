@@ -308,7 +308,7 @@ rule fire_sites:
         """
 
 
-rule fire_tracks:
+rule fire_fdr_table:
     input:
         fire=rules.fire_sites.output.bed,
         fiber_locations=rules.filtered_and_shuffled_fiber_locations.output.bed,
@@ -321,7 +321,31 @@ rule fire_tracks:
         "../envs/python.yaml"
     params:
         script=workflow.source_path("../scripts/fire-null-distribution.py"),
+    resources:
+        mem_mb=get_mem_mb,
     shell:
         """
         python {params.script} -v 1 {input.fire} {input.fiber_locations} {input.fai} -s {input.shuffled} {output.tbl}
+        """
+
+rule fire_tracks:
+    input:
+        fire=rules.fire_sites.output.bed,
+        fiber_locations=rules.filtered_and_shuffled_fiber_locations.output.bed,
+        fai=ancient(f"{ref}.fai"),
+        fdr_tbl=rules.fire_fdr_table.output.tbl,
+    output:
+        bed="results/{sm}/FIRE.track.bed.gz",
+    threads: 8
+    conda:
+        "../envs/python.yaml"
+    params:
+        script=workflow.source_path("../scripts/fire-null-distribution.py"),
+    resources:
+        mem_mb=get_mem_mb,
+    shell:
+        """
+        python {params.script} -v 1 {input.fire} {input.fiber_locations} {input.fai} \
+            -f {input.fdr_tbl} \
+            {output.bed}
         """
