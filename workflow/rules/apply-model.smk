@@ -90,6 +90,17 @@ rule filtered_and_shuffled_fiber_locations_chromosome:
         conda
     shell:
         """
+        # check if file is empty
+        if [ -n "$(gunzip <{input.bed} | head -c 1 | tr '\0\n' __)" ]; then
+            echo "input is not empty"
+        else
+            echo "input is empty"
+            bgzip -c <(printf "") > {output.bed}
+            bgzip -c <(printf "") > {output.bg}
+            bgzip -c <(printf "") > {output.shuffled}
+            exit 0
+        fi
+
         # get fiber locations
         bedtools intersect -v -f 0.2 \
             -a {input.bed} \
