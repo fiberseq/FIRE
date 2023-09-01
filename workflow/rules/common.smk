@@ -59,7 +59,7 @@ def find_median_coverage(file, outfile=None):
 def get_median_coverage(wc):
     if force_coverage is not None:
         return force_coverage
-    median_coverages = expand(rules.genome_bedgraph.output.median, sm=sm.wc)
+    median_coverages = expand(rules.genome_bedgraph.output.median, sm=wc.sm)
     return find_median_coverage(median_coverages)
 
 

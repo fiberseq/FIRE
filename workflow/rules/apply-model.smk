@@ -82,6 +82,7 @@ rule filtered_and_shuffled_fiber_locations_chromosome:
         bed=rules.fiber_locations_chromosome.output.bed,
         # required for the coverage function to work
         bg=rules.genome_bedgraph.output.bg,
+        ave_cov=rules.average_coverage.output,
     output:
         bed=temp("temp/{sm}/coverage/{chrom}.fiber-locations-filtered.bed.gz"),
         bg=temp("temp/{sm}/coverage/{chrom}.fiber-locations-filtered.coverage.bed.gz"),
