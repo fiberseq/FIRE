@@ -77,15 +77,34 @@ def fire_scores_per_chrom(
 
 
 @njit
-def fdr_from_fire_scores(fire_scores, null_fire_scores, thresholds):
-    Rs = np.zeros(thresholds.shape[0], dtype=np.int64)
-    Vs = np.zeros(thresholds.shape[0], dtype=np.int64)
-    for data, result in zip([fire_scores, null_fire_scores], [Rs, Vs]):
-        for start, end, score in data:
-            result += ((score > thresholds) * (end - start)).astype(np.int64)
+def fdr_from_fire_scores(fire_scores):
+    Vs = []
+    Rs = []
+    Ts = []
+    cur_R = 0.0
+    cur_V = 0.0
+    pre_score = 0.0
+    for start, end, score, is_real in fire_scores:
+        # save the counts and thresholds as long as we have counts
+        if score != pre_score and cur_R > 0:
+            Rs.append(cur_R)
+            Vs.append(cur_V)
+            Ts.append(score)
+        # update the counts
+        counts = end - start
+        if is_real:
+            cur_R += counts
+        else:
+            cur_V += counts
+        # prepare for next iteration
+        pre_score = score
+    # set up return values
+    Vs = np.array(Vs)
+    Rs = np.array(Rs)
+    Ts = np.array(Ts)
     FDRs = Vs / Rs
-    FDRs[FDRs > 1] = 1
-    return (FDRs, Vs, Rs)
+    FDRs[FDRs > 1] = 1.0
+    return (Ts, FDRs, Vs, Rs)
 
 
 @njit
@@ -162,24 +181,40 @@ def fire_tracks(fire, outfile):
     fire_scores = np.concatenate(fire_s)
     null_fire_scores = np.concatenate(null_s)
     logging.debug(f"rle fire score shape: {fire_scores.shape}")
-
-    # Calculate FDR thresholds
-    thresholds = np.arange(1, 20)  # np.quantile(fire_scores, qs)
-    FDRs, Vs, Rs = fdr_from_fire_scores(fire_scores, null_fire_scores, thresholds)
-    results = pd.DataFrame(
-        {
-            "threshold": thresholds,
-            "FDR": FDRs,
-            "shuffled_peaks": Vs,
-            "peaks": Rs,
-        }
-    )
     logging.info(
         f"all: {fire_scores.shape[0]:,}\t"
         f"Max real FIRE score: {fire_scores[:,2].max():,.8}\t"
         f"Max null FIRE score: {null_fire_scores[:,2].max():,.8}"
     )
+
+    # convert to pandas for easier manipulation
+    fire_scores = pd.DataFrame(fire_scores, columns=["start", "end", "score"])
+    fire_scores["is_real"] = 1.0
+    null_fire_scores = pd.DataFrame(null_fire_scores, columns=["start", "end", "score"])
+    null_fire_scores["is_real"] = 0.0
+    fire_scores = (
+        pd.concat([fire_scores, null_fire_scores])
+        .sort_values("score", ascending=False)
+        .to_numpy()
+    )
+    logging.debug(f"Fire scores\n{fire_scores}")
+
+    # Calculate FDR thresholds
+    Ts, FDRs, Vs, Rs = fdr_from_fire_scores(fire_scores)
+    results = pd.DataFrame(
+        {
+            "threshold": Ts,
+            "FDR": FDRs,
+            "shuffled_peaks": Vs,
+            "peaks": Rs,
+        }
+    )
+    # simplify the results a little, don't want 100,000s of thresholds
+    results = results.groupby("FDR", sort=False).tail(1).reset_index(drop=True)
+    results["threshold"] = results["threshold"].round(2)
+    results = results.groupby("threshold", sort=False).tail(1).reset_index(drop=True)
     logging.info(f"FDR results\n{results}")
+    results.to_csv(outfile, sep="\t", index=False)
 
 
 def make_fdr_table(fire, fibers, outfile):
@@ -242,6 +277,7 @@ def main(
     outfile: Path,
     *,
     shuffled_locations_file: Optional[Path] = None,
+    fdr_table_file: Optional[Path] = None,
     n_rows: Optional[int] = None,
     verbose: int = 0,
 ):
@@ -305,6 +341,7 @@ def main(
         fibers = fiber_locations.join(shuffled_locations, on=["chrom", "fiber"])
         make_fdr_table(fire, fibers, outfile)
     else:
+        fdr_table = pl.read_csv(fdr_table_file, sep="\t")
         write_scores(fire, fiber_locations, outfile)
     return 0
 
