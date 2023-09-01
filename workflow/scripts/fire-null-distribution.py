@@ -58,7 +58,13 @@ def bed_rle(inarray):
 
 @njit
 def fire_scores_per_chrom(
-    starts, ends, q_values, chrom_length, coverage_array, min_allowed_q=0.01
+    starts,
+    ends,
+    q_values,
+    chrom_length,
+    coverage_array,
+    min_allowed_q=0.01,
+    min_coverage=4,
 ):
     fire_scores = np.zeros(chrom_length, dtype=np.float64)
 
@@ -75,8 +81,7 @@ def fire_scores_per_chrom(
     # correct divide by zeros
     fire_scores[np.isnan(fire_scores)] = 0.0
     # drop the scores that have no coverage
-    to_drop = coverage_array == 0
-    fire_scores[to_drop] = -1.0
+    fire_scores[coverage_array < min_coverage] = -1.0
     return fire_scores
 
 
@@ -138,7 +143,7 @@ def make_coverage_array(starts, ends, chrom_length):
     return coverage_array
 
 
-def fire_tracks(fire, outfile):
+def fire_tracks(fire, outfile, min_coverage=4):
     null_s = []
     fire_s = []
     logging.info(f"Fire data\n{fire}")
@@ -179,6 +184,7 @@ def fire_tracks(fire, outfile):
                 g.fdr.values,
                 g.length.max(),
                 coverage_array,
+                min_coverage=min_coverage,
             )
         )
         rle_null_scores = bed_rle(
@@ -188,6 +194,7 @@ def fire_tracks(fire, outfile):
                 g.fdr.values,
                 g.length.max(),
                 null_coverage_array,
+                min_coverage=min_coverage,
             )
         )
 
@@ -246,11 +253,11 @@ def fire_tracks(fire, outfile):
     results.to_csv(outfile, sep="\t", index=False)
 
 
-def make_fdr_table(fire, fibers, outfile):
+def make_fdr_table(fire, fibers, outfile, min_coverage=4):
     logging.info("Starting analysis")
     fire = fire.join(fibers, on=["chrom", "fiber"])
     logging.debug(f"Joined fibers\n{fire}")
-    fire_tracks(fire, outfile)
+    fire_tracks(fire, outfile, min_coverage=min_coverage)
     return 0
 
 
@@ -282,7 +289,7 @@ def write_bed(chrom, rle_scores, FDRs, coverage, fire_coverage, out, first=True)
     df.to_csv(out, mode=mode, header=header, index=False, sep="\t")
 
 
-def write_scores(fire, fibers, fdr_table, outfile):
+def write_scores(fire, fibers, fdr_table, outfile, min_coverage=4):
     fire = fire.join(fibers, on=["chrom", "fiber"])
     first = True
     for chrom, g in fire.groupby("chrom", maintain_order=True):
@@ -305,6 +312,7 @@ def write_scores(fire, fibers, fdr_table, outfile):
                 g.fdr.values,
                 g.length.max(),
                 coverage_array,
+                min_coverage=min_coverage,
             )
         )
 
@@ -339,6 +347,7 @@ def main(
     shuffled_locations_file: Optional[Path] = None,
     fdr_table_file: Optional[Path] = None,
     n_rows: Optional[int] = None,
+    min_coverage: Optional[int] = 4,
     verbose: int = 0,
 ):
     """
@@ -400,14 +409,16 @@ def main(
             new_columns=["chrom", "null_fiber_start", "null_fiber_end", "fiber"],
         )
         fibers = fiber_locations.join(shuffled_locations, on=["chrom", "fiber"])
-        make_fdr_table(fire, fibers, outfile)
+        make_fdr_table(fire, fibers, outfile, min_coverage=min_coverage)
     else:
         fdr_table = (
             pl.read_csv(fdr_table_file, separator="\t")
             .to_pandas()
             .sort_values("threshold")
         )
-        write_scores(fire, fiber_locations, fdr_table, outfile)
+        write_scores(
+            fire, fiber_locations, fdr_table, outfile, min_coverage=min_coverage
+        )
     return 0
 
 
