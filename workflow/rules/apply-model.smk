@@ -318,7 +318,7 @@ rule fire_tracks:
         tbl="results/{sm}/FIRE.to.FDR.tbl",
     threads: 8
     conda:
-        conda
+        "../envs/python.yaml"
     params:
         script=workflow.source_path("../scripts/fire-null-distribution.py"),
     shell:

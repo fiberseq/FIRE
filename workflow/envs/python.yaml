@@ -1,0 +1,13 @@
+name: fire
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - tqdm
+  - defopt
+  - numpy==1.23.1 # setting exactly due to picky numpy numba compatibility
+  - numba
+  - pandas>=2.0
+  - polars[pyarrow]>=0.18
+  - pysam>=0.19
