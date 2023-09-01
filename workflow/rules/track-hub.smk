@@ -175,6 +175,24 @@ rule percent_accessible:
         tabix -p bed {output.bed}
         """
 
+rule fdr_and_fire_score_bw:
+    input:
+        bed=rules.fdr_track.output.bed,
+        fai=ancient(f"{ref}.fai"),
+    output:
+        fdr="results/{sm}/trackHub/bw/FDR-scores.bw",
+        fire="results/{sm}/trackHub/bw/FIRE-scores.bw",
+        tmp=temp("temp/{sm}/trackHub/bw/F.bw.tmp.bed"),
+    threads: 4
+    conda:
+        conda
+    shell:
+        """
+        hck -z -F "#chrom" -F st -F en -F FDR {input.bed} > {output.tmp} 
+        bedGraphToBigWig {output.tmp} {input.fai} {output.fdr}
+        hck -z -F "#chrom" -F st -F en -F score {input.bed} > {output.tmp}
+        bedGraphToBigWig {output.tmp} {input.fai} {output.fire}
+        """
 
 rule chromosome_fire_tracks:
     input:
