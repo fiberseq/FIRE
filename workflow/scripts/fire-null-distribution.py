@@ -74,7 +74,7 @@ def fire_scores_per_chrom(
     coverage_array[to_drop] = 1
     # correct for coverage
     fire_scores = fire_scores / coverage_array
-    fire_scores[to_drop] = 0.0
+    fire_scores[to_drop] = -1.0
     return fire_scores
 
 
@@ -93,8 +93,8 @@ def fdr_from_fire_scores(fire_scores):
             Rs.append(cur_R)
             Vs.append(cur_V)
             Ts.append(pre_score)
-        # don't add zero counts to the fdr data, since they have no coverage.
-        if score == 0.0:
+        # don't add negative scores to the fdr data, since they have no coverage.
+        if score < 0.0:
             break
         # update the counts
         counts = end - start
