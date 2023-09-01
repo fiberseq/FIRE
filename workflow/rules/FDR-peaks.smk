@@ -51,7 +51,8 @@ rule filtered_and_shuffled_fiber_locations_chromosome:
         shuffled=temp("temp/{sm}/coverage/{chrom}.fiber-locations-shuffled.bed.gz"),
     threads: 4
     params:
-        min_coverage=get_min_coverage,
+        min_cov=get_min_coverage,
+        max_cov=get_max_coverage,
     conda:
         conda
     shell:
@@ -70,7 +71,7 @@ rule filtered_and_shuffled_fiber_locations_chromosome:
         # get fiber locations
         bedtools intersect -v -f 0.2 \
             -a {input.bed} \
-            -b <(zcat {input.bg} | awk '$4 <= {params.min_coverage}') \
+            -b <(zcat {input.bg} | awk '$4 <= {params.min_cov} || $4 >= {params.max_cov}') \
         | bgzip -@ {threads} \
         > {output.bed}
 
@@ -101,8 +102,8 @@ rule filtered_and_shuffled_fiber_locations:
             allow_missing=True,
         ),
     output:
-        bed="results/{sm}/coverage/filtered-for-fdr/fiber-locations.bed.gz",
-        shuffled="results/{sm}/coverage/filtered-for-fdr/fiber-locations-shuffled.bed.gz",
+        bed="results/{sm}/FDR-peaks/filtered-for-fdr/fiber-locations.bed.gz",
+        shuffled="results/{sm}/FDR-peaks/filtered-for-fdr/fiber-locations-shuffled.bed.gz",
     threads: 1
     conda:
         conda
