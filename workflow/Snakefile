@@ -3,11 +3,12 @@ import math
 import sys
 import os
 from snakemake.utils import min_version
+
 min_version("7.30.0")
 
 # Force users to use the same underlying OS via singularity.
-#container: "docker://continuumio/miniconda3"
-#container: "docker://mambaorg/micromamba"
+# container: "docker://continuumio/miniconda3"
+# container: "docker://mambaorg/micromamba"
 
 ref = config["ref"]
 ref_name = config["ref_name"]
@@ -41,6 +42,7 @@ types_to_col = {"fdr": 4, "acc": 5, "link": 6, "nuc": 7}
 
 include: "rules/common.smk"
 include: "rules/apply-model.smk"
+include: "rules/FDR-peaks.smk"
 include: "rules/train-model.smk"
 include: "rules/track-hub.smk"
 
