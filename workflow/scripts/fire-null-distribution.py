@@ -107,7 +107,7 @@ def make_coverage_array(starts, ends, chrom_length):
 def fire_tracks(fire, outfile):
     null_s = []
     fire_s = []
-    for chrom, g in fire.groupby("chrom", maintain_order=True):
+    for chrom, g in fire.group_by("chrom", maintain_order=True):
         logging.info(f"Processing {chrom}")
         # fibers for this chromosome
         fibers = g[FIBER_COLUMNS].unique().to_pandas()
@@ -209,7 +209,7 @@ def write_bed(chrom, rle_scores, out, first=True):
 def write_scores(fire, fibers, outfile):
     fire = fire.join(fibers, on=["chrom", "fiber"])
     first = True
-    for chrom, g in fire.groupby("chrom", maintain_order=True):
+    for chrom, g in fire.group_by("chrom", maintain_order=True):
         logging.info(f"Processing {chrom}")
         # fibers for this chromosome
         fibers = g[FIBER_COLUMNS].unique().to_pandas()
