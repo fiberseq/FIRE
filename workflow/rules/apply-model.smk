@@ -38,7 +38,6 @@ rule average_coverage:
 rule fiber_locations_chromosome:
     input:
         bam=lambda wc: data.loc[wc.sm, "bam"],
-        fai=ancient(f"{ref}.fai"),
     output:
         bed=temp("temp/{sm}/coverage/{chrom}.fiber-locations.bed.gz"),
     threads: 4
@@ -77,6 +76,7 @@ rule fiber_locations:
 rule filtered_and_shuffled_fiber_locations_chromosome:
     input:
         bed=rules.fiber_locations_chromosome.output.bed,
+        fai=ancient(f"{ref}.fai"),
         # required for the coverage function to work
         bg=rules.genome_bedgraph.output.bg,
     output:
