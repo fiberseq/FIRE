@@ -175,7 +175,7 @@ rule percent_accessible:
         tabix -p bed {output.bed}
         """
 
-rule fdr_and_fire_score_bw:
+rule fdr_and_fire_bw:
     input:
         bed=rules.fdr_track.output.bed,
         fai=ancient(f"{ref}.fai"),

@@ -90,6 +90,8 @@ rule all:
         expand(rules.filtered_and_shuffled_fiber_locations.output, sm=data.index),
         # FDR results
         expand(rules.fdr_track.output, sm=data.index),
+        # trackhub
+        expand(rules.fdr_and_fire_bw.output.fdr, sm=data.index),
         # misc
         expand("results/{sm}/trackHub/hub.txt", sm=data.index),
         expand(
