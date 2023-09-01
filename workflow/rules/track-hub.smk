@@ -180,7 +180,7 @@ rule fdr_and_fire_bw:
         bed=rules.fdr_track.output.bed,
         fai=ancient(f"{ref}.fai"),
     output:
-        fdr="results/{sm}/trackHub/bw/FDR-scores.bw",
+        fdr="results/{sm}/trackHub/bw/log-FDR-scores.bw",
         fire="results/{sm}/trackHub/bw/FIRE-scores.bw",
         tmp=temp("temp/{sm}/trackHub/bw/F.bw.tmp.bed"),
     threads: 4
@@ -188,8 +188,13 @@ rule fdr_and_fire_bw:
         conda
     shell:
         """
-        hck -z -F "#chrom" -F st -F en -F FDR {input.bed} > {output.tmp} 
+        # FDR track
+        hck -z -F "#chrom" -F st -F en -F FDR {input.bed} \
+            | awk -v OFS='\t' '{print $1,$2,$3,-10*log($4)/log(10)}' \
+            > {output.tmp} 
         bedGraphToBigWig {output.tmp} {input.fai} {output.fdr}
+
+        # score track
         hck -z -F "#chrom" -F st -F en -F score {input.bed} > {output.tmp}
         bedGraphToBigWig {output.tmp} {input.fai} {output.fire}
         """
