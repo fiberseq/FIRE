@@ -71,7 +71,7 @@ def fire_scores_per_chrom(
 
     # allow division with coverage to always work
     to_drop = coverage_array == 0
-    coverage_array[to_drop] = 1
+    coverage_array[coverage_array == 0] = 1
     # correct for coverage
     fire_scores = fire_scores / coverage_array
     fire_scores[to_drop] = -1.0
@@ -85,7 +85,7 @@ def fdr_from_fire_scores(fire_scores):
     Ts = []
     cur_R = 0.0
     cur_V = 0.0
-    pre_score = None
+    pre_score = -1.0
     first = True
     for start, end, score, is_real in fire_scores:
         # save the counts and thresholds as long as we have counts
@@ -133,6 +133,7 @@ def make_coverage_array(starts, ends, chrom_length):
 def fire_tracks(fire, outfile):
     null_s = []
     fire_s = []
+    logging.info(f"Fire data\n{fire}")
     for chrom, g in fire.groupby("chrom", maintain_order=True):
         logging.info(f"Processing {chrom}")
         # fibers for this chromosome
@@ -156,6 +157,11 @@ def fire_tracks(fire, outfile):
         g["offset"] = g.null_fiber_start - g.fiber_start
         g["null_start"] = g.start + g.offset
         g["null_end"] = g.end + g.offset
+
+        logging.info(
+            f"real bp: {(g.end-g.start).sum():,}\t"
+            f"null bp: {(g.null_end-g.null_start).sum():,}"
+        )
 
         #
         rle_fire_scores = bed_rle(
