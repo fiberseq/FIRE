@@ -70,9 +70,11 @@ def fire_scores_per_chrom(
         fire_scores[start:end] += min(q, max_add)
 
     # allow division with coverage to always work
-    coverage_array[coverage_array == 0] = 1
+    to_drop = coverage_array == 0
+    coverage_array[to_drop] = 1
     # correct for coverage
     fire_scores = fire_scores / coverage_array
+    fire_scores[to_drop] = 0.0
     return fire_scores
 
 
@@ -83,13 +85,17 @@ def fdr_from_fire_scores(fire_scores):
     Ts = []
     cur_R = 0.0
     cur_V = 0.0
-    pre_score = 0.0
+    pre_score = None
+    first = True
     for start, end, score, is_real in fire_scores:
         # save the counts and thresholds as long as we have counts
-        if score != pre_score and cur_R > 0:
+        if score != pre_score and cur_R > 0 and not first:
             Rs.append(cur_R)
             Vs.append(cur_V)
-            Ts.append(score)
+            Ts.append(pre_score)
+        # don't add zero counts to the fdr data, since they have no coverage.
+        if score == 0.0:
+            break
         # update the counts
         counts = end - start
         if is_real:
@@ -98,6 +104,7 @@ def fdr_from_fire_scores(fire_scores):
             cur_V += counts
         # prepare for next iteration
         pre_score = score
+        first = False
     # set up return values
     Vs = np.array(Vs)
     Rs = np.array(Rs)
@@ -141,7 +148,9 @@ def fire_tracks(fire, outfile):
         null_coverage_array = make_coverage_array(
             fibers.null_fiber_start.values, fibers.null_fiber_end.values, chrom_length
         )
-        expected_median_coverage = np.median(null_coverage_array)
+        expected_median_coverage = np.median(
+            null_coverage_array[null_coverage_array > 0]
+        )
 
         # find offset to use based on the shuffled fiber
         g["offset"] = g.null_fiber_start - g.fiber_start
@@ -210,12 +219,14 @@ def fire_tracks(fire, outfile):
         }
     )
     # simplify the results a little, don't want 100,000s of thresholds
+    results = results[results.threshold > 0.0]
     results = results.groupby("FDR", sort=False).tail(1).reset_index(drop=True)
     results = (
         results.groupby("shuffled_peaks", sort=False).tail(1).reset_index(drop=True)
     )
-    results["threshold"] = results["threshold"].round(2)
-    results = results.groupby("threshold", sort=False).tail(1).reset_index(drop=True)
+    results = results.groupby("peaks", sort=False).tail(1).reset_index(drop=True)
+    # results["threshold"] = results["threshold"].round(1)
+    # results = results.groupby("threshold", sort=False).tail(1).reset_index(drop=True)
     logging.info(f"FDR results\n{results}")
     results.to_csv(outfile, sep="\t", index=False)
 
@@ -313,7 +324,7 @@ def main(
         comment_char="#",
         n_rows=n_rows,
     )
-    logging.info(f"FIRE peaks {fire}")
+    logging.debug(f"FIRE peaks {fire}")
     logging.info(f"Reading genome file: {genome_file}")
     fai = pl.read_csv(
         genome_file,
