@@ -305,7 +305,7 @@ def main(
         infile,
         separator="\t",
         has_header=False,
-        new_columns=FIRE_COLUMNS,
+        # new_columns=FIRE_COLUMNS,
         comment_char="#",
         n_rows=n_rows,
     )
