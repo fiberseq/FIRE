@@ -37,8 +37,8 @@ types_to_col = {"fdr": 4, "acc": 5, "link": 6, "nuc": 7}
 
 
 include: "rules/common.smk"
-include: "rules/train-model.smk"
 include: "rules/apply-model.smk"
+include: "rules/train-model.smk"
 include: "rules/track-hub.smk"
 
 
