@@ -197,9 +197,9 @@ def fire_tracks(fire, outfile, min_coverage=4):
                 min_coverage=min_coverage,
             )
         )
-
+        n_bp_considered = (rle_fire_scores[:, 1] - rle_fire_scores[:, 0]).sum()
         logging.info(
-            f"{chrom}: {rle_fire_scores.shape[0]:,}\t"
+            f"{chrom}: {n_bp_considered:,} of {chrom_length:,}\t"
             f"Max real FIRE score: {rle_fire_scores[:,2].max():,.8}\t"
             f"Max null FIRE score: {rle_null_scores[:,2].max():,.8}\t"
             f"Expected median coverage: {expected_median_coverage}"
