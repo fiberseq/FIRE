@@ -239,8 +239,9 @@ def fire_tracks(fire, outfile):
         results.groupby("shuffled_peaks", sort=False).tail(1).reset_index(drop=True)
     )
     results = results.groupby("peaks", sort=False).tail(1).reset_index(drop=True)
-    # results["threshold"] = results["threshold"].round(1)
-    # results = results.groupby("threshold", sort=False).tail(1).reset_index(drop=True)
+    # limit the number of thresholds that can be in the table
+    results["threshold"] = results["threshold"].round(2)
+    results = results.groupby("threshold", sort=False).tail(1).reset_index(drop=True)
     logging.info(f"FDR results\n{results}")
     results.to_csv(outfile, sep="\t", index=False)
 
