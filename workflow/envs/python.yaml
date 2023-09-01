@@ -9,5 +9,6 @@ dependencies:
   - numpy==1.23.1 # setting exactly due to picky numpy numba compatibility
   - numba
   - pandas>=2.0
-  - polars[pyarrow]>=0.18
+  - polars>=0.18
+  - pyarrow
   - pysam>=0.19
