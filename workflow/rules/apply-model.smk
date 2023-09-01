@@ -315,7 +315,7 @@ rule fire_fdr_table:
         shuffled=rules.filtered_and_shuffled_fiber_locations.output.shuffled,
         fai=ancient(f"{ref}.fai"),
     output:
-        tbl="results/{sm}/FIRE.to.FDR.tbl",
+        tbl="results/{sm}/FDR-peaks/FIRE.score.to.FDR.tbl",
     threads: 8
     conda:
         "../envs/python.yaml"
@@ -331,11 +331,11 @@ rule fire_fdr_table:
 rule fire_tracks:
     input:
         fire=rules.fire_sites.output.bed,
-        fiber_locations=rules.filtered_and_shuffled_fiber_locations.output.bed,
+        fiber_locations=rules.fiber_locations.output.bed,
         fai=ancient(f"{ref}.fai"),
         fdr_tbl=rules.fire_fdr_table.output.tbl,
     output:
-        bed="results/{sm}/FIRE.track.bed.gz",
+        bed="results/{sm}/FDR-peaks/FDR.track.bed.gz",
     threads: 8
     conda:
         "../envs/python.yaml"
