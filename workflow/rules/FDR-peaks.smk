@@ -114,27 +114,8 @@ rule filtered_and_shuffled_fiber_locations:
 
 
 #
-# FIRE sites and tracks
+# FIRE sites and FDR tracks
 #
-rule fire_sites:
-    input:
-        bed=expand(rules.merge_model_results.output.bed, hp="all", allow_missing=True),
-    output:
-        bed="results/{sm}/FIRE.bed.gz",
-    threads: 8
-    conda:
-        conda
-    params:
-        min_fdr=min_fire_fdr,
-    shell:
-        """
-        bgzip -cd -@{threads} {input.bed} \
-            | awk '$10<={params.min_fdr}' \
-            | bgzip -@{threads} \
-            > {output.bed}
-        """
-
-
 rule fire_fdr_table:
     input:
         fire=rules.fire_sites.output.bed,
