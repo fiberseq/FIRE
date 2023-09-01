@@ -305,7 +305,8 @@ def main(
         infile,
         separator="\t",
         has_header=False,
-        new_columns=FIRE_COLUMNS,
+        columns=[0, 1, 2, 3, 9, 10],
+        new_columns=["chrom", "start", "end", "fiber", "fdr", "hap"],
         comment_char="#",
         n_rows=n_rows,
     )
