@@ -190,7 +190,7 @@ rule fdr_and_fire_bw:
         """
         # FDR track
         hck -z -F "#chrom" -F st -F en -F FDR {input.bed} \
-            | awk -v OFS='\t' '{print $1,$2,$3,-10*log($4)/log(10)}' \
+            | awk -v OFS='\t' '{{print $1,$2,$3,-10*log($4)/log(10)}}' \
             > {output.tmp} 
         bedGraphToBigWig {output.tmp} {input.fai} {output.fdr}
 
