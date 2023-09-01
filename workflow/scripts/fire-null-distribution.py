@@ -22,6 +22,14 @@ FIRE_COLUMNS = [
     "fdr",
     "hap",
 ]
+FIBER_COLUMNS = [
+    "chrom",
+    "fiber",
+    "fiber_start",
+    "fiber_end",
+    "null_fiber_start",
+    "null_fiber_end",
+]
 
 
 def rle(inarray):
@@ -49,19 +57,22 @@ def bed_rle(inarray):
 
 @njit
 def fire_scores_per_chrom(
-    starts, ends, q_values, chrom_length, coverage_array, max_add=20
+    starts, ends, q_values, chrom_length, coverage_array, min_allowed_q=0.01
 ):
     fire_scores = np.zeros(chrom_length, dtype=np.float64)
-    q_values_t = -50.0 * np.log10(q_values)
+
+    multi = -50.0  # a multi of -50 and a min_allowed_q of 0.01 gives a max score of 100
+    max_add = multi * np.log10(min_allowed_q)
+    q_values_t = multi * np.log10(q_values)
     for start, end, q in zip(starts, ends, q_values_t):
         if end >= chrom_length:
             continue
         fire_scores[start:end] += min(q, max_add)
-    # correct for regions with high coverage
+
+    # allow division with coverage to always work
     coverage_array[coverage_array == 0] = 1
+    # correct for coverage
     fire_scores = fire_scores / coverage_array
-    # min score, if only one fiber supports a region give it a score of zero
-    fire_scores[fire_scores <= max_add / coverage_array] = 0
     return fire_scores
 
 
@@ -93,38 +104,13 @@ def make_coverage_array(starts, ends, chrom_length):
     return coverage_array
 
 
-def write_bed(chrom, rle_scores, out):
-    df = pd.DataFrame(
-        {
-            "chrom": chrom,
-            "st": rle_scores[:, 0],
-            "en": rle_scores[:, 1],
-            "score": rle_scores[:, 2],
-        }
-    )
-    df.to_csv(out, mode="a", header=False, index=False, sep="\t")
-
-
-def fire_tracks(fire, outfile, build_fdr=False):
+def fire_tracks(fire, outfile):
     null_s = []
     fire_s = []
     for chrom, g in fire.groupby("chrom", maintain_order=True):
         logging.info(f"Processing {chrom}")
         # fibers for this chromosome
-        fibers = (
-            g[
-                [
-                    "chrom",
-                    "fiber",
-                    "fiber_start",
-                    "fiber_end",
-                    "null_fiber_start",
-                    "null_fiber_end",
-                ]
-            ]
-            .unique()
-            .to_pandas()
-        )
+        fibers = g[FIBER_COLUMNS].unique().to_pandas()
         # convert to pandas for easier manipulation
         g = g.to_pandas()
 
@@ -162,7 +148,6 @@ def fire_tracks(fire, outfile, build_fdr=False):
                 null_coverage_array,
             )
         )
-        write_bed(chrom, rle_fire_scores, outfile)
 
         logging.info(
             f"{chrom}: {rle_fire_scores.shape[0]:,}\t"
@@ -179,7 +164,7 @@ def fire_tracks(fire, outfile, build_fdr=False):
     logging.debug(f"rle fire score shape: {fire_scores.shape}")
 
     # Calculate FDR thresholds
-    thresholds = np.arange(5, 25)  # np.quantile(fire_scores, qs)
+    thresholds = np.arange(1, 20)  # np.quantile(fire_scores, qs)
     FDRs, Vs, Rs = fdr_from_fire_scores(fire_scores, null_fire_scores, thresholds)
     results = pd.DataFrame(
         {
@@ -197,7 +182,7 @@ def fire_tracks(fire, outfile, build_fdr=False):
     logging.info(f"FDR results\n{results}")
 
 
-def analysis(fire, fibers, outfile):
+def make_fdr_table(fire, fibers, outfile):
     logging.info("Starting analysis")
     fire = fire.join(fibers, on=["chrom", "fiber"])
     logging.debug(f"Joined fibers\n{fire}")
@@ -205,14 +190,58 @@ def analysis(fire, fibers, outfile):
     return 0
 
 
+def write_bed(chrom, rle_scores, out, first=True):
+    df = pd.DataFrame(
+        {
+            "chrom": chrom,
+            "st": rle_scores[:, 0],
+            "en": rle_scores[:, 1],
+            "score": rle_scores[:, 2],
+        }
+    )
+    if first:
+        mode = "w"
+    else:
+        mode = "a"
+    df.to_csv(out, mode=mode, header=False, index=False, sep="\t")
+
+
+def write_scores(fire, fibers, outfile):
+    fire = fire.join(fibers, on=["chrom", "fiber"])
+    first = True
+    for chrom, g in fire.groupby("chrom", maintain_order=True):
+        logging.info(f"Processing {chrom}")
+        # fibers for this chromosome
+        fibers = g[FIBER_COLUMNS].unique().to_pandas()
+        # convert to pandas for easier manipulation
+        g = g.to_pandas()
+
+        # get coverage for this chromosome and the shuffled fibers
+        chrom_length = g.length[0]
+        coverage_array = make_coverage_array(
+            fibers.fiber_start.values, fibers.fiber_end.values, chrom_length
+        )
+        #
+        rle_fire_scores = bed_rle(
+            fire_scores_per_chrom(
+                g.start.values,
+                g.end.values,
+                g.fdr.values,
+                g.length.max(),
+                coverage_array,
+            )
+        )
+        write_bed(chrom, rle_fire_scores, outfile, first=first)
+        first = False
+
+
 def main(
     infile: Path,
     fiber_locations_file: Path,
-    shuffled_locations_file: Path,
     genome_file: Path,
     outfile: Path,
-    xoutfile: Optional[Path] = None,
     *,
+    shuffled_locations_file: Optional[Path] = None,
     n_rows: Optional[int] = None,
     verbose: int = 0,
 ):
@@ -235,30 +264,7 @@ def main(
     logging.basicConfig(format=log_format)
     logger.setLevel(log_level)
 
-    fai = pl.read_csv(
-        genome_file,
-        separator="\t",
-        has_header=False,
-        columns=[0, 1],
-        new_columns=["chrom", "length"],
-    )
-    fiber_locations = pl.read_csv(
-        fiber_locations_file,
-        separator="\t",
-        has_header=False,
-        columns=[0, 1, 2, 3],
-        new_columns=["chrom", "fiber_start", "fiber_end", "fiber"],
-    )
-    shuffled_locations = pl.read_csv(
-        shuffled_locations_file,
-        separator="\t",
-        has_header=False,
-        columns=[0, 1, 2, 3],
-        new_columns=["chrom", "null_fiber_start", "null_fiber_end", "fiber"],
-    )
-    fibers = fiber_locations.join(shuffled_locations, on=["chrom", "fiber"]).join(
-        fai, on="chrom"
-    )
+    logging.info(f"Reading FIRE file: {infile}")
     fire = pl.read_csv(
         infile,
         separator="\t",
@@ -268,7 +274,38 @@ def main(
         batch_size=100_000,
         n_rows=n_rows,
     )
-    analysis(fire, fibers, outfile)
+    logging.info(f"Reading genome file: {genome_file}")
+    fai = pl.read_csv(
+        genome_file,
+        separator="\t",
+        has_header=False,
+        columns=[0, 1],
+        new_columns=["chrom", "length"],
+    )
+    logging.info(f"Reading fiber locations file: {fiber_locations_file}")
+    fiber_locations = pl.read_csv(
+        fiber_locations_file,
+        separator="\t",
+        has_header=False,
+        columns=[0, 1, 2, 3],
+        new_columns=["chrom", "fiber_start", "fiber_end", "fiber"],
+    ).join(fai, on="chrom")
+
+    if shuffled_locations_file is not None:
+        logging.info(
+            f"Reading shuffled fiber locations file: {shuffled_locations_file}"
+        )
+        shuffled_locations = pl.read_csv(
+            shuffled_locations_file,
+            separator="\t",
+            has_header=False,
+            columns=[0, 1, 2, 3],
+            new_columns=["chrom", "null_fiber_start", "null_fiber_end", "fiber"],
+        )
+        fibers = fiber_locations.join(shuffled_locations, on=["chrom", "fiber"])
+        make_fdr_table(fire, fibers, outfile)
+    else:
+        write_scores(fire, fiber_locations, outfile)
     return 0
 
 

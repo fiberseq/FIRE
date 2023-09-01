@@ -278,7 +278,9 @@ rule index_model_results:
         tabix -p bed {input.bed}
         """
 
-
+#
+# FIRE sites and tracks
+#
 rule fire_sites:
     input:
         bed=expand(rules.merge_model_results.output.bed, hp="all", allow_missing=True),
@@ -301,10 +303,11 @@ rule fire_sites:
 rule fire_tracks:
     input:
         fire=rules.fire_sites.output.bed,
-        fiber_locations=rules.fiber_locations.output.bed,
-        shuffled=rules.fiber_locations.output.shuffled,
+        fiber_locations=rules.filtered_and_shuffled_fiber_locations.output.bed,
+        shuffled=rules.filtered_and_shuffled_fiber_locations.output.shuffled,
+        fai=ancient(f"{ref}.fai"),
     output:
-        bed="results/{sm}/FIRE.track.bed.gz",
+        tbl="results/{sm}/FIRE.to.FDR.tbl",
     threads: 8
     conda:
         conda
@@ -315,5 +318,7 @@ rule fire_tracks:
         python {params.script} -v 1 \
             {input.fire} \
             {input.fiber_locations} \
-            {input.shuffled} \
+            {input.fai} \
+            -s {input.shuffled} \
+            {output.tbl}
         """
