@@ -51,9 +51,6 @@ rule fiber_locations_chromosome:
             | bedtools bamtobed -i - \
             | bgzip -@ {threads} \
         > {output.bed}
-
-        # get bedgraph
-        bedtools genomecov -bg -i {output.bed} -g {input.fai} | bgzip -@ {threads} > {output.bg}
         """
 
 
