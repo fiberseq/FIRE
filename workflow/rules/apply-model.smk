@@ -91,7 +91,7 @@ rule filtered_and_shuffled_fiber_locations_chromosome:
     shell:
         """
         # check if file is empty
-        if [ -n "$(gunzip <{input.bed} | head -c 1 | tr '\0\n' __)" ]; then
+        if [ -n "$(gunzip <{input.bed} | head -c 1 | tr '\\0\\n' __)" ]; then
             echo "input is not empty"
         else
             echo "input is empty"
