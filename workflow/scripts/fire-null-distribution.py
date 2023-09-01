@@ -8,6 +8,7 @@ import pandas as pd
 import polars as pl
 import numpy as np
 from numba import njit
+import math
 
 FIRE_COLUMNS = [
     "chrom",
@@ -69,11 +70,12 @@ def fire_scores_per_chrom(
             continue
         fire_scores[start:end] += min(q, max_add)
 
-    # allow division with coverage to always work
-    to_drop = coverage_array == 0
-    coverage_array[coverage_array == 0] = 1
     # correct for coverage
     fire_scores = fire_scores / coverage_array
+    # correct divide by zeros
+    fire_scores[np.isnan(fire_scores)] = 0.0
+    # drop the scores that have no coverage
+    to_drop = coverage_array == 0
     fire_scores[to_drop] = -1.0
     return fire_scores
 
@@ -115,11 +117,17 @@ def fdr_from_fire_scores(fire_scores):
 
 
 @njit
-def get_coverage_array(starts, ends, coverages, chrom_length):
-    coverage_array = np.zeros(chrom_length, dtype=np.float64)
-    for start, end, cov in zip(starts, ends, coverages):
-        coverage_array[start:end] = cov
-    return coverage_array
+def get_coverage_from_array(starts, ends, coverage_array, median=True):
+    out_coverage = np.zeros(starts.shape[0], dtype=np.float64)
+    idx = 0
+    for start, end in zip(starts, ends):
+        if median:
+            stat = np.median(coverage_array[start:end])
+        else:
+            stat = np.mean(coverage_array[start:end])
+        out_coverage[idx] = stat
+        idx += 1
+    return out_coverage
 
 
 @njit
@@ -245,29 +253,41 @@ def make_fdr_table(fire, fibers, outfile):
     return 0
 
 
-def write_bed(chrom, rle_scores, out, first=True):
+def find_nearest(array, value):
+    idx = np.searchsorted(array, value, side="left")
+    idx[idx < 0] = 0
+    idx[idx >= len(array)] = len(array) - 1
+    return idx
+
+
+def write_bed(chrom, rle_scores, FDRs, coverage, fire_coverage, out, first=True):
     df = pd.DataFrame(
         {
-            "chrom": chrom,
+            "#chrom": chrom,
             "st": rle_scores[:, 0],
             "en": rle_scores[:, 1],
             "score": rle_scores[:, 2],
+            "FDR": FDRs,
+            "coverage": coverage,
+            "fire_coverage": fire_coverage,
         }
     )
     if first:
+        header = True
         mode = "w"
     else:
+        header = False
         mode = "a"
-    df.to_csv(out, mode=mode, header=False, index=False, sep="\t")
+    df.to_csv(out, mode=mode, header=header, index=False, sep="\t")
 
 
-def write_scores(fire, fibers, outfile):
+def write_scores(fire, fibers, fdr_table, outfile):
     fire = fire.join(fibers, on=["chrom", "fiber"])
     first = True
     for chrom, g in fire.groupby("chrom", maintain_order=True):
         logging.info(f"Processing {chrom}")
         # fibers for this chromosome
-        fibers = g[FIBER_COLUMNS].unique().to_pandas()
+        fibers = g[["chrom", "fiber", "fiber_start", "fiber_end"]].unique().to_pandas()
         # convert to pandas for easier manipulation
         g = g.to_pandas()
 
@@ -286,7 +306,26 @@ def write_scores(fire, fibers, outfile):
                 coverage_array,
             )
         )
-        write_bed(chrom, rle_fire_scores, outfile, first=first)
+
+        # find the FDRs for the thresholds
+        fdr_idx = find_nearest(fdr_table.threshold.values, rle_fire_scores[:, 2])
+        FDRs = fdr_table.FDR.values[fdr_idx]
+
+        # find coverages
+        coverage = get_coverage_from_array(
+            rle_fire_scores[:, 0], rle_fire_scores[:, 1], coverage_array
+        )
+        fire_coverage_array = make_coverage_array(
+            g.start.values, g.end.values, chrom_length
+        )
+        fire_coverage = get_coverage_from_array(
+            rle_fire_scores[:, 0], rle_fire_scores[:, 1], fire_coverage_array
+        )
+
+        # write data
+        write_bed(
+            chrom, rle_fire_scores, FDRs, coverage, fire_coverage, outfile, first=first
+        )
         first = False
 
 
@@ -362,8 +401,12 @@ def main(
         fibers = fiber_locations.join(shuffled_locations, on=["chrom", "fiber"])
         make_fdr_table(fire, fibers, outfile)
     else:
-        fdr_table = pl.read_csv(fdr_table_file, sep="\t")
-        write_scores(fire, fiber_locations, outfile)
+        fdr_table = (
+            pl.read_csv(fdr_table_file, separator="\t")
+            .to_pandas()
+            .sort_values("threshold")
+        )
+        write_scores(fire, fiber_locations, fdr_table, outfile)
     return 0
 
 
