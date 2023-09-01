@@ -69,7 +69,6 @@ localrules:
     model_bam,
     trackhub,
     coverage_tracks,
-    fire_tracks,
     average_coverage,
     clustering_vs_null,
     percent_in_clusters,
