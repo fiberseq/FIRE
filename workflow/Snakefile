@@ -80,6 +80,9 @@ localrules:
 
 rule all:
     input:
+        # coverage information
+        expand(rules.genome_bedgraph.output, sm=data.index),
+        expand(rules.average_coverage.output, sm=data.index),
         # model results
         expand(rules.merge_model_results.output, sm=data.index, hp=haps),
         expand(rules.index_model_results.output, sm=data.index, hp=haps),
@@ -105,5 +108,4 @@ rule all:
         expand(rules.hap_differences_track.output.bb, sm=data.index),
         expand(rules.fire_with_coverage.output, sm=data.index),
         expand(rules.peaks_vs_percent.output, sm=data.index),
-        expand(rules.average_coverage.output, sm=data.index),
         expand(rules.percent_accessible.output.bw, sm=data.index, hp=not_unk),
