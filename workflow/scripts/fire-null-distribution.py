@@ -309,6 +309,7 @@ def main(
         comment_char="#",
         n_rows=n_rows,
     )
+    logging.info(f"FIRE peaks {fire}")
     logging.info(f"Reading genome file: {genome_file}")
     fai = pl.read_csv(
         genome_file,
