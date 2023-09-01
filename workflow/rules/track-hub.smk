@@ -189,7 +189,7 @@ rule fdr_and_fire_bw:
     shell:
         """
         # FDR track
-        hck -z -F "#chrom" -F st -F en -F FDR {input.bed} > {output.tmp} 
+        hck -z -F "#chrom" -F st -F en -F log_FDR {input.bed} > {output.tmp} 
         bedGraphToBigWig {output.tmp} {input.fai} {output.fdr}
 
         # score track
