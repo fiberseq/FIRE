@@ -80,7 +80,15 @@ localrules:
 
 rule all:
     input:
-        expand("results/{sm}/{hp}/acc.model.results.bed.gz", sm=data.index, hp=haps),
+        # model results
+        expand(rules.merge_model_results.output, sm=data.index, hp=haps),
+        expand(rules.index_model_results.output, sm=data.index, hp=haps),
+        # Fiber locations
+        expand(rules.fiber_locations.output, sm=data.index),
+        expand(rules.filtered_and_shuffled_fiber_locations.output, sm=data.index),
+        # FDR results
+        expand(rules.fdr_track.output, sm=data.index),
+        # misc
         expand("results/{sm}/trackHub/hub.txt", sm=data.index),
         expand(
             "results/{sm}/{hp}/fire.peaks.and.coverages.bed.gz", sm=data.index, hp=haps
@@ -91,9 +99,6 @@ rule all:
             bin=bins,
             hp=not_all,
         ),
-        expand(rules.fiber_locations.output, sm=data.index),
-        expand(rules.filtered_and_shuffled_fiber_locations.output, sm=data.index),
-        expand(rules.fire_tracks.output, sm=data.index),
         expand(rules.clustering_vs_null.output.bed, sm=data.index),
         expand(rules.percent_in_clusters.output, sm=data.index),
         expand(rules.hap_differences.output, sm=data.index),

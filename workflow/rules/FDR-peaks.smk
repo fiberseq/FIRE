@@ -116,7 +116,7 @@ rule filtered_and_shuffled_fiber_locations:
 #
 # FIRE sites and FDR tracks
 #
-rule fire_fdr_table:
+rule fdr_table:
     input:
         fire=rules.fire_sites.output.bed,
         fiber_locations=rules.filtered_and_shuffled_fiber_locations.output.bed,
@@ -137,12 +137,12 @@ rule fire_fdr_table:
         """
 
 
-rule fire_tracks:
+rule fdr_track:
     input:
         fire=rules.fire_sites.output.bed,
         fiber_locations=rules.fiber_locations.output.bed,
         fai=ancient(f"{ref}.fai"),
-        fdr_tbl=rules.fire_fdr_table.output.tbl,
+        fdr_tbl=rules.fdr_table.output.tbl,
     output:
         bed="results/{sm}/FDR-peaks/FDR.track.bed.gz",
     threads: 8
