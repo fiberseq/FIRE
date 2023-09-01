@@ -307,7 +307,6 @@ def main(
         has_header=False,
         new_columns=FIRE_COLUMNS,
         comment_char="#",
-        batch_size=100_000,
         n_rows=n_rows,
     )
     logging.info(f"Reading genome file: {genome_file}")
