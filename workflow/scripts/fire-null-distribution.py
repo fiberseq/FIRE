@@ -269,13 +269,17 @@ def find_nearest(array, value):
 
 
 def write_bed(chrom, rle_scores, FDRs, coverage, fire_coverage, out, first=True):
+    tmp_FDR = FDRs.copy()
+    tmp_FDR[tmp_FDR <= 0] = tmp_FDR[tmp_FDR > 0].min()
+    log_FDRs = -10 * np.log10(tmp_FDR)
     df = pd.DataFrame(
         {
             "#chrom": chrom,
-            "st": rle_scores[:, 0],
-            "en": rle_scores[:, 1],
+            "st": rle_scores[:, 0].astype(int),
+            "en": rle_scores[:, 1].astype(int),
             "score": rle_scores[:, 2],
             "FDR": FDRs,
+            "log_FDR": log_FDRs,
             "coverage": coverage,
             "fire_coverage": fire_coverage,
         }

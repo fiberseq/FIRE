@@ -189,9 +189,7 @@ rule fdr_and_fire_bw:
     shell:
         """
         # FDR track
-        hck -z -F "#chrom" -F st -F en -F FDR {input.bed} \
-            | awk -v OFS='\t' '{{print $1,$2,$3,-10*log($4)/log(10)}}' \
-            > {output.tmp} 
+        hck -z -F "#chrom" -F st -F en -F FDR {input.bed} > {output.tmp} 
         bedGraphToBigWig {output.tmp} {input.fai} {output.fdr}
 
         # score track
