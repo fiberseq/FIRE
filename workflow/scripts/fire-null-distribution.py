@@ -280,6 +280,7 @@ def write_bed(output_dict, out, first=True):
     else:
         header = False
         mode = "a"
+    logging.info(f"Now writing: {out}")
     df.to_csv(out, mode=mode, header=header, index=False, sep="\t")
 
 
