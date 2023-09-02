@@ -329,7 +329,6 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
                     "score",
                     "FDR",
                     "log_FDR",
-                    "is_local_max",
                 ]:
                     return_data[f"{x}{tag}"] = -1
                 continue
@@ -381,10 +380,11 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
         return_data[f"log_FDR{tag}"] = log_FDRs
 
         # find local maxima
-        local_max = argrelextrema(cur_scores, np.greater)
-        is_local_max = np.zeros(FDRs.shape[0], dtype=int)
-        is_local_max[local_max] = True
-        return_data[f"is_local_max{tag}"] = is_local_max
+        if hap == "":
+            local_max = argrelextrema(cur_scores, np.greater)
+            is_local_max = np.zeros(FDRs.shape[0], dtype=int)
+            is_local_max[local_max] = True
+            return_data[f"is_local_max{tag}"] = is_local_max
 
     logging.info(f"Finished making data, starting to write")
     return return_data
