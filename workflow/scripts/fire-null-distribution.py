@@ -128,12 +128,12 @@ def get_coverage_from_array(starts, ends, coverage_array, stat="median"):
     idx = 0
     for start, end in zip(starts, ends):
         if stat == "median":
-            stat = np.median(coverage_array[start:end])
+            val = np.median(coverage_array[start:end])
         elif stat == "max":
-            stat = np.max(coverage_array[start:end])
+            val = np.max(coverage_array[start:end])
         else:
-            stat = np.mean(coverage_array[start:end])
-        out_coverage[idx] = stat
+            val = np.mean(coverage_array[start:end])
+        out_coverage[idx] = val
         idx += 1
     return out_coverage
 
