@@ -309,8 +309,8 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
         rle_fire_scores[:, 1],
     )
     return_data["#chrom"] = fire.chrom[0]
-    return_data["starts"] = starts.astype(int)
-    return_data["ends"] = ends.astype(int)
+    return_data["start"] = starts.astype(int)
+    return_data["end"] = ends.astype(int)
 
     # get fire info per haplotype
     for hap in [""] + HAPS:
