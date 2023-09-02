@@ -6,14 +6,16 @@ rule fiber_locations_chromosome:
         bam=lambda wc: data.loc[wc.sm, "bam"],
     output:
         bed=temp("temp/{sm}/coverage/{chrom}.fiber-locations.bed.gz"),
-    threads: 4
+    threads: 8
     conda:
         conda
     shell:
         """
         # get fiber locations
         samtools view -@ {threads} -F 2308 -u {input.bam} {wildcards.chrom} \
-            | bedtools bamtobed -i - \
+            | ft extract -t {threads} -s \
+            | hck -F '#ct' -F st -F en -F fiber -F strand -F HP \
+            | grep -v '^#' \
             | bgzip -@ {threads} \
         > {output.bed}
         """

@@ -8,7 +8,7 @@ import pandas as pd
 import polars as pl
 import numpy as np
 from numba import njit
-import math
+from scipy.signal import argrelextrema
 
 FIRE_COLUMNS = [
     "chrom",
@@ -269,9 +269,15 @@ def find_nearest(array, value):
 
 
 def write_bed(chrom, rle_scores, FDRs, coverage, fire_coverage, out, first=True):
+    # log the FDRs
     tmp_FDR = FDRs.copy()
     tmp_FDR[tmp_FDR <= 0] = tmp_FDR[tmp_FDR > 0].min()
     log_FDRs = -10 * np.log10(tmp_FDR)
+    # find local maxima
+    local_max = argrelextrema(rle_scores[:, 2], np.greater)
+    is_local_max = np.zeros(FDRs.shape[0], dtype=int)
+    is_local_max[local_max] = True
+    # make df
     df = pd.DataFrame(
         {
             "#chrom": chrom,
@@ -282,6 +288,7 @@ def write_bed(chrom, rle_scores, FDRs, coverage, fire_coverage, out, first=True)
             "log_FDR": log_FDRs,
             "coverage": coverage,
             "fire_coverage": fire_coverage,
+            "is_local_max": is_local_max,
         }
     )
     if first:

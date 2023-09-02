@@ -8,6 +8,7 @@ dependencies:
   - defopt
   - numpy==1.23.1 # setting exactly due to picky numpy numba compatibility
   - numba
+  - scipy
   - pandas>=2.0
   - polars>=0.18
   - pyarrow
