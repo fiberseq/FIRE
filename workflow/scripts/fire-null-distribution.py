@@ -273,7 +273,7 @@ def find_nearest(array, value):
 
 def write_bed(output_dict, out, first=True):
     # make df
-    df = pd.DataFrame(output_dict)
+    df = pl.DataFrame(output_dict).to_pandas()
     if first:
         header = True
         mode = "w"
