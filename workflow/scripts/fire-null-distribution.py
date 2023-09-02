@@ -271,7 +271,8 @@ def find_nearest(array, value):
     return idx
 
 
-def write_bed(output_dict, out, first=True):
+def write_bed(chrom, output_dict, out, first=True):
+    chrom_length = output_dict["coverage"].shape[0]
     # make df
     if first:
         header = True
@@ -280,37 +281,30 @@ def write_bed(output_dict, out, first=True):
         header = False
         mode = "a"
     df = pl.DataFrame(output_dict).to_pandas()
-    logging.info(f"Now writing: {out}")
+    original_columns = df.columns.tolist()
+    logging.info(f"Data frame made, now converting to bed format")
+    # rows that are different from previous row
+    diff = (df != df.shift()).any(axis=1)
+    # groupings based on the rows that are different
+    df["group"] = diff.cumsum() - 1
+    cols_that_count_for_dup = df.columns.tolist()
+    df["end"] = df.index + 1
+    df.drop_duplicates(subset=cols_that_count_for_dup, keep="last", inplace=True)
+    # start are the previous ends
+    df["start"] = [0] + df["end"][0:-1].tolist()
+    df["#chrom"] = chrom
+    df = df[["#chrom", "start", "end"] + original_columns]
+    final_end = df.end.max()
+    assert final_end == chrom_length, f"{final_end} != {chrom_length}"
+    logging.info(f"Writing {chrom}")
     df.to_csv(out, mode=mode, header=header, index=False, sep="\t")
-    # df.write_csv(out, mode=mode, has_header=header, separator="\t")
+    logging.info(f"Done writing {chrom}")
 
 
 def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
     return_data = {}
     # get the inital data
     chrom_length = fire.length[0]
-    # get coverage for this chromosome and the shuffled fibers
-    coverage_array = make_coverage_array(
-        fibers.fiber_start.values, fibers.fiber_end.values, chrom_length
-    )
-    # get the FIRE scores in bed format
-    fire_scores = fire_scores_per_chrom(
-        fire.start.values,
-        fire.end.values,
-        fire.fdr.values,
-        fire.length.max(),
-        coverage_array,
-        min_coverage=min_coverage,
-    )
-    rle_fire_scores = bed_rle(fire_scores)
-    # ranges to make calculations on
-    starts, ends = (
-        rle_fire_scores[:, 0],
-        rle_fire_scores[:, 1],
-    )
-    return_data["#chrom"] = fire.chrom[0]
-    return_data["start"] = starts.astype(int)
-    return_data["end"] = ends.astype(int)
 
     # get fire info per haplotype
     for hap in [""] + HAPS:
@@ -319,13 +313,12 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
             tag = ""
             cur_fire = fire
             cur_fibers = fibers
-            cur_rle_fire_scores = rle_fire_scores
-            cur_coverage_array = coverage_array
-            cur_fire_scores = fire_scores
         else:
             logging.info(f"Processing {hap}")
             tag = f"_{hap}"
+            cur_fibers = fibers[fibers.hap == hap]
             cur_fire = fire[fire.hap == hap]
+            # if no data in the hap write empty values
             if cur_fire.shape[0] == 0:
                 for x in [
                     "fire_coverage",
@@ -336,43 +329,33 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
                 ]:
                     return_data[f"{x}{tag}"] = -1
                 continue
-            cur_fibers = fibers[fibers.hap == hap]
-            cur_coverage_array = make_coverage_array(
-                cur_fibers.fiber_start.values, cur_fibers.fiber_end.values, chrom_length
-            )
-            # get the FIRE scores in bed format
-            cur_fire_scores = fire_scores_per_chrom(
-                cur_fire.start.values,
-                cur_fire.end.values,
-                cur_fire.fdr.values,
-                cur_fire.length.max(),
-                cur_coverage_array,
-                min_coverage=min_coverage,
-            )
-            cur_rle_fire_scores = bed_rle(cur_fire_scores)
-        #
-        # calculate a bunch of different stats per haplotype
-        #
+
+        cur_coverage_array = make_coverage_array(
+            cur_fibers.fiber_start.values, cur_fibers.fiber_end.values, chrom_length
+        )
+        # get the FIRE scores in bed format
+        cur_fire_scores = fire_scores_per_chrom(
+            cur_fire.start.values,
+            cur_fire.end.values,
+            cur_fire.fdr.values,
+            cur_fire.length.max(),
+            cur_coverage_array,
+            min_coverage=min_coverage,
+        )
         # fire coverage
-        fire_coverage = get_coverage_from_array(
-            starts,
-            ends,
-            make_coverage_array(
-                cur_fire.start.values, cur_fire.end.values, chrom_length
-            ),
+        fire_coverage = make_coverage_array(
+            cur_fire.start.values, cur_fire.end.values, chrom_length
         )
         return_data[f"fire_coverage{tag}"] = fire_coverage
 
         # total coverage
-        coverage = get_coverage_from_array(starts, ends, cur_coverage_array)
-        return_data[f"coverage{tag}"] = coverage
+        return_data[f"coverage{tag}"] = cur_coverage_array
 
         # save the scores
-        cur_scores = get_coverage_from_array(starts, ends, cur_fire_scores, stat="max")
-        return_data[f"score{tag}"] = cur_scores
+        return_data[f"score{tag}"] = cur_fire_scores
 
         # find the FDRs for the thresholds
-        fdr_idx = find_nearest(fdr_table.threshold.values, cur_scores)
+        fdr_idx = find_nearest(fdr_table.threshold.values, cur_fire_scores)
         FDRs = fdr_table.FDR.values[fdr_idx]
         return_data[f"FDR{tag}"] = FDRs
 
@@ -383,7 +366,7 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
         return_data[f"log_FDR{tag}"] = log_FDRs
 
         # find local maxima
-        if hap == "":
+        if False:
             local_max = argrelextrema(cur_scores, np.greater)
             is_local_max = np.zeros(FDRs.shape[0], dtype=int)
             is_local_max[local_max] = True
@@ -392,10 +375,8 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
     for key, data in return_data.items():
         if isinstance(data, np.ndarray):
             assert (
-                data.shape[0] == starts.shape[0]
-            ), f"{key} is not the expected size: {data.shape} instead of {starts.shape}."
-
-    logging.info(f"Finished making data, starting to write")
+                data.shape[0] == chrom_length
+            ), f"{key} is not the expected size: {data.shape} instead of {chrom_length.shape}."
     return return_data
 
 
@@ -419,7 +400,7 @@ def write_scores(fire, fibers, fdr_table, outfile, min_coverage=4):
         )
 
         # write data
-        write_bed(output_dict, outfile, first=first)
+        write_bed(chrom, output_dict, outfile, first=first)
         first = False
 
 
