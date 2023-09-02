@@ -123,12 +123,14 @@ def fdr_from_fire_scores(fire_scores):
 
 
 @njit
-def get_coverage_from_array(starts, ends, coverage_array, median=True):
+def get_coverage_from_array(starts, ends, coverage_array, stat="median"):
     out_coverage = np.zeros(starts.shape[0], dtype=np.float64)
     idx = 0
     for start, end in zip(starts, ends):
-        if median:
+        if stat == "median":
             stat = np.median(coverage_array[start:end])
+        elif stat == "max":
+            stat = np.max(coverage_array[start:end])
         else:
             stat = np.mean(coverage_array[start:end])
         out_coverage[idx] = stat
@@ -290,16 +292,15 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
         fibers.fiber_start.values, fibers.fiber_end.values, chrom_length
     )
     # get the FIRE scores in bed format
-    rle_fire_scores = bed_rle(
-        fire_scores_per_chrom(
-            fire.start.values,
-            fire.end.values,
-            fire.fdr.values,
-            fire.length.max(),
-            coverage_array,
-            min_coverage=min_coverage,
-        )
+    fire_scores = fire_scores_per_chrom(
+        fire.start.values,
+        fire.end.values,
+        fire.fdr.values,
+        fire.length.max(),
+        coverage_array,
+        min_coverage=min_coverage,
     )
+    rle_fire_scores = bed_rle(fire_scores)
     # ranges to make calculations on
     starts, ends = (
         rle_fire_scores[:, 0],
@@ -318,6 +319,7 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
             cur_fibers = fibers
             cur_rle_fire_scores = rle_fire_scores
             cur_coverage_array = coverage_array
+            cur_fire_scores = fire_scores
         else:
             logging.info(f"Processing {hap}")
             tag = f"_{hap}"
@@ -337,16 +339,15 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
                 cur_fibers.fiber_start.values, cur_fibers.fiber_end.values, chrom_length
             )
             # get the FIRE scores in bed format
-            cur_rle_fire_scores = bed_rle(
-                fire_scores_per_chrom(
-                    cur_fire.start.values,
-                    cur_fire.end.values,
-                    cur_fire.fdr.values,
-                    cur_fire.length.max(),
-                    cur_coverage_array,
-                    min_coverage=min_coverage,
-                )
+            cur_fire_scores = fire_scores_per_chrom(
+                cur_fire.start.values,
+                cur_fire.end.values,
+                cur_fire.fdr.values,
+                cur_fire.length.max(),
+                cur_coverage_array,
+                min_coverage=min_coverage,
             )
+            cur_rle_fire_scores = bed_rle(cur_fire_scores)
         #
         # calculate a bunch of different stats per haplotype
         #
@@ -365,7 +366,7 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
         return_data[f"coverage{tag}"] = coverage
 
         # save the scores
-        cur_scores = cur_rle_fire_scores[:, 2]
+        cur_scores = get_coverage_from_array(starts, ends, cur_fire_scores, stat="max")
         return_data[f"score{tag}"] = cur_scores
 
         # find the FDRs for the thresholds
@@ -391,8 +392,6 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
             assert (
                 data.shape[0] == starts.shape[0]
             ), f"{key} is not the expected size: {data.shape} instead of {starts.shape}."
-        else:
-            logging.info(f"small data: {key}: {data}")
 
     logging.info(f"Finished making data, starting to write")
     return return_data
