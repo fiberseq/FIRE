@@ -273,15 +273,16 @@ def find_nearest(array, value):
 
 def write_bed(output_dict, out, first=True):
     # make df
-    df = pl.DataFrame(output_dict).to_pandas()
     if first:
         header = True
         mode = "w"
     else:
         header = False
         mode = "a"
+    df = pl.DataFrame(output_dict).to_pandas()
     logging.info(f"Now writing: {out}")
     df.to_csv(out, mode=mode, header=header, index=False, sep="\t")
+    # df.write_csv(out, mode=mode, has_header=header, separator="\t")
 
 
 def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
