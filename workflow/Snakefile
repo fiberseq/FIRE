@@ -39,6 +39,8 @@ print(data.index)
 types = ["fdr", "acc", "link", "nuc"]
 types_to_col = {"fdr": 4, "acc": 5, "link": 6, "nuc": 7}
 
+bw_types = ["score", "FDR", "log_FDR"]
+bw_types = bw_types + [f"{t}_H1" for t in bw_types] + [f"{t}_H2" for t in bw_types]
 
 include: "rules/common.smk"
 include: "rules/apply-model.smk"
@@ -58,6 +60,7 @@ wildcard_constraints:
     types="|".join(types),
     fdr="\d+",
     hp="|".join(haps),
+    col="|".join(bw_types),
 
 
 localrules:
@@ -91,7 +94,7 @@ rule all:
         # FDR results
         expand(rules.fdr_track.output, sm=data.index),
         # trackhub
-        expand(rules.fdr_and_fire_bw.output.fdr, sm=data.index),
+        expand(rules.fdr_table_to_bw.output.fdr, sm=data.index, col=bw_types),
         # misc
         expand("results/{sm}/trackHub/hub.txt", sm=data.index),
         expand(
