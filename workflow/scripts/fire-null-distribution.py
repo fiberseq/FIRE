@@ -281,10 +281,19 @@ def write_bed(chrom, output_dict, out, first=True):
     else:
         header = False
         mode = "a"
-    df = pl.DataFrame(output_dict).to_pandas()
-    original_columns = df.columns.tolist()
+    df = pl.DataFrame(output_dict).lazy()
+    original_columns = df.get_columns()
+    df = (
+        df.group_by(original_columns, maintain_order=True)
+        .agg(pl.col("coverage").length())
+        .collect()
+    )
+    logging.debug(f"\n{df}")
     del output_dict
     gc.collect()
+    return
+    df = pl.DataFrame(output_dict).to_pandas()
+    original_columns = df.columns.tolist()
     logging.info(f"Data frame made, now converting to bed format")
     # rows that are different from previous row
     diff = (df != df.shift()).any(axis=1)
