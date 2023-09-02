@@ -386,6 +386,14 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
             is_local_max[local_max] = True
             return_data[f"is_local_max{tag}"] = is_local_max
 
+    for key, data in return_data.items():
+        if isinstance(data, np.ndarray):
+            assert (
+                data.shape[0] == starts.shape[0]
+            ), f"{key} is not the expected size: {data.shape} instead of {starts.shape}."
+        else:
+            logging.info(f"small data: {key}: {data}")
+
     logging.info(f"Finished making data, starting to write")
     return return_data
 
