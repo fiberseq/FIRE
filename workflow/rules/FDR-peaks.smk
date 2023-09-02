@@ -13,7 +13,7 @@ rule fiber_locations_chromosome:
         """
         # get fiber locations
         samtools view -@ {threads} -F 2308 -u {input.bam} {wildcards.chrom} \
-            | ft extract -t {threads} -s \
+            | ft extract -t {threads} -s --all - \
             | hck -F '#ct' -F st -F en -F fiber -F strand -F HP \
             | grep -v '^#' \
             | bgzip -@ {threads} \
