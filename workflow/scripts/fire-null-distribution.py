@@ -31,6 +31,7 @@ FIBER_COLUMNS = [
     "null_fiber_start",
     "null_fiber_end",
 ]
+HAPS = ["H1", "H2"]
 
 
 def rle(inarray):
@@ -255,7 +256,7 @@ def fire_tracks(fire, outfile, min_coverage=4):
 
 def make_fdr_table(fire, fibers, outfile, min_coverage=4):
     logging.info("Starting analysis")
-    fire = fire.join(fibers, on=["chrom", "fiber"])
+    fire = fire.join(fibers, on=["chrom", "fiber", "hap"])
     logging.debug(f"Joined fibers\n{fire}")
     fire_tracks(fire, outfile, min_coverage=min_coverage)
     return 0
@@ -268,29 +269,9 @@ def find_nearest(array, value):
     return idx
 
 
-def write_bed(chrom, rle_scores, FDRs, coverage, fire_coverage, out, first=True):
-    # log the FDRs
-    tmp_FDR = FDRs.copy()
-    tmp_FDR[tmp_FDR <= 0] = tmp_FDR[tmp_FDR > 0].min()
-    log_FDRs = -10 * np.log10(tmp_FDR)
-    # find local maxima
-    local_max = argrelextrema(rle_scores[:, 2], np.greater)
-    is_local_max = np.zeros(FDRs.shape[0], dtype=int)
-    is_local_max[local_max] = True
+def write_bed(output_dict, out, first=True):
     # make df
-    df = pd.DataFrame(
-        {
-            "#chrom": chrom,
-            "st": rle_scores[:, 0].astype(int),
-            "en": rle_scores[:, 1].astype(int),
-            "score": rle_scores[:, 2],
-            "FDR": FDRs,
-            "log_FDR": log_FDRs,
-            "coverage": coverage,
-            "fire_coverage": fire_coverage,
-            "is_local_max": is_local_max,
-        }
-    )
+    df = pd.DataFrame(output_dict)
     if first:
         header = True
         mode = "w"
@@ -300,52 +281,136 @@ def write_bed(chrom, rle_scores, FDRs, coverage, fire_coverage, out, first=True)
     df.to_csv(out, mode=mode, header=header, index=False, sep="\t")
 
 
+def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
+    return_data = {}
+    # get the inital data
+    chrom_length = fire.length[0]
+    # get coverage for this chromosome and the shuffled fibers
+    coverage_array = make_coverage_array(
+        fibers.fiber_start.values, fibers.fiber_end.values, chrom_length
+    )
+    # get the FIRE scores in bed format
+    rle_fire_scores = bed_rle(
+        fire_scores_per_chrom(
+            fire.start.values,
+            fire.end.values,
+            fire.fdr.values,
+            fire.length.max(),
+            coverage_array,
+            min_coverage=min_coverage,
+        )
+    )
+    # ranges to make calculations on
+    starts, ends = (
+        rle_fire_scores[:, 0],
+        rle_fire_scores[:, 1],
+    )
+    return_data["#chrom"] = fire.chrom[0]
+    return_data["starts"] = starts
+    return_data["ends"] = ends
+
+    # get fire info per haplotype
+    for hap in [""] + HAPS:
+        # select data we are working with
+        if hap == "":
+            tag = ""
+            cur_fire = fire
+            cur_fibers = fibers
+            cur_rle_fire_scores = rle_fire_scores
+            cur_coverage_array = coverage_array
+        else:
+            logging.info(f"Processing {hap}")
+            tag = f"_{hap}"
+            cur_fire = fire[fire.hap == hap]
+            if cur_fire.shape[0] == 0:
+                for x in [
+                    "fire_coverage",
+                    "coverage",
+                    "score",
+                    "FDR",
+                    "log_FDR",
+                    "is_local_max",
+                ]:
+                    return_data[f"{x}{tag}"] = -1
+                continue
+            cur_fibers = fibers[fibers.hap == hap]
+            cur_coverage_array = make_coverage_array(
+                cur_fibers.fiber_start.values, cur_fibers.fiber_end.values, chrom_length
+            )
+            # get the FIRE scores in bed format
+            cur_rle_fire_scores = bed_rle(
+                fire_scores_per_chrom(
+                    cur_fire.start.values,
+                    cur_fire.end.values,
+                    cur_fire.fdr.values,
+                    cur_fire.length.max(),
+                    cur_coverage_array,
+                    min_coverage=min_coverage,
+                )
+            )
+        #
+        # calculate a bunch of different stats per haplotype
+        #
+        # fire coverage
+        fire_coverage = get_coverage_from_array(
+            starts,
+            ends,
+            make_coverage_array(
+                cur_fire.start.values, cur_fire.end.values, chrom_length
+            ),
+        )
+        return_data[f"fire_coverage{tag}"] = fire_coverage
+
+        # total coverage
+        coverage = get_coverage_from_array(starts, ends, cur_coverage_array)
+        return_data[f"coverage{tag}"] = coverage
+
+        # save the scores
+        cur_scores = cur_rle_fire_scores[:, 2]
+        return_data[f"score{tag}"] = cur_scores
+
+        # find the FDRs for the thresholds
+        fdr_idx = find_nearest(fdr_table.threshold.values, cur_scores)
+        FDRs = fdr_table.FDR.values[fdr_idx]
+        return_data[f"FDR{tag}"] = FDRs
+
+        # log the FDRs
+        tmp_FDR = FDRs.copy()
+        tmp_FDR[tmp_FDR <= 0] = tmp_FDR[tmp_FDR > 0].min()
+        log_FDRs = -10 * np.log10(tmp_FDR)
+        return_data[f"log_FDR{tag}"] = log_FDRs
+
+        # find local maxima
+        local_max = argrelextrema(cur_scores, np.greater)
+        is_local_max = np.zeros(FDRs.shape[0], dtype=int)
+        is_local_max[local_max] = True
+        return_data[f"is_local_max{tag}"] = is_local_max
+
+    logging.info(f"Finished making data, starting to write")
+    return return_data
+
+
 def write_scores(fire, fibers, fdr_table, outfile, min_coverage=4):
-    fire = fire.join(fibers, on=["chrom", "fiber"])
+    fire = fire.join(fibers, on=["chrom", "fiber", "hap"])
     first = True
     for chrom, g in fire.groupby("chrom", maintain_order=True):
         logging.info(f"Processing {chrom}")
         # fibers for this chromosome
-        fibers = g[["chrom", "fiber", "fiber_start", "fiber_end"]].unique().to_pandas()
+        fibers = (
+            g[["chrom", "fiber", "fiber_start", "fiber_end", "hap"]]
+            .unique()
+            .to_pandas()
+        )
         # convert to pandas for easier manipulation
         g = g.to_pandas()
 
-        # get coverage for this chromosome and the shuffled fibers
-        chrom_length = g.length[0]
-        coverage_array = make_coverage_array(
-            fibers.fiber_start.values, fibers.fiber_end.values, chrom_length
-        )
-        #
-        rle_fire_scores = bed_rle(
-            fire_scores_per_chrom(
-                g.start.values,
-                g.end.values,
-                g.fdr.values,
-                g.length.max(),
-                coverage_array,
-                min_coverage=min_coverage,
-            )
-        )
-
-        # find the FDRs for the thresholds
-        fdr_idx = find_nearest(fdr_table.threshold.values, rle_fire_scores[:, 2])
-        FDRs = fdr_table.FDR.values[fdr_idx]
-
-        # find coverages
-        coverage = get_coverage_from_array(
-            rle_fire_scores[:, 0], rle_fire_scores[:, 1], coverage_array
-        )
-        fire_coverage_array = make_coverage_array(
-            g.start.values, g.end.values, chrom_length
-        )
-        fire_coverage = get_coverage_from_array(
-            rle_fire_scores[:, 0], rle_fire_scores[:, 1], fire_coverage_array
+        # get a bunch of extra columns + per haplotype
+        output_dict = extra_output_columns(
+            g, fibers, fdr_table, min_coverage=min_coverage
         )
 
         # write data
-        write_bed(
-            chrom, rle_fire_scores, FDRs, coverage, fire_coverage, outfile, first=first
-        )
+        write_bed(output_dict, outfile, first=first)
         first = False
 
 
@@ -404,8 +469,8 @@ def main(
         fiber_locations_file,
         separator="\t",
         has_header=False,
-        columns=[0, 1, 2, 3],
-        new_columns=["chrom", "fiber_start", "fiber_end", "fiber"],
+        columns=[0, 1, 2, 3, 5],
+        new_columns=["chrom", "fiber_start", "fiber_end", "fiber", "hap"],
     ).join(fai, on="chrom")
 
     if shuffled_locations_file is not None:
