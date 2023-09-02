@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import defopt
 import sys
+import gc
 import logging
 from pathlib import Path
 from typing import Optional
@@ -282,6 +283,8 @@ def write_bed(chrom, output_dict, out, first=True):
         mode = "a"
     df = pl.DataFrame(output_dict).to_pandas()
     original_columns = df.columns.tolist()
+    del output_dict
+    gc.collect()
     logging.info(f"Data frame made, now converting to bed format")
     # rows that are different from previous row
     diff = (df != df.shift()).any(axis=1)
