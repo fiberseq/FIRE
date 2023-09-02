@@ -12,10 +12,10 @@ rule fiber_locations_chromosome:
     shell:
         """
         # get fiber locations
-        (echo "#"; samtools view -@ {threads} -F 2308 -u {input.bam} {wildcards.chrom} \
+        (samtools view -@ {threads} -F 2308 -u {input.bam} {wildcards.chrom} \
             | ft extract -t {threads} -s --all - \
             | hck -F '#ct' -F st -F en -F fiber -F strand -F HP ) \
-            | grep -v "^#" \
+            | (grep -v "^#" || true) \
             | bgzip -@ {threads} \
         > {output.bed}
         """
