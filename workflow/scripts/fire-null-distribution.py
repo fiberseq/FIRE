@@ -300,6 +300,8 @@ def write_bed(chrom, output_dict, out, first=True):
     final_end = df.end.max()
     assert final_end == chrom_length, f"{final_end} != {chrom_length}"
     logging.info(f"Writing {chrom}")
+    if out is None:
+        out = sys.stdout
     df.to_csv(out, mode=mode, header=header, index=False, sep="\t")
     logging.info(f"Done writing {chrom}")
 
@@ -411,8 +413,8 @@ def main(
     infile: Path,
     fiber_locations_file: Path,
     genome_file: Path,
-    outfile: Path,
     *,
+    outfile: Optional[Path] = None,
     shuffled_locations_file: Optional[Path] = None,
     fdr_table_file: Optional[Path] = None,
     n_rows: Optional[int] = None,

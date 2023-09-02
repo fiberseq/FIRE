@@ -13,3 +13,4 @@ dependencies:
   - polars>=0.18
   - pyarrow
   - pysam>=0.19
+  - htslib>=1.17

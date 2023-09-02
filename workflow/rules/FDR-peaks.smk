@@ -157,7 +157,8 @@ rule fdr_track:
         mem_mb=get_mem_mb,
     shell:
         """
-        python {params.script} -v 1 {input.fire} {input.fiber_locations} {input.fai} \
-            -f {input.fdr_tbl} \
-            {output.bed}
+        python {params.script} \
+            -v 1 {input.fire} {input.fiber_locations} {input.fai} -f {input.fdr_tbl} \
+            | bgzip -@ {threads} \ 
+            > {output.bed}
         """
