@@ -281,15 +281,17 @@ def write_bed(chrom, output_dict, out, first=True):
     else:
         header = False
         mode = "a"
+    logging.info(f"Making data frame")
     df = pl.DataFrame(output_dict)
     original_columns = df.columns
     del output_dict
     gc.collect()
     # find and clear the duplicates
     # float array that says if a row is different from the previous row
-    logging.info(f"Data frame made, now converting to bed format")
+    logging.info(f"Finding duplicates")
     diff = (((df != df.shift(periods=1)).sum(axis=1)) > 0) * 1.0
     # turn the diff array into a group number
+    logging.info(f"Merging duplicates")
     df = (
         df.with_columns(
             diff.cumsum().alias("group"),
@@ -322,6 +324,7 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
     for hap in [""] + HAPS:
         # select data we are working with
         if hap == "":
+            logging.info(f"Processing all haplotypes")
             tag = ""
             cur_fire = fire
             cur_fibers = fibers
