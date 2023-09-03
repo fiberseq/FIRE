@@ -157,7 +157,8 @@ rule fdr_track:
         mem_mb=get_mem_mb,
     shell:
         """
-        TMP_OUT="${{{output.bed}%.*}}"
+        OUT={output.bed}
+        TMP_OUT="${{OUT%.*}}"
         echo $TMP_OUT
         python {params.script} \
             -v 1 {input.fire} {input.fiber_locations} {input.fai} -f {input.fdr_tbl} \
