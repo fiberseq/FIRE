@@ -298,7 +298,7 @@ def write_bed(chrom, output_dict, out, first=True):
         .unique(keep="last", subset=original_columns + ["group"])
         .with_columns(
             pl.col("end").shift_and_fill(periods=1, fill_value=0).alias("start"),
-            pl.when(True).then(chrom).alias("#chrom"),
+            pl.lit(chrom).alias("#chrom"),
         )
         .select(["#chrom", "start", "end"] + original_columns)
     ).to_pandas()
