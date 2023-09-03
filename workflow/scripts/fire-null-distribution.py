@@ -308,7 +308,7 @@ def write_bed(chrom, output_dict, out, first=True):
     assert final_end == chrom_length, f"{final_end} != {chrom_length}"
 
     logging.info(f"Writing {chrom}")
-    df.to_csv(sys.stdout, mode=mode, header=header, index=False, sep="\t")
+    df.to_csv(out, mode=mode, header=header, index=False, sep="\t")
     logging.info(f"Done writing {chrom}")
     return
 

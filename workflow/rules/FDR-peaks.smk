@@ -157,8 +157,11 @@ rule fdr_track:
         mem_mb=get_mem_mb,
     shell:
         """
+        TMP_OUT="${{{output.bed}%.*}}"
+        echo $TMP_OUT
         python {params.script} \
             -v 1 {input.fire} {input.fiber_locations} {input.fai} -f {input.fdr_tbl} \
-            | bgzip -@ {threads} \ 
-            > {output.bed}
+            -o $TMP_OUT
+        
+        bgzip -@ {threads} $TMP_OUT
         """
