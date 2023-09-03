@@ -136,7 +136,7 @@ rule fdr_table:
         mem_mb=get_mem_mb,
     shell:
         """
-        python {params.script} -v 1 {input.fire} {input.fiber_locations} {input.fai} -s {input.shuffled} {output.tbl}
+        python {params.script} -v 1 {input.fire} {input.fiber_locations} {input.fai} -s {input.shuffled} -o {output.tbl}
         """
 
 
