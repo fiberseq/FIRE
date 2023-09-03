@@ -292,10 +292,10 @@ def write_bed(chrom, output_dict, out, first=True):
     # turn the diff array into a group number
     df = (
         df.with_columns(
-            (diff.cumsum() - 1).alias("group"),
+            diff.cumsum().alias("group"),
         )
         .with_row_count(name="end", offset=1)
-        .unique(keep="last", subset=original_columns + ["group"])
+        .unique(keep="last", subset=original_columns + ["group"], maintain_order=True)
         .with_columns(
             pl.col("end").shift_and_fill(periods=1, fill_value=0).alias("start"),
             pl.lit(chrom).alias("#chrom"),
