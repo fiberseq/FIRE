@@ -281,38 +281,36 @@ def write_bed(chrom, output_dict, out, first=True):
     else:
         header = False
         mode = "a"
-    df = pl.DataFrame(output_dict).lazy()
-    original_columns = df.get_columns()
-    df = (
-        df.group_by(original_columns, maintain_order=True)
-        .agg(pl.col("coverage").length())
-        .collect()
-    )
-    logging.debug(f"\n{df}")
+    df = pl.DataFrame(output_dict)
+    original_columns = df.columns
     del output_dict
     gc.collect()
-    return
-    df = pl.DataFrame(output_dict).to_pandas()
-    original_columns = df.columns.tolist()
+    # find and clear the duplicates
+    # float array that says if a row is different from the previous row
     logging.info(f"Data frame made, now converting to bed format")
-    # rows that are different from previous row
-    diff = (df != df.shift()).any(axis=1)
-    # groupings based on the rows that are different
-    df["group"] = diff.cumsum() - 1
-    cols_that_count_for_dup = df.columns.tolist()
-    df["end"] = df.index + 1
-    df.drop_duplicates(subset=cols_that_count_for_dup, keep="last", inplace=True)
-    # start are the previous ends
-    df["start"] = [0] + df["end"][0:-1].tolist()
-    df["#chrom"] = chrom
-    df = df[["#chrom", "start", "end"] + original_columns]
+    diff = (((df != df.shift(periods=1)).sum(axis=1)) > 0) * 1.0
+    # turn the diff array into a group number
+    df = (
+        df.with_columns(
+            (diff.cumsum() - 1).alias("group"),
+        )
+        .with_row_count(name="end", offset=1)
+        .unique(keep="last", subset=original_columns + ["group"])
+        .with_columns(
+            pl.col("end").shift_and_fill(periods=1, fill_value=0).alias("start"),
+            pl.when(True).then(chrom).alias("#chrom"),
+        )
+        .select(["#chrom", "start", "end"] + original_columns)
+    ).to_pandas()
+
+    # checks
     final_end = df.end.max()
     assert final_end == chrom_length, f"{final_end} != {chrom_length}"
+
     logging.info(f"Writing {chrom}")
-    if out is None:
-        out = sys.stdout
-    df.to_csv(out, mode=mode, header=header, index=False, sep="\t")
+    df.to_csv(sys.stdout, mode=mode, header=header, index=False, sep="\t")
     logging.info(f"Done writing {chrom}")
+    return
 
 
 def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
