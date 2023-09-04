@@ -180,3 +180,24 @@ rule nucleosome_and_linker_coverages:
             | bgzip -@{threads} \
             > {output.bed}
         """
+
+rule fire_coverages:
+    input:
+        bed=rules.fire_sites.output.bed,
+        fai=f"{ref}.fai",
+    output:
+        bed="results/{sm}/fiber-calls/fire_coverage_{hp}.bed.gz",
+    threads: 8
+    conda:
+        conda
+    params:
+        hap_grep=lambda wc: "" if wc.hp == "all" else wc.hp,
+    shell:
+        """
+        bgzip -cd -@{threads} {input.bed} \
+            | grep -w "{params.hap_grep}" \
+            | bedtools genomecov -bga -i - -g {input.fai} \
+            | bgzip -@{threads} \
+            > {output.bed}
+        """
+
