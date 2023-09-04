@@ -1,47 +1,6 @@
 #
-# stats in peaks
+# weird fire stuff I want gone
 #
-rule clustering_vs_null:
-    input:
-        bed=rules.fire_sites.output.bed,
-        fai=ancient(f"{ref}.fai"),
-    output:
-        tmp=temp("temp/{sm}/acc.calls.bed"),
-        null=temp("temp/{sm}/null.calls.bed"),
-        bed="results/{sm}/clustering-vs-null.bed.gz",
-    threads: 8
-    conda:
-        conda
-    shell:
-        """
-        bgzip -cd -@{threads} {input.bed} | cut -f 1-3 > {output.tmp}
-        bedtools shuffle -chrom -i {output.tmp} -g {input.fai} > {output.null}
-
-        ( bedtools genomecov -bg -i {output.tmp} -g {input.fai} | sed 's/$/\\tReal/g' ; \
-          bedtools genomecov -bg -i {output.null} -g {input.fai} | sed 's/$/\\tNull/g' ) \
-            | bedtools sort \
-            | bgzip -@ {threads} \
-        > {output.bed}
-        """
-
-
-rule percent_in_clusters:
-    input:
-        bed=rules.clustering_vs_null.output.bed,
-        fire=expand(rules.merged_fire_track.output.bed, hp="all", allow_missing=True),
-    output:
-        txt="results/{sm}/percent-in-clusters.txt",
-    threads: 8
-    conda:
-        conda
-    params:
-        script=workflow.source_path("../scripts/percent-in-clusters.sh"),
-    shell:
-        """
-        bash {params.script} {input.bed} {input.fire} {output.txt}
-        """
-
-
 rule input_make_fire_d4:
     input:
         bed=rules.merge_model_results.output.bed,
@@ -167,6 +126,50 @@ rule merged_fire_track:
         """
         cat {input.beds} | grep -v '^#' | bgzip -@ {threads} > {output.bed}
         tabix -p bed {output.bed}
+        """
+
+
+#
+# stats in peaks
+#
+rule clustering_vs_null:
+    input:
+        bed=rules.fire_sites.output.bed,
+        fai=ancient(f"{ref}.fai"),
+    output:
+        tmp=temp("temp/{sm}/acc.calls.bed"),
+        null=temp("temp/{sm}/null.calls.bed"),
+        bed="results/{sm}/clustering-vs-null.bed.gz",
+    threads: 8
+    conda:
+        conda
+    shell:
+        """
+        bgzip -cd -@{threads} {input.bed} | cut -f 1-3 > {output.tmp}
+        bedtools shuffle -chrom -i {output.tmp} -g {input.fai} > {output.null}
+
+        ( bedtools genomecov -bg -i {output.tmp} -g {input.fai} | sed 's/$/\\tReal/g' ; \
+          bedtools genomecov -bg -i {output.null} -g {input.fai} | sed 's/$/\\tNull/g' ) \
+            | bedtools sort \
+            | bgzip -@ {threads} \
+        > {output.bed}
+        """
+
+
+rule percent_in_clusters:
+    input:
+        bed=rules.clustering_vs_null.output.bed,
+        fire=expand(rules.merged_fire_track.output.bed, hp="all", allow_missing=True),
+    output:
+        txt="results/{sm}/percent-in-clusters.txt",
+    threads: 8
+    conda:
+        conda
+    params:
+        script=workflow.source_path("../scripts/percent-in-clusters.sh"),
+    shell:
+        """
+        bash {params.script} {input.bed} {input.fire} {output.txt}
         """
 
 
