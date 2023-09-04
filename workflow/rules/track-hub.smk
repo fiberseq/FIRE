@@ -61,7 +61,7 @@ rule binned_fire_calls:
     resources:
         mem_mb=get_large_mem_mb,
     conda:
-        conda
+        "../envs/fibertools.yaml"
     shell:
         """
         ((zcat {input.bed} | head -n 1) || true; tabix {input.bed} {wildcards.chrom}) \

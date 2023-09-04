@@ -15,7 +15,7 @@ rule bed_chunks:
         ),
     threads: 1
     conda:
-        conda
+        "../envs/fibertools.yaml"
     params:
         keep_chrs="|".join(get_chroms()),
     shell:
@@ -61,23 +61,19 @@ rule apply_model:
         model=get_model,
     output:
         haps=temp("temp/{sm}/all/chunks/{chunk}.bed"),
-        #hap1=temp("temp/{sm}/hap1/chunks/{chunk}.bed"),
-        #hap2=temp("temp/{sm}/hap2/chunks/{chunk}.bed"),
-        #unk=temp("temp/{sm}/unk/chunks/{chunk}.bed"),
     benchmark:
         "benchmarks/{sm}/chunks/apply_model_{chunk}.tsv"
     threads: 1
     resources:
         mem_mb=get_mem_mb,
     conda:
-        conda
+        "../envs/fibertools.yaml"
     priority: 0
     shell:
         """
         fibertools -v model -m {input.model} {input.bed} \
             -o {output.haps} 
         """
-        #--haps {output.hap1} {output.hap2} {output.unk}
 
 
 rule sort_model:

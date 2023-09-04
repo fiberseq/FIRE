@@ -109,7 +109,7 @@ rule make_model:
         "benchmarks/{sm}/make_model.tsv"
     threads: 60
     conda:
-        conda
+        "../envs/fibertools.yaml"
     params:
         n=100_000,
     shell:
