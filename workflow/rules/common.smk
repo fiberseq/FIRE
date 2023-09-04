@@ -85,3 +85,13 @@ def grep_command_for_el_type(wc):
         return "awk '$10<={params.min_fdr}'"
     else:
         raise ValueError(f"Unknown element type {wc.el_type}")
+
+def hap_grep(wc):
+    if wc.hp=="all":
+        return ""
+    elif wc.hp=="hap1":
+        return "grep -w H1"
+    elif wc.hp=="hap2":
+        return "grep -w H2"
+    else:
+        raise ValueError(f"Unknown haplotype {wc.hp}")
