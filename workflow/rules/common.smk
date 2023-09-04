@@ -86,12 +86,12 @@ def grep_command_for_el_type(wc):
     else:
         raise ValueError(f"Unknown element type {wc.el_type}")
 
-def hap_grep(wc):
+def hap_grep_term(wc):
     if wc.hp=="all":
         return ""
     elif wc.hp=="hap1":
-        return "grep -w H1"
+        return "H1"
     elif wc.hp=="hap2":
-        return "grep -w H2"
+        return "H2"
     else:
         raise ValueError(f"Unknown haplotype {wc.hp}")

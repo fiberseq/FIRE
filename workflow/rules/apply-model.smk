@@ -170,11 +170,11 @@ rule element_coverages:
         conda
     params:
         filter_cmd=grep_command_for_el_type,
-        filter_hap=hap_grep,
+        filter_hap=hap_grep_term,
     shell:
         """
         bgzip -cd -@{threads} {input.bed} \
-            | {params.filter_hap} \
+            | grep -w {params.filter_hap} \
             | {params.filter_cmd} \
             | bedtools genomecov -bga -i - -g {input.fai} \
             | bgzip -@{threads} \
