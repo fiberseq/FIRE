@@ -20,6 +20,7 @@ rule coverage_tracks:
         bedGraphToBigWig {output.bed} {input.fai} {output.bw}
         """
 
+
 rule percent_accessible:
     input:
         bed=rules.merged_fire_track.output.bed,
