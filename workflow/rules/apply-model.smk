@@ -160,8 +160,8 @@ rule element_coverages:
         bed=rules.merge_model_results.output.bed,
         fai=f"{ref}.fai",
     output:
-        bed="results/{sm}/fiber-calls/{el_type}_coverage_{hp}.bed.gz",
-        tbi="results/{sm}/fiber-calls/{el_type}_coverage_{hp}.bed.gz.tbi",
+        bed="results/{sm}/fiber-calls/{hp}/{el_type}_coverage_{hp}.bed.gz",
+        tbi="results/{sm}/fiber-calls/{hp}/{el_type}_coverage_{hp}.bed.gz.tbi",
     benchmark:
         "benchmarks/{sm}/element_coverages/{el_type}_{hp}.tsv"
     conda:
