@@ -13,5 +13,5 @@ dependencies:
   - pysam>=0.19
   - htslib>=1.17
   - pip
-  pip:
-    - polars[pyarrow]>=0.19
+  - pip:
+      - polars[pyarrow]>=0.19
