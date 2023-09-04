@@ -3,19 +3,10 @@ channels:
   - conda-forge
   - bioconda
   - defaults
+# Most dependencies are specified by the pypi package fibertools
+# so better to leave this mostly empty
 dependencies:
-  - tqdm
   - htslib>=1.17
-  - pysam>=0.19
-  - numba
-  - numpy==1.23.1
-  - pandas==1.5.3
-  - joblib>=1.1.0
-  - scikit-learn>=1.1.1
-  - rust
-  - pyarrow
   - pip
   - pip:
-      - polars>=0.19
-      - pyd4>=0.3.6.2
       - git+https://github.com/fiberseq/fibertools.git
