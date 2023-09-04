@@ -161,6 +161,7 @@ rule element_coverages:
         fai=f"{ref}.fai",
     output:
         bed="results/{sm}/fiber-calls/{el_type}_coverage_{hp}.bed.gz",
+        tbi="results/{sm}/fiber-calls/{el_type}_coverage_{hp}.bed.gz.tbi",
     benchmark:
         "benchmarks/{sm}/element_coverages/{el_type}_{hp}.tsv"
     conda:
@@ -177,6 +178,7 @@ rule element_coverages:
             | bedtools genomecov -bga -i - -g {input.fai} \
             | bgzip -@{threads} \
             > {output.bed}
+        tabix -p bed {output.bed}
         """
 
 
