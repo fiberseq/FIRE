@@ -168,7 +168,7 @@ rule nucleosome_and_linker_coverages:
     conda:
         conda
     params:
-        get_color=lambda wc: "230,230,230" if wc.type == "nucleosome" else "147,112,219",
+        get_color=lambda wc: "230,230,230" if wc.el_type == "nucleosome" else "147,112,219",
         hap_grep=lambda wc: "" if wc.hap == "all" else wc.hap,
     shell:
         """
