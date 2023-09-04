@@ -1,135 +1,4 @@
 #
-# weird fire stuff I want gone
-#
-rule input_make_fire_d4:
-    input:
-        bed=rules.merge_model_results.output.bed,
-        tbi=rules.index_model_results.output.tbi,
-    output:
-        bed=temp("temp/{sm}/{hp}/{chrom}.fire.coverages.bed"),
-    threads: 1
-    resources:
-        mem_mb=get_mem_mb,
-    conda:
-        conda
-    priority: 0
-    shell:
-        """
-        tabix {input.bed} {wildcards.chrom} > {output.bed}
-
-        if [ ! -s {output.bed} ]; then
-              ( \
-            printf '{wildcards.chrom}\t0\t%s\tfake\t0\t+\t0\t1\t255,0,0\t0.00\n' {{1..1}}; \
-            printf '{wildcards.chrom}\t0\t%s\tfake\t1\t+\t0\t1\t255,0,0\t0.01\n' {{1..1}}; \
-            printf '{wildcards.chrom}\t0\t%s\tfake\t2\t+\t0\t1\t255,0,0\t0.02\n' {{1..1}}; \
-            printf '{wildcards.chrom}\t0\t%s\tfake\t3\t+\t0\t1\t255,0,0\t0.03\n' {{1..1}}; \
-            printf '{wildcards.chrom}\t0\t%s\tfake\t4\t+\t0\t1\t255,0,0\t0.04\n' {{1..1}}; \
-            printf '{wildcards.chrom}\t0\t%s\tfake\t5\t+\t0\t1\t255,0,0\t0.05\n' {{1..1}}; \
-            printf '{wildcards.chrom}\t0\t%s\tfake\t6\t+\t0\t1\t255,0,0\t0.06\n' {{1..1}}; \
-            printf '{wildcards.chrom}\t0\t%s\tfake\t7\t+\t0\t1\t255,0,0\t0.07\n' {{1..1}}; \
-            printf '{wildcards.chrom}\t0\t%s\tfake\t8\t+\t0\t1\t255,0,0\t0.08\n' {{1..1}}; \
-            printf '{wildcards.chrom}\t0\t%s\tfake\t9\t+\t0\t1\t255,0,0\t0.09\n' {{1..1}}; \
-            printf '{wildcards.chrom}\t0\t%s\tfake\t100\t+\t0\t1\t147,112,219\t1.0\n' {{1..1}}; \
-            printf '{wildcards.chrom}\t0\t%s\tfake\t100\t+\t0\t1\t230,230,230\t1.0\n' {{1..1}}; \
-            ) \
-            | bedtools sort -i - \
-            > {output.bed}
-        fi
-        """
-
-
-rule make_fire_d4:
-    input:
-        fai=ancient(f"{ref}.fai"),
-        bed=rules.input_make_fire_d4.output.bed,
-    output:
-        d4=temp("temp/{sm}/{hp}/{chrom}.fire.coverages.d4"),
-    benchmark:
-        "benchmarks/{sm}/{hp}/{chrom}.fire.d4.tsv"
-    threads: 4
-    resources:
-        mem_mb=get_large_mem_mb,
-    conda:
-        conda
-    priority: 100
-    shell:
-        """ 
-        fibertools -v bed2d4 \
-            --chromosome {wildcards.chrom} \
-            -g {input.fai} \
-            -c score \
-            {input.bed} {output.d4}
-        """
-
-
-rule fire_bed:
-    input:
-        fai=ancient(f"{ref}.fai"),
-        d4=rules.make_fire_d4.output.d4,
-    output:
-        bed=temp("temp/{sm}/{hp}/chromosomes/{chrom}.fire.peaks.and.coverages.bed"),
-        tmp=temp("temp/{sm}/{hp}/chromosomes/{chrom}.fire.coverages.bed.gz"),
-    benchmark:
-        "benchmarks/{sm}/{hp}/{chrom}.fire.peaks.tsv"
-    threads: 4
-    resources:
-        mem_mb=get_mem_mb,
-    conda:
-        conda
-    shell:
-        """
-        d4tools view --header {input.d4} {wildcards.chrom} | bgzip -@ {threads} > {output.tmp}
-        fibertools -v bed2d4 \
-            --chromosome {wildcards.chrom} \
-            -g {input.fai} \
-            -c score \
-            -q {output.tmp} \
-            {output.bed}
-        """
-
-
-rule chromosome_coverage_tracks:
-    input:
-        bed=rules.fire_bed.output.bed,
-    output:
-        bed=temp("temp/{sm}/{hp}/trackHub/bw/{chrom}.{types}.cov.bed"),
-    threads: 4
-    params:
-        col=lambda wc: types_to_col[wc.types],
-    conda:
-        conda
-    resources:
-        mem_mb=get_mem_mb,
-    shell:
-        """
-        cut -f 1,2,3,{params.col} {input.bed} > {output.bed}
-        """
-
-
-rule merged_fire_track:
-    input:
-        beds=expand(
-            rules.fire_bed.output.bed,
-            chrom=get_chroms(),
-            allow_missing=True,
-        ),
-        fai=ancient(f"{ref}.fai"),
-    output:
-        bed="results/{sm}/{hp}/fire.peaks.and.coverages.bed.gz",
-        tbi="results/{sm}/{hp}/fire.peaks.and.coverages.bed.gz.tbi",
-    threads: 8
-    conda:
-        conda
-    resources:
-        mem_mb=get_mem_mb,
-    shell:
-        """
-        cat {input.beds} | grep -v '^#' | bgzip -@ {threads} > {output.bed}
-        tabix -p bed {output.bed}
-        """
-
-
-#
 # stats in peaks
 #
 rule clustering_vs_null:
@@ -137,7 +6,7 @@ rule clustering_vs_null:
         bed=rules.fire_sites.output.bed,
         fai=ancient(f"{ref}.fai"),
     output:
-        tmp=temp("temp/{sm}/acc.calls.bed"),
+        tmp=temp("temp/{sm}/tmp.pre.calls.bed"),
         null=temp("temp/{sm}/null.calls.bed"),
         bed="results/{sm}/clustering-vs-null.bed.gz",
     threads: 8
@@ -155,11 +24,11 @@ rule clustering_vs_null:
         > {output.bed}
         """
 
-
+# TODO
 rule percent_in_clusters:
     input:
         bed=rules.clustering_vs_null.output.bed,
-        fire=expand(rules.merged_fire_track.output.bed, hp="all", allow_missing=True),
+        fire=rules.fdr_track_filtered.output.bed,
     output:
         txt="results/{sm}/percent-in-clusters.txt",
     threads: 8
@@ -176,10 +45,12 @@ rule percent_in_clusters:
 #
 # shane peak calling
 #
+
+#TODO
 rule peak_calls_per_chromosome:
     input:
-        bed=rules.merged_fire_track.output.bed,
-        tbi=rules.merged_fire_track.output.tbi,
+        bed=rules.fdr_track_filtered.output.bed,
+        tbi=rules.fdr_track_filtered.output.tbi,
     output:
         bed="temp/{sm}/{hp}/{chrom}.peak.calls.bed",
     benchmark:
@@ -235,12 +106,12 @@ rule fire_peaks:
         awk -v min_fdr=$MIN_FDR '$7 >= min_fdr' {input.bed} > {output.bed}
         """
 
-
+#TODO
 rule fire_with_coverage:
     input:
         bed=rules.fire_peaks.output.bed,
         cov=rules.average_coverage.output.cov,
-        cov_bed=expand(rules.merged_fire_track.output.bed, hp="all", allow_missing=True),
+        cov_bed=rules.fdr_track_filtered.output.bed,
     output:
         bed="results/{sm}/FIRE.peaks.with.coverage.bed",
     threads: 8
@@ -285,45 +156,10 @@ rule fire_bw:
           touch {output.bb}
         fi
         """
-
-
-rule hap_peaks:
-    input:
-        bed=rules.fire_with_coverage.output.bed,
-        cov=rules.average_coverage.output.cov,
-        h1=expand(rules.merged_fire_track.output.bed, hp="hap1", allow_missing=True),
-        h2=expand(rules.merged_fire_track.output.bed, hp="hap2", allow_missing=True),
-    output:
-        bed=temp("temp/{sm}/hap1-vs-hap2/FIRE.hap.peaks.bed"),
-    threads: 8
-    conda:
-        conda
-    shell:
-        """
-        COV=$(cat {input.cov})
-        printf "#ct\tst\ten\t" > {output.bed}
-        printf "hap1_ct\thap1_st\thap1_en\t" >> {output.bed}
-        printf "hap1_fdr\thap1_acc\thap1_link\thap1_nuc\t" >> {output.bed}
-        printf "hap2_ct\thap2_st\thap2_en\t" >> {output.bed}
-        printf "hap2_fdr\thap2_acc\thap2_link\thap2_nuc\t" >> {output.bed}
-        printf "sample\tcov\\n" >> {output.bed}
-        paste \
-            <(bedmap --delim '\\t' --echo --max-element \
-                <(cut -f 1-3 {input.bed} | tail -n +2 ) \
-                <(zcat {input.h1} | tail -n +2) \
-            ) \
-            <(bedmap --max-element  \
-                <(cut -f 1-3 {input.bed} | tail -n +2) \
-                <(zcat {input.h2} | tail -n +2) \
-            ) \
-            | sed "s/$/\t{wildcards.sm}\t$COV/g" \
-        >> {output.bed}
-        """
-
-
+# TODO
 rule hap_differences:
     input:
-        bed=rules.hap_peaks.output.bed,
+        bed=rules.fdr_track_filtered.output.bed,
     output:
         fig1="results/{sm}/hap1-vs-hap2/hap1-vs-hap2.pdf",
         fig2="results/{sm}/hap1-vs-hap2/hap1-vs-hap2-volcano.pdf",

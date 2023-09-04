@@ -166,3 +166,26 @@ rule fdr_track:
         
         bgzip -@ {threads} $TMP_OUT
         """
+
+
+
+rule fdr_track_filtered:
+    input:
+        bed=rules.fdr_track.output.bed,
+    output:
+        bed="results/{sm}/FDR-peaks/FDR.track.coverage.filtered.bed.gz",
+        tbi="results/{sm}/FDR-peaks/FDR.track.coverage.filtered.bed.gz.tbi",
+    threads: 8
+    conda:
+        conda
+    params:
+        min_cov=get_min_coverage,
+        max_cov=get_max_coverage,
+    shell:
+        """
+        zcat {input.bed} \
+            | awk '$5 >= {params.min_cov} && $5 <= {params.max_cov}' \
+            | bgzip -@ {threads} \
+            > {output.bed}
+        tabix -f -p bed {output.bed}
+        """

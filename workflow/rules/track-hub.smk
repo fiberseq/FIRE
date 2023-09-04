@@ -1,3 +1,22 @@
+
+rule chromosome_coverage_tracks:
+    input:
+        bed=rules.fire_bed.output.bed,
+    output:
+        bed=temp("temp/{sm}/{hp}/trackHub/bw/{chrom}.{types}.cov.bed"),
+    threads: 4
+    params:
+        col=lambda wc: types_to_col[wc.types],
+    conda:
+        conda
+    resources:
+        mem_mb=get_mem_mb,
+    shell:
+        """
+        cut -f 1,2,3,{params.col} {input.bed} > {output.bed}
+        """
+
+
 rule coverage_tracks:
     input:
         beds=expand(
@@ -20,10 +39,10 @@ rule coverage_tracks:
         bedGraphToBigWig {output.bed} {input.fai} {output.bw}
         """
 
-
+#TODO
 rule percent_accessible:
     input:
-        bed=rules.merged_fire_track.output.bed,
+        bed=rules.fdr_track_filtered.output.bed,
         fai=ancient(f"{ref}.fai"),
     output:
         tmp=temp("temp/{sm}/{hp}/percent.accessible.bed"),
