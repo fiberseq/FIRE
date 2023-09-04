@@ -24,6 +24,7 @@ rule clustering_vs_null:
         > {output.bed}
         """
 
+
 # TODO
 rule percent_in_clusters:
     input:
@@ -46,7 +47,8 @@ rule percent_in_clusters:
 # shane peak calling
 #
 
-#TODO
+
+# TODO
 rule peak_calls_per_chromosome:
     input:
         bed=rules.fdr_track_filtered.output.bed,
@@ -106,7 +108,8 @@ rule fire_peaks:
         awk -v min_fdr=$MIN_FDR '$7 >= min_fdr' {input.bed} > {output.bed}
         """
 
-#TODO
+
+# TODO
 rule fire_with_coverage:
     input:
         bed=rules.fire_peaks.output.bed,
@@ -156,6 +159,8 @@ rule fire_bw:
           touch {output.bb}
         fi
         """
+
+
 # TODO
 rule hap_differences:
     input:

@@ -1,45 +1,4 @@
-
-rule chromosome_coverage_tracks:
-    input:
-        bed=rules.fire_bed.output.bed,
-    output:
-        bed=temp("temp/{sm}/{hp}/trackHub/bw/{chrom}.{types}.cov.bed"),
-    threads: 4
-    params:
-        col=lambda wc: types_to_col[wc.types],
-    conda:
-        conda
-    resources:
-        mem_mb=get_mem_mb,
-    shell:
-        """
-        cut -f 1,2,3,{params.col} {input.bed} > {output.bed}
-        """
-
-
-rule coverage_tracks:
-    input:
-        beds=expand(
-            rules.chromosome_coverage_tracks.output.bed,
-            chrom=get_chroms(),
-            allow_missing=True,
-        ),
-        fai=ancient(f"{ref}.fai"),
-    output:
-        bed=temp("temp/{sm}/{hp}/trackHub/bw/{types}.cov.bed"),
-        bw="results/{sm}/trackHub/bw/{hp}.{types}.bw",
-    threads: 4
-    conda:
-        conda
-    resources:
-        mem_mb=get_mem_mb,
-    shell:
-        """
-        cat {input.beds} | grep -v '^#' > {output.bed}
-        bedGraphToBigWig {output.bed} {input.fai} {output.bw}
-        """
-
-#TODO
+# TODO
 rule percent_accessible:
     input:
         bed=rules.fdr_track_filtered.output.bed,
@@ -202,6 +161,7 @@ rule hap_differences_track:
         """
 
 
+# TODO
 rule trackhub:
     input:
         fai=ancient(f"{ref}.fai"),
@@ -210,21 +170,6 @@ rule trackhub:
         hap_diffs=rules.hap_differences.output.bed,
         hap_diffs2=rules.hap_differences_track.output.bb,
         bed=expand(rules.merge_model_results.output.bed, hp=haps, allow_missing=True),
-        bw=expand(
-            rules.bw_fire_tracks.output.bw, hp=haps, fdr=[100], allow_missing=True
-        ),
-        fdr=expand(
-            rules.coverage_tracks.output.bw, hp=haps, types="fdr", allow_missing=True
-        ),
-        acc=expand(
-            rules.coverage_tracks.output.bw, hp=haps, types="acc", allow_missing=True
-        ),
-        link=expand(
-            rules.coverage_tracks.output.bw, hp=haps, types="link", allow_missing=True
-        ),
-        nuc=expand(
-            rules.coverage_tracks.output.bw, hp=haps, types="nuc", allow_missing=True
-        ),
     output:
         hub="results/{sm}/trackHub/hub.txt",
     benchmark:
@@ -236,13 +181,14 @@ rule trackhub:
         conda
     params:
         ref=ref_name,
+        script=workflow.source_path("../scripts/trackhub.py"),
+        max_bins=max_bins,
     shell:
         """
-        fibertools -v trackhub \
-          -r {params.ref} \
+        python {params.script} -v \
+          --trackhub-dir results/{wildcards.sm}/trackHub \
+          --reference {params.ref} \
           --sample {wildcards.sm} \
-          -t results/{wildcards.sm}/trackHub \
-          --average-coverage $(cat {input.cov}) \
-          {input.fai} \
-          --bw {input.acc} {input.link} {input.nuc} {input.bw} {input.fdr}
+          --max-bins {max_bins} \
+          --average-coverage $(cat {input.cov}) 
         """
