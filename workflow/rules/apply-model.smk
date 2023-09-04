@@ -174,7 +174,7 @@ rule element_coverages:
     shell:
         """
         bgzip -cd -@{threads} {input.bed} \
-            | grep -w {params.filter_hap} \
+            | (grep -w {params.filter_hap} || true) \
             | {params.filter_cmd} \
             | bedtools genomecov -bga -i - -g {input.fai} \
             | bgzip -@{threads} \
