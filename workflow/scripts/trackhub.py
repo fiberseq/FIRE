@@ -1,19 +1,10 @@
 #!/usr/bin/env python
 import os
-import sys
 import defopt
-import pandas as pd
 import logging
-import polars as pl
 from pathlib import Path
-import psutil
 import numpy as np
 from typing import Optional
-
-
-def log_mem_usage():
-    gb = psutil.Process(os.getpid()).memory_info().rss / 1024**3
-    logging.info(f"Using {gb:.2f} GB of memory")
 
 
 HUB = """
