@@ -88,7 +88,7 @@ def grep_command_for_el_type(wc):
 
 def hap_grep_term(wc):
     if wc.hp=="all":
-        return ""
+        return '""'
     elif wc.hp=="hap1":
         return "H1"
     elif wc.hp=="hap2":
