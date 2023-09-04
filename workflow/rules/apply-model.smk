@@ -161,6 +161,8 @@ rule element_coverages:
         fai=f"{ref}.fai",
     output:
         bed="results/{sm}/fiber-calls/{el_type}_coverage_{hp}.bed.gz",
+    benchmark:
+        "benchmarks/{sm}/element_coverages/{el_type}_{hp}.tsv"
     conda:
         conda
     params:
