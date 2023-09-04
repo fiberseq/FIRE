@@ -42,53 +42,9 @@ rule fdr_table_to_bw:
         bedGraphToBigWig {output.tmp} {input.fai} {output.bw}
         """
 
-
-rule chromosome_fire_tracks:
-    input:
-        bed=rules.fire_bed.output.bed,
-    output:
-        bed=temp("temp/{sm}/{hp}/trackHub/bw/{chrom}.fire.{fdr}.bed"),
-    threads: 4
-    conda:
-        conda
-    resources:
-        mem_mb=get_mem_mb,
-    shell:
-        """
-        cut -f 1-4 {input.bed} | awk '$4 > {wildcards.fdr} && !/^#/' > {output.bed}
-        """
-
-
-rule bw_fire_tracks:
-    input:
-        beds=expand(
-            rules.chromosome_fire_tracks.output.bed,
-            chrom=get_chroms(),
-            allow_missing=True,
-        ),
-        fai=ancient(f"{ref}.fai"),
-    output:
-        bw="results/{sm}/trackHub/bw/fire.{hp}.{fdr}.bw",
-        bed=temp("temp/{sm}/{hp}/trackHub/bw/fire.{fdr}.bed"),
-    threads: 4
-    conda:
-        conda
-    resources:
-        mem_mb=get_mem_mb,
-    params:
-        chrom=get_chroms()[0],
-    shell:
-        """
-        cat {input.beds} | awk 'NF > 2' | awk 'BEGIN {{OFS="\t"}} {{if(NR==1 && $1!~/^#/ && $2!=0) {{print $1,0,1,0}} print}}' > {output.bed}
-        
-        if [ ! -s {output.bed} ]; then
-            printf '{params.chrom}\t0\t1\t0\n' > {output.bed}
-        fi
-
-        bedGraphToBigWig {output.bed} {input.fai} {output.bw}
-        """
-
-
+#
+# make single molecule viz for trackhub
+#
 rule binned_fire_calls:
     input:
         bed=rules.merge_model_results.output.bed,
