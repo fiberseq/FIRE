@@ -1,38 +1,4 @@
 #
-# Coverage calculations
-#
-rule genome_bedgraph:
-    input:
-        bam=ancient(lambda wc: data.loc[wc.sm, "bam"]),
-        fai=ancient(f"{ref}.fai"),
-    output:
-        d4="results/{sm}/coverage/{sm}.d4",
-        bg="results/{sm}/coverage/{sm}.bed.gz",
-        median="results/{sm}/coverage/{sm}.median.chromosome.coverage.bed",
-    threads: 16
-    conda:
-        conda
-    shell:
-        """ 
-        d4tools create -F 2308 -t {threads} -Azr {input.fai} {input.bam} {output.d4}
-        d4tools view {output.d4} | bgzip -@ {threads} > {output.bg}
-        zcat {output.bg} \
-            | awk '$4>0' \
-            | datamash -g 1 min 2 max 3 median 4 \
-        > {output.median}
-        """
-
-
-rule average_coverage:
-    input:
-        median=rules.genome_bedgraph.output.median,
-    output:
-        cov="results/{sm}/coverage/{sm}.median.coverage.txt",
-    run:
-        find_median_coverage(input["median"], outfile=output["cov"])
-
-
-#
 # Applying the model
 #
 rule bed_chunks:
@@ -95,9 +61,9 @@ rule apply_model:
         model=get_model,
     output:
         haps=temp("temp/{sm}/all/chunks/{chunk}.bed"),
-        hap1=temp("temp/{sm}/hap1/chunks/{chunk}.bed"),
-        hap2=temp("temp/{sm}/hap2/chunks/{chunk}.bed"),
-        unk=temp("temp/{sm}/unk/chunks/{chunk}.bed"),
+        #hap1=temp("temp/{sm}/hap1/chunks/{chunk}.bed"),
+        #hap2=temp("temp/{sm}/hap2/chunks/{chunk}.bed"),
+        #unk=temp("temp/{sm}/unk/chunks/{chunk}.bed"),
     benchmark:
         "benchmarks/{sm}/chunks/apply_model_{chunk}.tsv"
     threads: 1
@@ -109,9 +75,9 @@ rule apply_model:
     shell:
         """
         fibertools -v model -m {input.model} {input.bed} \
-            -o {output.haps} \
-            --haps {output.hap1} {output.hap2} {output.unk}
+            -o {output.haps} 
         """
+        #--haps {output.hap1} {output.hap2} {output.unk}
 
 
 rule sort_model:
@@ -138,9 +104,9 @@ rule merge_model_results:
     input:
         beds=expand(rules.sort_model.output.bed, chunk=chunks, allow_missing=True),
     output:
-        bed="results/{sm}/{hp}/acc.model.results.bed.gz",
+        bed="results/{sm}/fiber-calls/model.results.bed.gz",
     benchmark:
-        "benchmarks/{sm}/{hp}/merge_model_results.tsv"
+        "benchmarks/{sm}/merge_model_results.tsv"
     threads: 8
     conda:
         conda
@@ -174,9 +140,9 @@ rule index_model_results:
 
 rule fire_sites:
     input:
-        bed=expand(rules.merge_model_results.output.bed, hp="all", allow_missing=True),
+        bed=rules.merge_model_results.output.bed,
     output:
-        bed="results/{sm}/FIRE.bed.gz",
+        bed="results/{sm}/fiber-calls/FIRE.bed.gz",
     threads: 8
     conda:
         conda
@@ -186,6 +152,28 @@ rule fire_sites:
         """
         bgzip -cd -@{threads} {input.bed} \
             | awk '$10<={params.min_fdr}' \
+            | bgzip -@{threads} \
+            > {output.bed}
+        """
+
+
+rule nucleosome_and_linker_coverages:
+    input:
+        bed=rules.merge_model_results.output.bed,
+    output:
+        bed="results/{sm}/fiber-calls/{el_type}_coverage_{hp}.bed.gz",
+    threads: 8
+    conda:
+        conda
+    params:
+        get_color=lambda wc: "230,230,230" if wc.type == "nucleosome" else "147,112,219",
+        hap_grep=lambda wc: "" if wc.hap == "all" else wc.hap,
+    shell:
+        """
+        bgzip -cd -@{threads} {input.bed} \
+            | grep -w "{params.hap_grep}" \
+            | grep "^#\|{params.get_color}"  \
+            | bedtools genomecov -bga -i - -g {input.fai} \
             | bgzip -@{threads} \
             > {output.bed}
         """

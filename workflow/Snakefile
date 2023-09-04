@@ -42,10 +42,13 @@ types_to_col = {"fdr": 4, "acc": 5, "link": 6, "nuc": 7}
 bw_types = ["score", "FDR", "log_FDR"]
 bw_types = bw_types + [f"{t}_H1" for t in bw_types] + [f"{t}_H2" for t in bw_types]
 
+
 include: "rules/common.smk"
+include: "rules/coverage.smk"
+include: "rules/train-model.smk"
 include: "rules/apply-model.smk"
 include: "rules/FDR-peaks.smk"
-include: "rules/train-model.smk"
+include: "rules/peak-calling.smk"
 include: "rules/track-hub.smk"
 
 
@@ -88,9 +91,15 @@ rule all:
         # model results
         expand(rules.merge_model_results.output, sm=data.index, hp=haps),
         expand(rules.index_model_results.output, sm=data.index, hp=haps),
-        # Fiber locations
+        # fiber locations and calls
         expand(rules.fiber_locations.output, sm=data.index),
         expand(rules.filtered_and_shuffled_fiber_locations.output, sm=data.index),
+        expand(
+            rules.nucleosome_and_linker_coverages.output,
+            sm=data.index,
+            hp=not_unk,
+            el_type=["nucleosome", "linker"],
+        ),
         # FDR results
         expand(rules.fdr_track.output, sm=data.index),
         # trackhub

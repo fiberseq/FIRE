@@ -78,7 +78,7 @@ rule filtered_and_shuffled_fiber_locations_chromosome:
         > {output.bed}
 
         # get bedgraph
-        bedtools genomecov -bg -i {output.bed} -g {input.fai} | bgzip -@ {threads} > {output.bg}
+        bedtools genomecov -bga -i {output.bed} -g {input.fai} | bgzip -@ {threads} > {output.bg}
 
         # make shuffled fiber locations
         bedtools shuffle -chrom \
