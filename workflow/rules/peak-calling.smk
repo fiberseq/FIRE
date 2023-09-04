@@ -1,3 +1,130 @@
+rule input_make_fire_d4:
+    input:
+        bed=rules.merge_model_results.output.bed,
+        tbi=rules.index_model_results.output.tbi,
+    output:
+        bed=temp("temp/{sm}/{hp}/{chrom}.fire.coverages.bed"),
+    threads: 1
+    resources:
+        mem_mb=get_mem_mb,
+    conda:
+        conda
+    priority: 0
+    shell:
+        """
+        tabix {input.bed} {wildcards.chrom} > {output.bed}
+
+        if [ ! -s {output.bed} ]; then
+              ( \
+            printf '{wildcards.chrom}\t0\t%s\tfake\t0\t+\t0\t1\t255,0,0\t0.00\n' {{1..1}}; \
+            printf '{wildcards.chrom}\t0\t%s\tfake\t1\t+\t0\t1\t255,0,0\t0.01\n' {{1..1}}; \
+            printf '{wildcards.chrom}\t0\t%s\tfake\t2\t+\t0\t1\t255,0,0\t0.02\n' {{1..1}}; \
+            printf '{wildcards.chrom}\t0\t%s\tfake\t3\t+\t0\t1\t255,0,0\t0.03\n' {{1..1}}; \
+            printf '{wildcards.chrom}\t0\t%s\tfake\t4\t+\t0\t1\t255,0,0\t0.04\n' {{1..1}}; \
+            printf '{wildcards.chrom}\t0\t%s\tfake\t5\t+\t0\t1\t255,0,0\t0.05\n' {{1..1}}; \
+            printf '{wildcards.chrom}\t0\t%s\tfake\t6\t+\t0\t1\t255,0,0\t0.06\n' {{1..1}}; \
+            printf '{wildcards.chrom}\t0\t%s\tfake\t7\t+\t0\t1\t255,0,0\t0.07\n' {{1..1}}; \
+            printf '{wildcards.chrom}\t0\t%s\tfake\t8\t+\t0\t1\t255,0,0\t0.08\n' {{1..1}}; \
+            printf '{wildcards.chrom}\t0\t%s\tfake\t9\t+\t0\t1\t255,0,0\t0.09\n' {{1..1}}; \
+            printf '{wildcards.chrom}\t0\t%s\tfake\t100\t+\t0\t1\t147,112,219\t1.0\n' {{1..1}}; \
+            printf '{wildcards.chrom}\t0\t%s\tfake\t100\t+\t0\t1\t230,230,230\t1.0\n' {{1..1}}; \
+            ) \
+            | bedtools sort -i - \
+            > {output.bed}
+        fi
+        """
+
+
+rule make_fire_d4:
+    input:
+        fai=ancient(f"{ref}.fai"),
+        bed=rules.input_make_fire_d4.output.bed,
+    output:
+        d4=temp("temp/{sm}/{hp}/{chrom}.fire.coverages.d4"),
+    benchmark:
+        "benchmarks/{sm}/{hp}/{chrom}.fire.d4.tsv"
+    threads: 4
+    resources:
+        mem_mb=get_large_mem_mb,
+    conda:
+        conda
+    priority: 100
+    shell:
+        """ 
+        fibertools -v bed2d4 \
+            --chromosome {wildcards.chrom} \
+            -g {input.fai} \
+            -c score \
+            {input.bed} {output.d4}
+        """
+
+
+rule fire_bed:
+    input:
+        fai=ancient(f"{ref}.fai"),
+        d4=rules.make_fire_d4.output.d4,
+    output:
+        bed=temp("temp/{sm}/{hp}/chromosomes/{chrom}.fire.peaks.and.coverages.bed"),
+        tmp=temp("temp/{sm}/{hp}/chromosomes/{chrom}.fire.coverages.bed.gz"),
+    benchmark:
+        "benchmarks/{sm}/{hp}/{chrom}.fire.peaks.tsv"
+    threads: 4
+    resources:
+        mem_mb=get_mem_mb,
+    conda:
+        conda
+    shell:
+        """
+        d4tools view --header {input.d4} {wildcards.chrom} | bgzip -@ {threads} > {output.tmp}
+        fibertools -v bed2d4 \
+            --chromosome {wildcards.chrom} \
+            -g {input.fai} \
+            -c score \
+            -q {output.tmp} \
+            {output.bed}
+        """
+
+
+rule chromosome_coverage_tracks:
+    input:
+        bed=rules.fire_bed.output.bed,
+    output:
+        bed=temp("temp/{sm}/{hp}/trackHub/bw/{chrom}.{types}.cov.bed"),
+    threads: 4
+    params:
+        col=lambda wc: types_to_col[wc.types],
+    conda:
+        conda
+    resources:
+        mem_mb=get_mem_mb,
+    shell:
+        """
+        cut -f 1,2,3,{params.col} {input.bed} > {output.bed}
+        """
+
+        
+rule merged_fire_track:
+    input:
+        beds=expand(
+            rules.fire_bed.output.bed,
+            chrom=get_chroms(),
+            allow_missing=True,
+        ),
+        fai=ancient(f"{ref}.fai"),
+    output:
+        bed="results/{sm}/{hp}/fire.peaks.and.coverages.bed.gz",
+        tbi="results/{sm}/{hp}/fire.peaks.and.coverages.bed.gz.tbi",
+    threads: 8
+    conda:
+        conda
+    resources:
+        mem_mb=get_mem_mb,
+    shell:
+        """
+        cat {input.beds} | grep -v '^#' | bgzip -@ {threads} > {output.bed}
+        tabix -p bed {output.bed}
+        """
+
 #
 # shane peak calling
 #
