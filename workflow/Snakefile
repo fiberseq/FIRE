@@ -44,7 +44,7 @@ bw_types = bw_types + [f"{t}_H1" for t in bw_types] + [f"{t}_H2" for t in bw_typ
 
 
 include: "rules/common.smk"
-include: "rules/coverage.smk"
+include: "rules/coverages.smk"
 include: "rules/train-model.smk"
 include: "rules/apply-model.smk"
 include: "rules/FDR-peaks.smk"
