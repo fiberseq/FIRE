@@ -82,9 +82,11 @@ rule apply_model:
 
 rule sort_model:
     input:
-        bed="temp/{sm}/{hp}/chunks/{chunk}.bed",
+        bed=rules.apply_model.output.haps,
+        #bed="temp/{sm}/{hp}/chunks/{chunk}.bed",
     output:
-        bed=temp("temp/{sm}/{hp}/chunks/{chunk}.sorted.bed"),
+        bed=temp("temp/{sm}/chunks/{chunk}.sorted.bed"),
+        #bed=temp("temp/{sm}/{hp}/chunks/{chunk}.sorted.bed"),
     threads: 4
     conda:
         conda
