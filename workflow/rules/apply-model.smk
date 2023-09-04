@@ -162,6 +162,7 @@ rule fire_sites:
 rule nucleosome_and_linker_coverages:
     input:
         bed=rules.merge_model_results.output.bed,
+        fai=f"{ref}.fai",
     output:
         bed="results/{sm}/fiber-calls/{el_type}_coverage_{hp}.bed.gz",
     threads: 8
