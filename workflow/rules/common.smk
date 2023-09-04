@@ -74,3 +74,14 @@ def get_max_coverage(wc):
     median = get_median_coverage(wc)
     sd = math.sqrt(median)
     return median + coverage_within_n_sd * sd
+
+
+def grep_command_for_el_type(wc):
+    if wc.el_type == "nucleosome":
+        return "grep '230,230,230'" 
+    elif wc.el_type == "147,112,219":
+        return "grep -v '230,230,230' | awk '$10>{params.min_fdr}'"
+    elif wc.el_type == "fire":
+        return "awk '$10<={params.min_fdr}'"
+    else:
+        raise ValueError(f"Unknown element type {wc.el_type}")

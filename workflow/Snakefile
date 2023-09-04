@@ -94,10 +94,10 @@ rule all:
         expand(rules.fiber_locations.output, sm=data.index),
         expand(rules.filtered_and_shuffled_fiber_locations.output, sm=data.index),
         expand(
-            rules.nucleosome_and_linker_coverages.output,
+            rules.element_coverages.output,
             sm=data.index,
             hp=not_unk,
-            el_type=["nucleosome", "linker"],
+            el_type=["nucleosome", "linker", "fire"],
         ),
         # FDR results
         expand(rules.fdr_track.output, sm=data.index),

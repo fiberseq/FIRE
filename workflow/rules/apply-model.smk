@@ -159,7 +159,7 @@ rule fire_sites:
         """
 
 
-rule nucleosome_and_linker_coverages:
+rule element_coverages:
     input:
         bed=rules.merge_model_results.output.bed,
         fai=f"{ref}.fai",
@@ -169,35 +169,16 @@ rule nucleosome_and_linker_coverages:
     conda:
         conda
     params:
-        get_color=lambda wc: "230,230,230" if wc.el_type == "nucleosome" else "147,112,219",
+        get_color=grep_command_for_el_type,
         hap_grep=lambda wc: "" if wc.hp == "all" else wc.hp,
     shell:
         """
         bgzip -cd -@{threads} {input.bed} \
             | grep -w "{params.hap_grep}" \
-            | grep "^#\|{params.get_color}"  \
+            | {params.grep_command_for_el_type} \
             | bedtools genomecov -bga -i - -g {input.fai} \
             | bgzip -@{threads} \
             > {output.bed}
         """
 
-rule fire_coverages:
-    input:
-        bed=rules.fire_sites.output.bed,
-        fai=f"{ref}.fai",
-    output:
-        bed="results/{sm}/fiber-calls/fire_coverage_{hp}.bed.gz",
-    threads: 8
-    conda:
-        conda
-    params:
-        hap_grep=lambda wc: "" if wc.hp == "all" else wc.hp,
-    shell:
-        """
-        bgzip -cd -@{threads} {input.bed} \
-            | grep -w "{params.hap_grep}" \
-            | bedtools genomecov -bga -i - -g {input.fai} \
-            | bgzip -@{threads} \
-            > {output.bed}
-        """
 
