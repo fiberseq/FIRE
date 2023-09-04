@@ -78,9 +78,9 @@ def get_max_coverage(wc):
 
 def grep_command_for_el_type(wc):
     if wc.el_type == "nucleosome":
-        return "(grep '230,230,230' || true)" 
+        return "(rg '230,230,230' || true)" 
     elif wc.el_type == "linker":
-        return f"(grep -v '230,230,230' || true) | awk '$10>{min_fire_fdr}'"
+        return f"(rg -v '230,230,230' || true) | awk '$10>{min_fire_fdr}'"
     elif wc.el_type == "fire":
         return f"awk '$10<={min_fire_fdr}'"
     else:

@@ -165,16 +165,16 @@ rule element_coverages:
         fai=f"{ref}.fai",
     output:
         bed="results/{sm}/fiber-calls/{el_type}_coverage_{hp}.bed.gz",
-    threads: 8
     conda:
         conda
     params:
         filter_cmd=grep_command_for_el_type,
         filter_hap=hap_grep_term,
+    threads: 8
     shell:
         """
         bgzip -cd -@{threads} {input.bed} \
-            | (grep -w {params.filter_hap} || true) \
+            | (rg -w {params.filter_hap} || true) \
             | {params.filter_cmd} \
             | bedtools genomecov -bga -i - -g {input.fai} \
             | bgzip -@{threads} \
