@@ -16,6 +16,6 @@ dependencies:
   - pyarrow
   - pip
   - pip:
-      - polars>=0.14
+      - polars>=0.19
       - pyd4>=0.3.6.2
       - git+https://github.com/fiberseq/fibertools.git

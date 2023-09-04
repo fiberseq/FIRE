@@ -10,7 +10,7 @@ dependencies:
   - numba
   - scipy
   - pandas>=2.0
-  - polars>=0.18
+  - polars>=0.19
   - pyarrow
   - pysam>=0.19
   - htslib>=1.17
