@@ -80,9 +80,9 @@ def grep_command_for_el_type(wc):
     if wc.el_type == "nucleosome":
         return "grep '230,230,230'" 
     elif wc.el_type == "linker":
-        return "grep -v '230,230,230' | awk '$10>{params.min_fdr}'"
+        return f"grep -v '230,230,230' | awk '$10>{min_fire_fdr}'"
     elif wc.el_type == "fire":
-        return "awk '$10<={params.min_fdr}'"
+        return f"awk '$10<={min_fire_fdr}'"
     else:
         raise ValueError(f"Unknown element type {wc.el_type}")
 
