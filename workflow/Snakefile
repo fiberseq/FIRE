@@ -106,6 +106,7 @@ rule all:
         # trackhub
         expand(rules.fdr_table_to_bw.output.bw, sm=data.index, col=bw_types),
         # misc
+"""
         expand("results/{sm}/trackHub/hub.txt", sm=data.index),
         expand(
             "results/{sm}/{hp}/fire.peaks.and.coverages.bed.gz", sm=data.index, hp=haps
@@ -123,3 +124,4 @@ rule all:
         expand(rules.fire_with_coverage.output, sm=data.index),
         expand(rules.peaks_vs_percent.output, sm=data.index),
         expand(rules.percent_accessible.output.bw, sm=data.index, hp=not_unk),
+"""
