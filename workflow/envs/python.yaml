@@ -6,7 +6,7 @@ channels:
 dependencies:
   - tqdm
   - defopt
-  - numpy==1.25 # setting exactly due to picky numpy numba compatibility issues
+  - numpy==1.25
   - numba
   - scipy
   - pandas==1.5
