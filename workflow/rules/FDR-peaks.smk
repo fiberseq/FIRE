@@ -183,7 +183,7 @@ rule fdr_track_filtered:
     shell:
         """
         zcat {input.bed} \
-            | csvtk -tT filter -f 'coverage >= {params.min_cov} && coverage <= {params.max_cov}' \
+            | csvtk filter -tT -C '$' -f 'coverage >= {params.min_cov} && coverage <= {params.max_cov}' \
             | bgzip -@ {threads} \
             > {output.bed}
         tabix -f -p bed {output.bed}
