@@ -6,7 +6,7 @@ channels:
 dependencies:
   - tqdm
   - defopt
-  - numpy==1.23.1 # use this version
+  - numpy==1.23 # use this version
   - numba==0.50 # use this version
   - libgcc
   - scipy
