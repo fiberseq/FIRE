@@ -7,7 +7,7 @@ dependencies:
   - tqdm
   - defopt
   - numpy==1.23 # use this version
-  - numba==0.57.1 # use this version
+  - numba==0.56.4 # use this version
   - libgcc
   - scipy
   - pandas==1.4 # pandas versions later than this have cxx errors
