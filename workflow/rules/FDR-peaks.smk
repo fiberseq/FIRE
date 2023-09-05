@@ -183,8 +183,10 @@ rule fdr_track_filtered:
     shell:
         """
         zcat {input.bed} \
-            | awk '$5 >= {params.min_cov} && $5 <= {params.max_cov}' \
+            | csvtk -tT filter -f '$5 >= {params.min_cov} && $5 <= {params.max_cov}' \
             | bgzip -@ {threads} \
             > {output.bed}
         tabix -f -p bed {output.bed}
+        
+        #| awk '$5 >= {params.min_cov} && $5 <= {params.max_cov}' \
         """
