@@ -10,7 +10,7 @@ dependencies:
   - numba
   - libgcc
   - scipy
-  - pandas>=2.0
+  - pandas==1.4 # pandas versions later than this have cxx errors
   - pysam>=0.19
   - htslib>=1.17
   - pip
