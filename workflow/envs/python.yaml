@@ -9,7 +9,7 @@ dependencies:
   - numpy==1.23.1 # setting exactly due to picky numpy numba compatibility issues
   - numba
   - scipy
-  - pandas>=2.0
+  - pandas==2.1
   - pysam>=0.19
   - htslib>=1.17
   - cmake
