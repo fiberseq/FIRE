@@ -8,10 +8,10 @@ dependencies:
   - defopt
   - numpy==1.23 # use this version
   - numba==0.56.4 # use this version
-  - libgcc
+  #- libgcc
+  #- libstdcxx-ng=12
   - scipy
   - pandas==1.4 # pandas versions later than this have cxx errors
-  - libstdcxx-ng
   - pysam>=0.19
   - htslib>=1.17
   - pip
