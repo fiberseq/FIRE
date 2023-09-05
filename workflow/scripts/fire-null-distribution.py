@@ -380,12 +380,11 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
         log_FDRs = -10 * np.log10(tmp_FDR)
         return_data[f"log_FDR{tag}"] = log_FDRs
 
-        # find local maxima
-        if False:
-            local_max = argrelextrema(cur_scores, np.greater)
-            is_local_max = np.zeros(FDRs.shape[0], dtype=int)
-            is_local_max[local_max] = True
-            return_data[f"is_local_max{tag}"] = is_local_max
+    # find local maxima in the scores
+    local_max = argrelextrema(return_data["score"], np.greater)
+    is_local_max = np.zeros(chrom_length, dtype=bool)
+    is_local_max[local_max] = True
+    return_data[f"is_local_max"] = is_local_max
 
     for key, data in return_data.items():
         if isinstance(data, np.ndarray):
