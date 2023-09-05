@@ -7,7 +7,7 @@ channels:
 dependencies:
   - tqdm
   - defopt
-  - numpy==1.23 # use this version to avoid cxx errors
+  - numpy==1.24 # use this version to avoid cxx errors
   - numba::numba
   - scipy
   - pandas==1.4 # pandas versions later than this have cxx errors
