@@ -118,14 +118,19 @@ df=fread(in_file) %>%
         !is.na(coverage_H1),
         !is.na(coverage_H2),
     ) %>%
+    mutate(
+        st=start,
+        en=end,
+        `#ct` = `#chrom`,
+    ) %>%
     data.table()
 
 # continue 
 df$hap1_frac_acc = df$fire_coverage_H1/df$coverage_H1
 df$hap2_frac_acc = df$fire_coverage_H2/df$coverage_H2
 df$autosome = "Autosome"
-df[`#ct` == "chrY"]$autosome = "chrY"
-df[`#ct` == "chrX"]$autosome = "chrX"
+df[`#chrom` == "chrY"]$autosome = "chrY"
+df[`#chrom` == "chrX"]$autosome = "chrX"
 
 # filter by coverage
 sd = 3
@@ -245,5 +250,5 @@ tdf %>%
             TRUE ~ "200,200,200"
         )
     ) %>%
-    select(c("#ct", "st", "en", "name", "score", "strand", "tst", "ten", "color")) %>%
+    select(c("#chrom", "st", "en", "name", "score", "strand", "tst", "ten", "color")) %>%
     fwrite(out_file_4, sep="\t", quote=F, na=".", row.names=F)
