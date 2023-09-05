@@ -98,50 +98,57 @@ out_file_2=snakemake@output[[2]]
 out_file_3=snakemake@output[[3]]
 out_file_4=snakemake@output[[4]]
 
+
+#chrom start end   fire_coverage coverage score FDR log_FDR
+#chr20  0   60245 0             0        -1    1   0
+#fire_coverage_H1 coverage_H1 score_H1 FDR_H1 log_FDR_H1 
+#       -1               -1          -1       -1     -1 
+#fire_coverage_H2 coverage_H2 score_H2 FDR_H2 log_FDR_H2
+#        -1               -1          -1       -1     -1
+
+
 df=fread(in_file) %>%
     mutate_at(
-        c("hap1_acc","hap2_acc","hap1_link","hap2_link","hap1_nuc","hap2_nuc"),
+        c("fire_coverage_H1","fire_coverage_H2","coverage_H1","coverage_H2"),
         as.numeric
     ) %>%
     filter(
-        !is.na(hap1_acc),
-        !is.na(hap1_link),
-        !is.na(hap1_nuc),
-        !is.na(hap2_acc),
-        !is.na(hap2_link),
-        !is.na(hap2_nuc),
+        !is.na(fire_coverage_H1),
+        !is.na(fire_coverage_H2),
+        !is.na(coverage_H1),
+        !is.na(coverage_H2),
     ) %>%
     data.table()
 
 # continue 
-df$hap1_cov = df$hap1_acc + df$hap1_link + df$hap1_nuc
-df$hap2_cov = df$hap2_acc + df$hap2_link + df$hap2_nuc
-df$hap1_frac_acc = df$hap1_acc/df$hap1_cov
-df$hap2_frac_acc = df$hap2_acc/df$hap2_cov
+df$hap1_frac_acc = df$fire_coverage_H1/df$coverage_H1
+df$hap2_frac_acc = df$fire_coverage_H2/df$coverage_H2
 df$autosome = "Autosome"
 df[`#ct` == "chrY"]$autosome = "chrY"
 df[`#ct` == "chrX"]$autosome = "chrX"
 
 # filter by coverage
 sd = 3
-cov = unique(df$cov)
+cov = median(df$coverage)
 my_min_cov = max(cov*0.5 - sd * sqrt(cov*0.5), 10)
 my_max_cov = cov*0.5 + sd * sqrt(cov*0.5)
 
 print(glue("min_cov={my_min_cov} max_cov={my_max_cov} cov={cov}"))
 
 pdf = df %>%
-    filter(hap1_cov > 0 & hap2_cov > 0) %>%
+    filter(coverage_H1 > 0 & coverage_H2 > 0) %>%
     mutate(
         min_cov = my_min_cov,
         max_cov = my_max_cov,
     ) %>%
     filter(autosome != "chrY" ) %>%
-    filter(hap1_cov > min_cov & hap2_cov > min_cov) %>%
-    filter(hap1_cov < max_cov & hap2_cov < max_cov) %>%
+    filter(coverage_H1 > min_cov & coverage_H2 > min_cov) %>%
+    filter(coverage_H1 < max_cov & coverage_H2 < max_cov) %>%
     mutate(
-        hap1_nacc = hap1_cov - hap1_acc,
-        hap2_nacc = hap2_cov - hap2_acc,
+        hap1_nacc = coverage_H1 - fire_coverage_H2,
+        hap2_nacc = coverage_H2 - fire_coverage_H2,
+        hap1_acc = fire_coverage_H1,
+        hap2_acc = fire_coverage_H2,
     )
 
 if(nrow(pdf)== 0){
