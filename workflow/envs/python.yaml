@@ -12,6 +12,7 @@ dependencies:
   - pandas>=2.0
   - pysam>=0.19
   - htslib>=1.17
+  - cmake
   - pip
   - pip:
       - polars[pyarrow]>=0.19
