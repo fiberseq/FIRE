@@ -7,7 +7,8 @@ dependencies:
   - tqdm
   - defopt
   - numpy==1.24
-  - numba>=0.57
+  - numba
+  - libstdcxx-ng # for GLIBCXX_3.4.30?
   - scipy
   - pandas>=2.0
   - pysam>=0.19
