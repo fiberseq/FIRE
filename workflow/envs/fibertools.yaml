@@ -1,5 +1,6 @@
 name: fibertools
 channels:
+  - numba
   - conda-forge
   - bioconda
   - defaults
@@ -8,7 +9,20 @@ channels:
 dependencies:
   - htslib>=1.17
   - numpy==1.23.1
-  - rust
-  - pip>=20.1
+  - numba::numba
+  - pandas==1.4
+  - pysam>=0.19.0
+  - pyranges>=0.0.115
+  - mokapot==0.8
+  - scikit-learn
+  - xgboost==1.5.1
+  - Cython
+  - pyarrow
+  - tqdm
+  - sorted_nearest
+  - bumpversion
+  - psutil
+  - rust # skip, needed for pyd4, ==1.61.0
+  - pip>=20.1 # pip is needed as dependency
   - pip:
       - git+https://github.com/fiberseq/fibertools.git
