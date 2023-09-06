@@ -8,6 +8,7 @@ channels:
 dependencies:
   - htslib>=1.17
   - numpy==1.23.1
+  - rust
   - pip>=20.1
   - pip:
       - git+https://github.com/fiberseq/fibertools.git
