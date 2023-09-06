@@ -75,7 +75,7 @@ localrules:
     merge_model_results,
     model_bam,
     trackhub,
-    average_coverage,
+    coverage,
     clustering_vs_null,
     percent_in_clusters,
     fire_peaks,
