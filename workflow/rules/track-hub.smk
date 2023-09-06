@@ -123,7 +123,7 @@ rule trackhub:
     input:
         fai=ancient(f"{ref}.fai"),
         fire=rules.fire_bw.output.bb,
-        cov=rules.average_coverage.output.cov,
+        cov=rules.coverage.output.cov,
         hap_diffs=rules.hap_differences.output.bed,
         hap_diffs2=rules.hap_differences_track.output.bb,
         bed=expand(rules.merge_model_results.output.bed, hp=haps, allow_missing=True),
