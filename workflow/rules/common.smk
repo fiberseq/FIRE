@@ -34,7 +34,7 @@ def get_load(wc):
     return 50
 
 
-def find_median_coverage(file, outfile=None):
+def find_median_coverage(file, out=None, min_out=None, max_out=None):
     if force_coverage is not None:
         coverage = force_coverage
     else:
@@ -46,13 +46,20 @@ def find_median_coverage(file, outfile=None):
         total = (df.end - df.start).sum()
         coverage = (df.coverage * (df.end - df.start)).sum() / total
 
+    min_coverage = get_min_coverage(coverage)
+    max_coverage = get_max_coverage(coverage)
+
     if coverage <= 1:
         raise ValueError(
             f"Median coverage is {coverage}! Did you use the correct reference, or is data missing from most of your genome. If so consider the keep_chromosomes parameter in config.yaml"
         )
 
-    if outfile is not None:
+    if out is not None:
         open(outfile, "w").write(str(round(coverage)) + "\n")
+    if min_out is not None:
+        open(min_out, "w").write(str(round(min_coverage)) + "\n")
+    if max_out is not None:
+        open(max_out, "w").write(str(round(max_coverage)) + "\n")
     return round(coverage)
 
 
@@ -63,22 +70,20 @@ def get_median_coverage(wc):
     return find_median_coverage(median_coverages[0])
 
 
-def get_min_coverage(wc):
-    median = get_median_coverage(wc)
+def get_min_coverage(median):
     sd = math.sqrt(median)
     mmin = median - coverage_within_n_sd * sd
     return max(mmin, min_coverage)
 
 
-def get_max_coverage(wc):
-    median = get_median_coverage(wc)
+def get_max_coverage(median):
     sd = math.sqrt(median)
     return median + coverage_within_n_sd * sd
 
 
 def grep_command_for_el_type(wc):
     if wc.el_type == "nucleosome":
-        return "(rg '230,230,230' || true)" 
+        return "(rg '230,230,230' || true)"
     elif wc.el_type == "linker":
         return f"(rg -v '230,230,230' || true) | awk '$10>{min_fire_fdr}'"
     elif wc.el_type == "fire":
@@ -86,12 +91,13 @@ def grep_command_for_el_type(wc):
     else:
         raise ValueError(f"Unknown element type {wc.el_type}")
 
+
 def hap_grep_term(wc):
-    if wc.hp=="all":
+    if wc.hp == "all":
         return '""'
-    elif wc.hp=="hap1":
+    elif wc.hp == "hap1":
         return "H1"
-    elif wc.hp=="hap2":
+    elif wc.hp == "hap2":
         return "H2"
     else:
         raise ValueError(f"Unknown haplotype {wc.hp}")

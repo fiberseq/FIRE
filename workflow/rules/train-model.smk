@@ -52,6 +52,8 @@ rule filter_model_input_by_coverage:
         bed=rules.dhs_null.output.bed,
         bam=lambda wc: data.loc[wc.sm, "bam"],
         bg=rules.genome_bedgraph.output.bg,
+        minimum=rules.coverage.output.minimum,
+        maximum=rules.coverage.output.maximum,
     output:
         bed="results/{sm}/dhs_with_null_cov_filtered.bed",
     threads: 8
@@ -59,17 +61,15 @@ rule filter_model_input_by_coverage:
         conda
     params:
         chrom=get_chroms()[0],
-        coverage=get_median_coverage,
     shell:
         """
-        median={params.coverage}
-        min=$(echo "$median" | awk '{{print $1-3*sqrt($1)}}')
-        max=$(echo "$median" | awk '{{print $1+3*sqrt($1)}}')
-        echo $median $min $max 
+        MIN=$(cat {input.minimum})
+        MAX=$(cat {input.maximum})
+        echo $MIN $MAX 
         bedmap --ec --delim '\t' --echo --mean \
             <(zcat {input.bed} | sort -k 1,1 -k2,2n) \
             <(zcat {input.bg} | awk '{{print $1"\t"$2"\t"$3"\t"$4"\t"$4}}' | sort -k 1,1 -k2,2n) \
-            | awk -v min="$min" -v max="$max" '$5 > min && $5 < max' \
+            | awk -v min="$MIN" -v max="$MAX" '$5 > min && $5 < max' \
             | cut -f 1-4 \
             > {output.bed}
         head {output.bed}

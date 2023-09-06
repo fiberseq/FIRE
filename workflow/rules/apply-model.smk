@@ -180,5 +180,3 @@ rule element_coverages:
             > {output.bed}
         tabix -p bed {output.bed}
         """
-
-

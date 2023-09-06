@@ -47,18 +47,20 @@ rule filtered_and_shuffled_fiber_locations_chromosome:
         fai=ancient(f"{ref}.fai"),
         # required for the coverage function to work
         bg=rules.genome_bedgraph.output.bg,
+        minimum=rules.coverage.output.minimum,
+        maximum=rules.coverage.output.maximum,
     output:
         bed=temp("temp/{sm}/coverage/{chrom}.fiber-locations-filtered.bed.gz"),
         bg=temp("temp/{sm}/coverage/{chrom}.fiber-locations-filtered.coverage.bed.gz"),
         shuffled=temp("temp/{sm}/coverage/{chrom}.fiber-locations-shuffled.bed.gz"),
     threads: 4
-    params:
-        min_cov=get_min_coverage,
-        max_cov=get_max_coverage,
     conda:
         conda
     shell:
         """
+        MIN=$(cat {input.minimum})
+        MAX=$(cat {input.maximum})
+
         # check if file is empty
         if [ -n "$(gunzip <{input.bed} | head -c 1 | tr '\\0\\n' __)" ]; then
             echo "input is not empty"
@@ -73,7 +75,7 @@ rule filtered_and_shuffled_fiber_locations_chromosome:
         # get fiber locations
         bedtools intersect -v -f 0.2 \
             -a {input.bed} \
-            -b <(zcat {input.bg} | awk '$4 <= {params.min_cov} || $4 >= {params.max_cov}') \
+            -b <(zcat {input.bg} | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX') \
         | bgzip -@ {threads} \
         > {output.bed}
 
@@ -174,17 +176,19 @@ rule fdr_track_filtered:
     output:
         bed="results/{sm}/FDR-peaks/FDR.track.coverage.filtered.bed.gz",
         tbi="results/{sm}/FDR-peaks/FDR.track.coverage.filtered.bed.gz.tbi",
+        minimum=rules.coverage.output.minimum,
+        maximum=rules.coverage.output.maximum,
     threads: 8
     conda:
         conda
-    params:
-        min_cov=get_min_coverage,
-        max_cov=get_max_coverage,
     shell:
         """
+        MIN=$(cat {input.minimum})
+        MAX=$(cat {input.maximum})
+
         zcat {input.bed} \
             | csvtk filter -tT -C '$' \
-                -f 'coverage>={params.min_cov}' -f 'coverage<={params.max_cov}' \
+                -f "coverage>=$MIN" -f "coverage<=$MAX" \
             | bgzip -@ {threads} \
             > {output.bed}
         tabix -f -p bed {output.bed}

@@ -23,10 +23,17 @@ rule genome_bedgraph:
         """
 
 
-rule average_coverage:
+rule coverage:
     input:
         median=rules.genome_bedgraph.output.median,
     output:
         cov="results/{sm}/coverage/{sm}.median.coverage.txt",
+        minimum="results/{sm}/coverage/{sm}.minimum.coverage.txt",
+        maximum="results/{sm}/coverage/{sm}.maximum.coverage.txt",
     run:
-        find_median_coverage(input["median"], outfile=output["cov"])
+        find_median_coverage(
+            input["median"],
+            out=output["cov"],
+            min_out=output["minimum"],
+            max_out=output["maximum"],
+        )

@@ -42,6 +42,7 @@ rule fdr_table_to_bw:
         bedGraphToBigWig {output.tmp} {input.fai} {output.bw}
         """
 
+
 #
 # make single molecule viz for trackhub
 #
