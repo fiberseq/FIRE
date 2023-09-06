@@ -173,11 +173,11 @@ rule fdr_track:
 rule fdr_track_filtered:
     input:
         bed=rules.fdr_track.output.bed,
+        minimum=rules.coverage.output.minimum,
+        maximum=rules.coverage.output.maximum,
     output:
         bed="results/{sm}/FDR-peaks/FDR.track.coverage.filtered.bed.gz",
         tbi="results/{sm}/FDR-peaks/FDR.track.coverage.filtered.bed.gz.tbi",
-        minimum=rules.coverage.output.minimum,
-        maximum=rules.coverage.output.maximum,
     threads: 8
     conda:
         conda
