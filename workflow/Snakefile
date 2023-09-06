@@ -41,7 +41,7 @@ types_to_col = {"fdr": 4, "acc": 5, "link": 6, "nuc": 7}
 
 bw_types = ["score", "FDR", "log_FDR"]
 bw_types = bw_types + [f"{t}_H1" for t in bw_types] + [f"{t}_H2" for t in bw_types]
-
+el_types=["nucleosome", "linker", "fire"]
 
 include: "rules/common.smk"
 include: "rules/coverages.smk"
@@ -64,6 +64,7 @@ wildcard_constraints:
     fdr="\d+",
     hp="|".join(haps),
     col="|".join(bw_types),
+    el_type="|".join(el_types),
 
 
 localrules:
@@ -99,7 +100,7 @@ rule all:
             rules.element_coverages.output,
             sm=data.index,
             hp=not_unk,
-            el_type=["nucleosome", "linker", "fire"],
+            el_type=el_types,
         ),
         # FDR results
         expand(rules.fdr_track.output, sm=data.index),
