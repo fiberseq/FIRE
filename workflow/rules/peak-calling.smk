@@ -113,8 +113,10 @@ rule fire_peaks:
 rule fire_with_coverage:
     input:
         bed=rules.fire_peaks.output.bed,
-        cov=rules.average_coverage.output.cov,
+        cov=rules.coverage.output.cov,
         cov_bed=rules.fdr_track_filtered.output.bed,
+        minimum=rules.coverage.output.minimum,
+        maximum=rules.coverage.output.maximum,
     output:
         bed="results/{sm}/FIRE.peaks.with.coverage.bed",
     threads: 8
@@ -123,8 +125,8 @@ rule fire_with_coverage:
     shell:
         """
         COV=$(cat {input.cov})
-        MIN=$(echo "$COV" | awk '{{print $1-5*sqrt($1)}}')
-        MAX=$(echo "$COV" | awk '{{print $1+5*sqrt($1)}}')
+        MIN=$(cat {input.minimum})
+        MAX=$(cat {input.maximum})
         printf "#ct\tst\ten\t" > {output.bed}
         printf "peak_ct\tpeak_st\tpeak_en\t" >> {output.bed}
         printf "peak_fdr\tpeak_acc\tpeak_link\tpeak_nuc\t" >> {output.bed}
