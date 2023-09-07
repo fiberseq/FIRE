@@ -1,5 +1,5 @@
 import re
-
+import logging
 
 def get_chroms():
     chroms = fai["chr"]
@@ -41,6 +41,7 @@ def find_median_coverage(file, out=None, min_out=None, max_out=None):
         df = pd.read_csv(
             file, sep="\t", header=None, names=["chr", "start", "end", "coverage"]
         )
+        logging.info(f"Calculating median coverage from {file}\n{df}")
         df = df[df.coverage > 0]
         df = df[df["chr"].isin(get_chroms())]
         total = (df.end - df.start).sum()
