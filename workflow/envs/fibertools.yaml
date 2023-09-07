@@ -9,7 +9,6 @@ channels:
 dependencies:
   - htslib>=1.17
   - numpy==1.23.1
-  - cmake
   - rust # skip, needed for pyd4, ==1.61.0
   - pip>=20.1 # pip is needed as dependency
   - pip:
