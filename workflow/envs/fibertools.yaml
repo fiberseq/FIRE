@@ -9,9 +9,10 @@ channels:
 dependencies:
   - htslib>=1.17
   - numpy==1.23.1
-  - rust # skip, needed for pyd4, ==1.61.0
+  - rust>=1.71# skip, needed for pyd4, ==1.61.0
   - pip>=20.1 # pip is needed as dependency
   - cmake
   - d4tools
   - pip:
+      - pyd
       - git+https://github.com/fiberseq/fibertools.git
