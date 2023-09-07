@@ -34,7 +34,7 @@ def get_load(wc):
     return 50
 
 
-def find_median_coverage(file, out=None, min_out=None, max_out=None):
+def find_median_coverage(file, outfile=None, min_out=None, max_out=None):
     if force_coverage is not None:
         coverage = force_coverage
     else:
@@ -55,7 +55,7 @@ def find_median_coverage(file, out=None, min_out=None, max_out=None):
             f"Median coverage is {coverage}! Did you use the correct reference, or is data missing from most of your genome. If so consider the keep_chromosomes parameter in config.yaml"
         )
 
-    if out is not None:
+    if outfile is not None:
         open(outfile, "w").write(str(round(coverage)) + "\n")
     if min_out is not None:
         open(min_out, "w").write(str(round(min_coverage)) + "\n")

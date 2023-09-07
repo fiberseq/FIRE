@@ -33,7 +33,7 @@ rule coverage:
     run:
         find_median_coverage(
             input["median"],
-            out=output["cov"],
+            outfile=output["cov"],
             min_out=output["minimum"],
             max_out=output["maximum"],
         )
