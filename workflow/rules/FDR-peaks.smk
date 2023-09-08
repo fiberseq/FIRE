@@ -175,8 +175,7 @@ rule fdr_track_with_elements:
         bed=rules.fdr_track.output.bed,
         fire=rules.fire_sites.output.bed,
     output:
-        bed="results/{sm}/FDR-peaks/FDR.track.coverage.filtered.bed.gz",
-        tbi="results/{sm}/FDR-peaks/FDR.track.coverage.filtered.bed.gz.tbi",
+        bed="temp/{sm}/FDR-peaks/FDR-track-with-FIRE.bed.gz",
     threads: 8
     conda:
         conda
