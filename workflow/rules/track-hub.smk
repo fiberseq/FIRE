@@ -26,7 +26,7 @@ rule percent_accessible:
         """
 
 
-rule fdr_table_to_bw:
+rule fdr_track_to_bw:
     input:
         bed=rules.fdr_track.output.bed,
         fai=ancient(f"{ref}.fai"),
@@ -39,6 +39,23 @@ rule fdr_table_to_bw:
     shell:
         """
         hck -z -f 1-3 -F {wildcards.col} {input.bed} > {output.tmp} 
+        bedGraphToBigWig {output.tmp} {input.fai} {output.bw}
+        """
+
+
+rule fdr_peaks_by_fire_elements_to_bw:
+    input:
+        bed=rules.fdr_peaks_by_fire_elements.output.bed,
+        fai=ancient(f"{ref}.fai"),
+    output:
+        bw="results/{sm}/trackHub/bw/FDR-fire-peaks.bw",
+        tmp="results/{sm}/trackHub/bw/FDR-fire-peaks.bw.tmp",
+    threads: 4
+    conda:
+        conda
+    shell:
+        """
+        hck -z -f 1-3 {input.bed} > {output.tmp} 
         bedGraphToBigWig {output.tmp} {input.fai} {output.bw}
         """
 
