@@ -169,7 +169,7 @@ rule element_coverages:
     params:
         filter_cmd=grep_command_for_el_type,
         filter_hap=hap_grep_term,
-    threads: 8
+    threads: 4
     shell:
         """
         bgzip -cd -@{threads} {input.bed} \
