@@ -56,7 +56,7 @@ rule fdr_peaks_by_fire_elements_to_bb:
     shell:
         """
         hck -z -f 1-3 {input.bed} -F FDR > {output.tmp} 
-        bedToBigBed -type=bed4 {output.tmp} {input.fai} {output.bw}
+        bedToBigBed -type=bed4 {output.tmp} {input.fai} {output.bb}
         """
 
 
