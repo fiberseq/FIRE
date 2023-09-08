@@ -170,7 +170,7 @@ rule fdr_track:
         """
 
 
-rule fdr_track_with_elements:
+rule fdr_peaks_by_fire_elements:
     input:
         bed=rules.fdr_track.output.bed,
         fire=rules.fire_sites.output.bed,
@@ -195,8 +195,8 @@ rule fdr_track_with_elements:
 
         printf "$OUT_HEADER\\n" | bgzip > {output.bed}
         zcat {input.bed} \
-            | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}" \
             | rg -w "True" \
+            | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}" \
             | bedtools intersect -wa -wb -sorted -a - \
                 -b <(zcat {input.fire} | cut -f 1-3 | awk '{{print $0"\t"NR}}') \
             | bedtools groupby -g 1-$NC \
