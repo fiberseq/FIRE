@@ -189,7 +189,7 @@ rule fdr_track_with_elements:
         FIRE_EN=$((NC+3))
         FIRE_ID_COL=$((NC+4))
 
-        OUT_HEADER=$(printf "$HEADER\\tpeak_start\\tpeak_end\\tFIRE_IDs\\n")
+        OUT_HEADER=$(printf "$HEADER tpeak_start tpeak_end FIRE_IDs\\n" | unexpand)
         echo $OUT_HEADER
         echo $FIRE_ST $FIRE_EN $FIRE_ID_COL
 
