@@ -187,7 +187,7 @@ rule fdr_track_with_elements:
             | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}"  \
             | rg -w "#chrom|True" \
             | bedtools intersect -wa -wb -sorted -header -a - \
-                -b <(zcat {input.fire} | cut -f 1-3) \
+                -b <(zcat {input.fire} | cut -f 1-3 | awk 'P{print $0"\t"NR}}' \
             | bgzip -@ {threads} \
             > {output.bed}
         """
