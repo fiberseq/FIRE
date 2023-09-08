@@ -1,6 +1,7 @@
 import re
 import logging
 
+
 def get_chroms():
     chroms = fai["chr"]
     chroms = sorted([chrom for chrom in fai["chr"] if "chrUn_" not in chrom])

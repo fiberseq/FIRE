@@ -205,7 +205,8 @@ rule fdr_peaks_by_fire_elements:
             | bgzip -@ {threads} \
             >> {output.bed}
         """
- 
+
+
 rule fdr_track_filtered:
     input:
         bed=rules.fdr_track.output.bed,
