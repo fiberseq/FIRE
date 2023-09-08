@@ -183,8 +183,8 @@ rule fdr_track_with_elements:
         max_peak_fdr=max_peak_fdr,
     shell:
         """
-        HEADER=$(zcat {input.bed} | head -n 1)
-        NC=$(echo $HEADER | awk '{{print NF}}')
+        HEADER=$(zcat {input.bed} | head -n 1 || true)
+        NC=$(echo $HEADER | awk '{{print NF}}' || true)
         FIRE_ST=$((NC+2))
         FIRE_EN=$((NC+3))
         FIRE_ID_COL=$((NC+4))
