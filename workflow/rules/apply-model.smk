@@ -175,7 +175,7 @@ rule element_coverages:
         bgzip -cd -@{threads} {input.bed} \
             | (rg -w {params.filter_hap} || true) \
             | {params.filter_cmd} \
-            | bedtools genomecov -bga -i - -g {input.fai} \
+            | bedtools genomecov -bg -i - -g {input.fai} \
             | bgzip -@{threads} \
             > {output.bed}
         tabix -p bed {output.bed}
