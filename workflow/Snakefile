@@ -33,6 +33,7 @@ haps = ["all", "hap1", "hap2", "unk"]
 not_all = ["hap1", "hap2", "unk"]
 not_unk = ["all", "hap1", "hap2"]
 min_fire_fdr = config.get("min_fire_fdr", 0.10)
+max_peak_fdr = config.get("max_peak_fdr", 0.05)
 print(data.index)
 
 types = ["fdr", "acc", "link", "nuc"]
@@ -103,6 +104,7 @@ rule all:
         ),
         # FDR results
         expand(rules.fdr_track.output, sm=data.index),
+        expand(rules.fdr_track_with_elements, sm=data.index),
         # trackhub
         expand(rules.fdr_table_to_bw.output.bw, sm=data.index, col=bw_types),
         # misc

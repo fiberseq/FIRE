@@ -170,6 +170,29 @@ rule fdr_track:
         """
 
 
+rule fdr_track_with_elements:
+    input:
+        bed=rules.fdr_track.output.bed,
+        fire=rules.fire_sites.output.bed,
+    output:
+        bed="results/{sm}/FDR-peaks/FDR.track.coverage.filtered.bed.gz",
+        tbi="results/{sm}/FDR-peaks/FDR.track.coverage.filtered.bed.gz.tbi",
+    threads: 8
+    conda:
+        conda
+    params:
+        max_peak_fdr=max_peak_fdr,
+    shell:
+        """
+         zcat {input.bed} \
+            | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}"  \
+            | rg -w "#chrom|True" \
+            | bedtools intersect -wa -wb -sorted -header -a - \
+                -b <(zcat {input.fire} | cut -f 1-3) \
+            | bgzip -@ {threads} \
+            > {output.bed}
+        """
+ 
 rule fdr_track_filtered:
     input:
         bed=rules.fdr_track.output.bed,
