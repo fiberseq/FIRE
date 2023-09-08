@@ -43,20 +43,20 @@ rule fdr_track_to_bw:
         """
 
 
-rule fdr_peaks_by_fire_elements_to_bw:
+rule fdr_peaks_by_fire_elements_to_bb:
     input:
         bed=rules.fdr_peaks_by_fire_elements.output.bed,
         fai=ancient(f"{ref}.fai"),
     output:
-        bw="results/{sm}/trackHub/bw/FDR-fire-peaks.bw",
-        tmp="results/{sm}/trackHub/bw/FDR-fire-peaks.bw.tmp",
+        bb="results/{sm}/trackHub/bw/FDR-fire-peaks.bb",
+        tmp="results/{sm}/trackHub/bw/FDR-fire-peaks.bb.tmp",
     threads: 4
     conda:
         conda
     shell:
         """
-        hck -z -f 1-3 {input.bed} > {output.tmp} 
-        bedGraphToBigWig {output.tmp} {input.fai} {output.bw}
+        hck -z -f 1-3 {input.bed} -F FDR > {output.tmp} 
+        bedToBigBed -type=bed4 {output.tmp} {input.fai} {output.bw}
         """
 
 
