@@ -196,7 +196,7 @@ rule fdr_peaks_by_fire_elements:
         ( \
             printf "$OUT_HEADER\\n"; \
             zcat {input.bed} \
-                | rg -w "True" \
+                | rg -w "#chrom|True" \
                 | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}" \
                 | bedtools intersect -wa -wb -sorted -a - \
                     -b <(zcat {input.fire} | cut -f 1-3 | awk '{{print $0"\t"NR}}') \
