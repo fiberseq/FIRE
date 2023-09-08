@@ -183,13 +183,27 @@ rule fdr_track_with_elements:
         max_peak_fdr=max_peak_fdr,
     shell:
         """
-         zcat {input.bed} \
-            | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}"  \
+        HEADER=$(zcat {input.bed} | head -n 1)
+        NC=$(echo $HEADER | awk '{print NF}')
+        FIRE_ST=$((NC+2))
+        FIRE_EN=$((NC+3))
+        FIRE_ID_COL=$((NC+4))
+
+        OUT_HEADER=$HEADER"\tpeak_start\tpeak_end\tFIRE_IDs"
+        echo $OUT_HEADER
+        echo $FIRE_ST $FIRE_EN $FIRE_ID_COL
+
+        echo $OUT_HEADER | bgzip > {output.bed}
+        zcat {input.bed} \
+            | csvtk filter -tT -C '$' -f "FDR<=0.05" \
             | rg -w "#chrom|True" \
             | bedtools intersect -wa -wb -sorted -header -a - \
-                -b <(zcat {input.fire} | cut -f 1-3 | awk '{{print $0"\t"NR}}' \
+                -b <(zcat {input.fire} | cut -f 1-3 | awk '{print $0"\t"NR}') \
+            | head -n 100 \
+            | bedtools groupby -header -g 1-$NC \
+                -o median,median,distinct_sort_num -c $FIRE_ST,$FIRE_EN,$FIRE_ID_COL \
             | bgzip -@ {threads} \
-            > {output.bed}
+            >> {output.bed}
         """
  
 rule fdr_track_filtered:
