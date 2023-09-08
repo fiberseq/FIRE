@@ -193,7 +193,7 @@ rule fdr_track_with_elements:
         echo $OUT_HEADER
         echo $FIRE_ST $FIRE_EN $FIRE_ID_COL
 
-        echo $OUT_HEADER | bgzip > {output.bed}
+        printf $OUT_HEADER | bgzip > {output.bed}
         zcat {input.bed} \
             | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}" \
             | rg -w "True" \
