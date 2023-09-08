@@ -189,11 +189,11 @@ rule fdr_track_with_elements:
         FIRE_EN=$((NC+3))
         FIRE_ID_COL=$((NC+4))
 
-        OUT_HEADER=$(printf "$HEADER tpeak_start tpeak_end FIRE_IDs\\n" | unexpand)
+        OUT_HEADER=$(printf "$HEADER tpeak_start tpeak_end FIRE_IDs" | unexpand)
         echo $OUT_HEADER
         echo $FIRE_ST $FIRE_EN $FIRE_ID_COL
 
-        printf $OUT_HEADER | bgzip > {output.bed}
+        printf "$OUT_HEADER\\n" | bgzip > {output.bed}
         zcat {input.bed} \
             | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}" \
             | rg -w "True" \
