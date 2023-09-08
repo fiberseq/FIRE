@@ -175,7 +175,7 @@ rule fdr_track_with_elements:
         bed=rules.fdr_track.output.bed,
         fire=rules.fire_sites.output.bed,
     output:
-        bed="temp/{sm}/FDR-peaks/FDR-track-with-FIRE.bed.gz",
+        bed="results/{sm}/FDR-peaks/FDR-FIRE-peaks.bed.gz",
     threads: 8
     conda:
         conda
@@ -189,19 +189,19 @@ rule fdr_track_with_elements:
         FIRE_EN=$((NC+3))
         FIRE_ID_COL=$((NC+4))
 
-        OUT_HEADER=$HEADER"\tpeak_start\tpeak_end\tFIRE_IDs"
+        OUT_HEADER=$HEADER"\\tpeak_start\\tpeak_end\\tFIRE_IDs"
         echo $OUT_HEADER
         echo $FIRE_ST $FIRE_EN $FIRE_ID_COL
 
         echo $OUT_HEADER | bgzip > {output.bed}
         zcat {input.bed} \
-            | csvtk filter -tT -C '$' -f "FDR<=0.05" \
-            | rg -w "#chrom|True" \
-            | bedtools intersect -wa -wb -sorted -header -a - \
+            | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}" \
+            | rg -w "True" \
+            | bedtools intersect -wa -wb -sorted -a - \
                 -b <(zcat {input.fire} | cut -f 1-3 | awk '{{print $0"\t"NR}}') \
-            | head -n 100 \
-            | bedtools groupby -header -g 1-$NC \
-                -o median,median,distinct_sort_num -c $FIRE_ST,$FIRE_EN,$FIRE_ID_COL \
+            | bedtools groupby -g 1-$NC \
+                -o median,median,distinct_sort_num \
+                -c $FIRE_ST,$FIRE_EN,$FIRE_ID_COL \
             | bgzip -@ {threads} \
             >> {output.bed}
         """
