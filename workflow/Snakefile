@@ -104,7 +104,7 @@ rule all:
         ),
         # FDR results
         expand(rules.fdr_track.output, sm=data.index),
-        expand(rules.fdr_track_with_elements, sm=data.index),
+        expand(rules.fdr_track_with_elements.output, sm=data.index),
         # trackhub
         expand(rules.fdr_table_to_bw.output.bw, sm=data.index, col=bw_types),
         # misc
