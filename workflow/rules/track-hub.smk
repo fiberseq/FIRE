@@ -48,8 +48,8 @@ rule fdr_peaks_by_fire_elements_to_bb:
         bed=rules.fdr_peaks_by_fire_elements.output.bed,
         fai=ancient(f"{ref}.fai"),
     output:
-        bb="results/{sm}/trackHub/bw/FDR-fire-peaks.bb",
-        tmp="results/{sm}/trackHub/bw/FDR-fire-peaks.bb.tmp",
+        bb="results/{sm}/trackHub/bw/FDR-FIRE-peaks.bb",
+        tmp=temp("temp/{sm}/trackHub/bw/FDR-FIRE-peaks.bb.tmp"),
     threads: 4
     conda:
         conda
