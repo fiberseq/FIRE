@@ -193,15 +193,18 @@ rule fdr_peaks_by_fire_elements:
         echo $OUT_HEADER
         echo $FIRE_ST $FIRE_EN $FIRE_ID_COL
 
-        printf "$OUT_HEADER\\n" | bgzip > {output.bed}
-        zcat {input.bed} \
-            | rg -w "True" \
-            | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}" \
-            | bedtools intersect -wa -wb -sorted -a - \
-                -b <(zcat {input.fire} | cut -f 1-3 | awk '{{print $0"\t"NR}}') \
-            | bedtools groupby -g 1-$NC \
-                -o median,median,distinct_sort_num \
-                -c $FIRE_ST,$FIRE_EN,$FIRE_ID_COL \
+        ( \
+            printf "$OUT_HEADER\\n"; \
+            zcat {input.bed} \
+                | rg -w "True" \
+                | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}" \
+                | bedtools intersect -wa -wb -sorted -a - \
+                    -b <(zcat {input.fire} | cut -f 1-3 | awk '{{print $0"\t"NR}}') \
+                | bedtools groupby -g 1-$NC \
+                    -o median,median,distinct_sort_num \
+                    -c $FIRE_ST,$FIRE_EN,$FIRE_ID_COL \
+        ) \
+            | hck -f 1,$FIRE_ST,$FIRE_EN,2- \
             | bgzip -@ {threads} \
             >> {output.bed}
         """
