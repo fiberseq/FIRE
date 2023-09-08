@@ -184,7 +184,7 @@ rule fdr_track_with_elements:
     shell:
         """
         HEADER=$(zcat {input.bed} | head -n 1)
-        NC=$(echo $HEADER | awk '{print NF}')
+        NC=$(echo $HEADER | awk '{{print NF}}')
         FIRE_ST=$((NC+2))
         FIRE_EN=$((NC+3))
         FIRE_ID_COL=$((NC+4))
@@ -198,7 +198,7 @@ rule fdr_track_with_elements:
             | csvtk filter -tT -C '$' -f "FDR<=0.05" \
             | rg -w "#chrom|True" \
             | bedtools intersect -wa -wb -sorted -header -a - \
-                -b <(zcat {input.fire} | cut -f 1-3 | awk '{print $0"\t"NR}') \
+                -b <(zcat {input.fire} | cut -f 1-3 | awk '{{print $0"\t"NR}}') \
             | head -n 100 \
             | bedtools groupby -header -g 1-$NC \
                 -o median,median,distinct_sort_num -c $FIRE_ST,$FIRE_EN,$FIRE_ID_COL \
