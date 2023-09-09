@@ -168,7 +168,7 @@ rule trackhub:
         load=get_load,
     threads: 4
     conda:
-        conda
+        "../envs/python.yaml"
     params:
         ref=ref_name,
         script=workflow.source_path("../scripts/trackhub.py"),
