@@ -154,10 +154,10 @@ pdf = df %>%
     filter(coverage_H1 > min_cov & coverage_H2 > min_cov) %>%
     filter(coverage_H1 < max_cov & coverage_H2 < max_cov) %>%
     mutate(
-        hap1_nacc = coverage_H1 - fire_coverage_H2,
-        hap2_nacc = coverage_H2 - fire_coverage_H2,
         hap1_acc = fire_coverage_H1,
         hap2_acc = fire_coverage_H2,
+        hap1_nacc = coverage_H1 - fire_coverage_H1,
+        hap2_nacc = coverage_H2 - fire_coverage_H2,
     )
 
 if(nrow(pdf)== 0){
