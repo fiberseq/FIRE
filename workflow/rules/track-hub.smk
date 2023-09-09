@@ -18,6 +18,7 @@ rule percent_accessible:
         """
         zcat {input.bed} \
             | hck -f 1-3 {params.cols} \
+            | grep -v "^#" \
             | awk -v OFS='\t' '$5 > 0 {{print $1,$2,$3,$4/$5}}' \
         > {output.tmp}
         
