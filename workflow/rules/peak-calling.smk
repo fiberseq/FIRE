@@ -163,10 +163,9 @@ rule fire_bw:
         """
 
 
-# TODO
 rule hap_differences:
     input:
-        bed=rules.fdr_track_filtered.output.bed,
+        bed=rules.fdr_peaks_by_fire_elements.output.bed,
     output:
         fig1="results/{sm}/hap1-vs-hap2/hap1-vs-hap2.pdf",
         fig2="results/{sm}/hap1-vs-hap2/hap1-vs-hap2-volcano.pdf",
