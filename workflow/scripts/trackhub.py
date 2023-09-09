@@ -199,19 +199,20 @@ def generate_trackhub(
 
     for hap in ["all", "hap1", "hap2", "unk"]:
         # add coverage tracks
-        acc = f"bw/{hap}.acc.bw"
-        nuc = f"bw/{hap}.nuc.bw"
-        link = f"bw/{hap}.link.bw"
-        trackDb.write(
-            MULTI_WIG.format(
-                acc=acc,
-                link=link,
-                nuc=nuc,
-                sample=sample,
-                hap=hap,
-                upper_coverage=upper_coverage,
+        if hap != "unk":
+            acc = f"bw/{hap}.fire.coverage.bw"
+            nuc = f"bw/{hap}.nucleosome.coverage.bw"
+            link = f"bw/{hap}.linker.coverage.bw"
+            trackDb.write(
+                MULTI_WIG.format(
+                    acc=acc,
+                    link=link,
+                    nuc=nuc,
+                    sample=sample,
+                    hap=hap,
+                    upper_coverage=upper_coverage,
+                )
             )
-        )
 
         if hap == "all":
             file = f"bb/FIRE.bb"
