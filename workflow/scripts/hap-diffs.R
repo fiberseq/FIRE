@@ -164,7 +164,7 @@ if(nrow(pdf)== 0){
     quit()
 }
 
-print(pdf[2446,:])
+print(pdf[2446,])
 pdf = pdf %>%
     rowwise() %>%
     mutate(
