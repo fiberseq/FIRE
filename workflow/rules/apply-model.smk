@@ -155,13 +155,12 @@ rule fire_sites:
         """
 
 
-rule element_coverages:
+rule element_coverages_by_type:
     input:
         bed=rules.merge_model_results.output.bed,
         fai=f"{ref}.fai",
     output:
-        bed="results/{sm}/coverage/{hp}/{el_type}_coverage_{hp}.bed.gz",
-        tbi="results/{sm}/coverage/{hp}/{el_type}_coverage_{hp}.bed.gz.tbi",
+        bed=temp("temp/{sm}/coverage/{hp}/{el_type}_coverage_{hp}.bed.gz"),
     benchmark:
         "benchmarks/{sm}/element_coverages/{el_type}_{hp}.tsv"
     conda:
@@ -178,14 +177,13 @@ rule element_coverages:
             | bedtools genomecov -bg -i - -g {input.fai} \
             | bgzip -@{threads} \
             > {output.bed}
-        tabix -p bed {output.bed}
         """
 
 
 rule element_coverages:
     input:
         beds=expand(
-            rules.element_coverages.output.bed,
+            rules.element_coverages_by_type.output.bed,
             el_type=el_types,
             allow_missing=True,
         ),
