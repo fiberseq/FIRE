@@ -169,10 +169,34 @@ rule fdr_track:
         bgzip -@ {threads} $TMP_OUT
         """
 
+rule fdr_track_filtered:
+    input:
+        bed=rules.fdr_track.output.bed,
+        minimum=rules.coverage.output.minimum,
+        maximum=rules.coverage.output.maximum,
+    output:
+        bed="results/{sm}/FDR-peaks/FDR.track.coverage.filtered.bed.gz",
+        tbi="results/{sm}/FDR-peaks/FDR.track.coverage.filtered.bed.gz.tbi",
+    threads: 8
+    conda:
+        conda
+    shell:
+        """
+        MIN=$(cat {input.minimum})
+        MAX=$(cat {input.maximum})
+
+        zcat {input.bed} \
+            | csvtk filter -tT -C '$' \
+                -f "coverage>=$MIN" -f "coverage<=$MAX" \
+            | bgzip -@ {threads} \
+            > {output.bed}
+        tabix -f -p bed {output.bed}
+        """
+
 
 rule fdr_peaks_by_fire_elements:
     input:
-        bed=rules.fdr_track.output.bed,
+        bed=rules.fdr_track_filtered.output.bed,
         fire=rules.fire_sites.output.bed,
     output:
         bed="results/{sm}/FDR-peaks/FDR-FIRE-peaks.bed.gz",
@@ -214,29 +238,3 @@ rule fdr_peaks_by_fire_elements:
             > {output.bed}
         """
 
-
-rule fdr_track_filtered:
-    input:
-        bed=rules.fdr_track.output.bed,
-        minimum=rules.coverage.output.minimum,
-        maximum=rules.coverage.output.maximum,
-    output:
-        bed="results/{sm}/FDR-peaks/FDR.track.coverage.filtered.bed.gz",
-        tbi="results/{sm}/FDR-peaks/FDR.track.coverage.filtered.bed.gz.tbi",
-    threads: 8
-    conda:
-        conda
-    shell:
-        """
-        MIN=$(cat {input.minimum})
-        MAX=$(cat {input.maximum})
-
-        zcat {input.bed} \
-            | csvtk filter -tT -C '$' \
-                -f "coverage>=$MIN" -f "coverage<=$MAX" \
-            | bgzip -@ {threads} \
-            > {output.bed}
-        tabix -f -p bed {output.bed}
-        
-        #| awk '$5 >= {params.min_cov} && $5 <= {params.max_cov}' \
-        """
