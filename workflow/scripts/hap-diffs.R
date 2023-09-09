@@ -125,6 +125,10 @@ df=fread(in_file) %>%
     ) %>%
     data.table()
 
+print(df[fire_coverage_H1 > coverage_H1])
+print(df[fire_coverage_H2 > coverage_H2])
+
+
 # continue 
 df$hap1_frac_acc = df$fire_coverage_H1/df$coverage_H1
 df$hap2_frac_acc = df$fire_coverage_H2/df$coverage_H2
