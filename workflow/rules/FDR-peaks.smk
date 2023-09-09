@@ -209,7 +209,7 @@ rule fdr_peaks_by_fire_elements:
         ) \
             | hck -f 1,$FIRE_ST,$FIRE_EN,2-$NC \
             | csvtk round -tT -C '$' -f 2,3 \
-            | bedtools sort -i - \
+            | bedtools sort -header -i - \
             | bgzip -@ {threads} \
             > {output.bed}
         """
