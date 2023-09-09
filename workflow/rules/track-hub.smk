@@ -28,6 +28,22 @@ rule percent_accessible:
         tabix -p bed {output.bed}
         """
 
+rule element_coverages_bw:
+    input:
+        bed=rules.element_coverages.output.bed
+        fai=ancient(f"{ref}.fai"),
+    output:
+        tmp=temp("temp/{sm}/trackHub/bw/{hp}.{el_type}.coverage.bed"),
+        bw="results/{sm}/trackHub/bw/{hp}.{el_type}.coverage.bw",
+    conda:
+        conda
+    shell:
+        """
+        zcat {input.bed} > {output.tmp}
+        bedGraphToBigWig {output.tmp} {input.fai} {output.bw}
+        """
+ 
+
 
 rule fdr_track_to_bw:
     input:
