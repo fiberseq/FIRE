@@ -185,13 +185,15 @@ rule fdr_peaks_by_fire_elements:
         """
         HEADER=$(zcat {input.bed} | head -n 1 || true)
         NC=$(echo $HEADER | awk '{{print NF}}' || true)
-        FIRE_ST=$((NC+2))
-        FIRE_EN=$((NC+3))
-        FIRE_ID_COL=$((NC+4))
+        FIRE_ST=$((NC+1))
+        FIRE_EN=$((NC+2))
+        FIRE_ID_COL=$((NC+3))
 
         OUT_HEADER=$(printf "$HEADER\\tpeak_start\\tpeak_end\\tFIRE_IDs")
         echo $OUT_HEADER
         echo $FIRE_ST $FIRE_EN $FIRE_ID_COL
+
+        printf "$OUT_HEADER\\n" | hck -f $FIRE_ST,FIRE_EN,FIRE_ID_COL,$NC
 
         ( \
             printf "$OUT_HEADER\\n"; \
