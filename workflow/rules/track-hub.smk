@@ -28,6 +28,7 @@ rule percent_accessible:
         tabix -p bed {output.bed}
         """
 
+
 rule element_coverages_bw:
     input:
         bed=rules.element_coverages.output.bed,
@@ -42,7 +43,6 @@ rule element_coverages_bw:
         zcat {input.bed} > {output.tmp}
         bedGraphToBigWig {output.tmp} {input.fai} {output.bw}
         """
- 
 
 
 rule fdr_track_to_bw:
