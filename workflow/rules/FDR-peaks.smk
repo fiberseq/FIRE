@@ -185,6 +185,7 @@ rule fdr_peaks_by_fire_elements:
         """
         HEADER=$(zcat {input.bed} | head -n 1 || true)
         NC=$(echo $HEADER | awk '{{print NF}}' || true)
+        FIRE_CT=$((NC+1))
         FIRE_ST=$((NC+2))
         FIRE_EN=$((NC+3))
         FIRE_ID_COL=$((NC+4))
@@ -203,8 +204,8 @@ rule fdr_peaks_by_fire_elements:
                 | bedtools intersect -wa -wb -sorted -a - \
                     -b <(zcat {input.fire} | cut -f 1-3 | awk '{{print $0"\t"NR}}') \
                 | bedtools groupby -g 1-$NC \
-                    -o median,median,distinct_sort_num \
-                    -c $FIRE_ST,$FIRE_EN,$FIRE_ID_COL \
+                    -o first,median,median,distinct_sort_num \
+                    -c $FIRE_CT,$FIRE_ST,$FIRE_EN,$FIRE_ID_COL \
         ) \
             | hck -f 1,$FIRE_ST,$FIRE_EN,2-$NC \
             | csvtk round -tT -C '$' -f 2,3 \
