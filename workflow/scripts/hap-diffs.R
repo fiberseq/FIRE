@@ -99,14 +99,6 @@ out_file_3=snakemake@output[[3]]
 out_file_4=snakemake@output[[4]]
 
 
-#chrom start end   fire_coverage coverage score FDR log_FDR
-#chr20  0   60245 0             0        -1    1   0
-#fire_coverage_H1 coverage_H1 score_H1 FDR_H1 log_FDR_H1 
-#       -1               -1          -1       -1     -1 
-#fire_coverage_H2 coverage_H2 score_H2 FDR_H2 log_FDR_H2
-#        -1               -1          -1       -1     -1
-
-
 df=fread(in_file) %>%
     mutate_at(
         c("fire_coverage_H1","fire_coverage_H2","coverage_H1","coverage_H2"),
@@ -119,8 +111,8 @@ df=fread(in_file) %>%
         !is.na(coverage_H2),
     ) %>%
     mutate(
-        st=start,
-        en=end,
+        st=peak_start,
+        en=peak_end,
         `#ct` = `#chrom`,
     ) %>%
     data.table()
@@ -244,7 +236,7 @@ tdf %>%
         tst=st+1,
         ten=case_when(
             p_value<=p_threshold ~ en - 1,
-            TRUE ~ st+1
+            TRUE ~ st+2
         ),
         strand=".",
         color = case_when(
