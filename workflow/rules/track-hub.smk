@@ -40,7 +40,7 @@ rule element_coverages_bw:
         conda
     shell:
         """
-        zcat {input.bed} > {output.tmp}
+        zcat {input.bed} | hck -f 1-3 -F {wildcards.el_type} > {output.tmp}
         bedGraphToBigWig {output.tmp} {input.fai} {output.bw}
         """
 
