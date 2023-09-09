@@ -215,7 +215,7 @@ def generate_trackhub(
             )
 
         if hap == "all":
-            file = f"bb/FIRE.bb"
+            file = f"bb/FDR-FIRE-peaks.bb"
             trackDb.write(FIRE_TEMPLATE.format(file=file, sample=sample))
             # add hap tracks
             file = f"bb/hap_differences.bb"
