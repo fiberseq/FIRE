@@ -175,7 +175,7 @@ rule trackhub:
         max_bins=max_bins,
     shell:
         """
-        python {params.script} -v \
+        python {params.script} -v 2 \
           --trackhub-dir results/{wildcards.sm}/trackHub \
           --reference {params.ref} \
           --sample {wildcards.sm} \
