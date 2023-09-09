@@ -169,6 +169,7 @@ rule fdr_track:
         bgzip -@ {threads} $TMP_OUT
         """
 
+
 rule fdr_track_filtered:
     input:
         bed=rules.fdr_track.output.bed,
@@ -237,4 +238,3 @@ rule fdr_peaks_by_fire_elements:
             | bgzip -@ {threads} \
             > {output.bed}
         """
-
