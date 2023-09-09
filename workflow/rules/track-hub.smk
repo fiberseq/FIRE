@@ -7,7 +7,7 @@ rule percent_accessible:
         bw="results/{sm}/trackHub/bw/{hp}.percent.accessible.bw",
         bed="results/{sm}/{hp}/percent.accessible.bed.gz",
         tbi="results/{sm}/{hp}/percent.accessible.bed.gz.tbi",
-    threads: 4
+    threads: 1
     conda:
         conda
     resources:
