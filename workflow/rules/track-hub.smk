@@ -30,7 +30,7 @@ rule percent_accessible:
 
 rule element_coverages_bw:
     input:
-        bed=rules.element_coverages.output.bed
+        bed=rules.element_coverages.output.bed,
         fai=ancient(f"{ref}.fai"),
     output:
         tmp=temp("temp/{sm}/trackHub/bw/{hp}.{el_type}.coverage.bed"),
