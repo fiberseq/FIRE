@@ -195,7 +195,7 @@ rule fdr_peaks_by_fire_elements:
 
         printf "$OUT_HEADER\\n" | hck -f $FIRE_ST,$FIRE_EN,$FIRE_ID_COL,$NC
         exit 
-        
+
         ( \
             printf "$OUT_HEADER\\n"; \
             zcat {input.bed} \
@@ -209,7 +209,7 @@ rule fdr_peaks_by_fire_elements:
         ) \
             | hck -f 1,$FIRE_ST,$FIRE_EN,2-$NC \
             | bgzip -@ {threads} \
-            >> {output.bed}
+            > {output.bed}
         """
 
 
