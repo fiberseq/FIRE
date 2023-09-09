@@ -256,10 +256,12 @@ def generate_trackhub(
                 )
 
     # FDR scores
-    FIRE_SCORE_AND_FDR.format(
-        fdr=f"bw/log_FDR.bw",
-        score=f"bw/score.bw",
-        y_line=-10 * np.log10(0.05),
+    trackDb.write(
+        FIRE_SCORE_AND_FDR.format(
+            fdr=f"bw/log_FDR.bw",
+            score=f"bw/score.bw",
+            y_line=-10 * np.log10(0.05),
+        )
     )
 
     # done with track db
