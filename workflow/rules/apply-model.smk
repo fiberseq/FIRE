@@ -180,3 +180,28 @@ rule element_coverages:
             > {output.bed}
         tabix -p bed {output.bed}
         """
+
+
+rule element_coverages:
+    input:
+        beds=expand(
+            rules.element_coverages.output.bed,
+            el_type=el_types,
+            allow_missing=True,
+        ),
+    output:
+        bed="results/{sm}/coverage/{hp}_element_coverages.bed.gz",
+        tbi="results/{sm}/coverage/{hp}_element_coverages.bed.gz.tbi",
+    conda:
+        conda
+    params:
+        names=" ".join(el_types),
+    threads: 4
+    shell:
+        """
+        bedtools unionbedg -header -i {input.beds} -names {params.names} \
+            | sed 's/^chrom/#chrom/' \
+            | bgzip -@ {threads} \
+        > {output.bed}
+        tabix -p bed {output.bed}
+        """
