@@ -116,7 +116,7 @@ rule all:
             hp=not_unk,
             el_type=el_types,
         ),
-        #expand(rules.trackhub.output, sm=data.index),
+        expand(rules.trackhub.output, sm=data.index),
         # misc
 
 
