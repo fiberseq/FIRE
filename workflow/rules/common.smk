@@ -103,3 +103,14 @@ def hap_grep_term(wc):
         return "H2"
     else:
         raise ValueError(f"Unknown haplotype {wc.hp}")
+
+
+def hap_hck_columns(wc):
+    if wc.hp == "all":
+        return "-F fire_coverage -F coverage"
+    elif wc.hp == "hap1":
+        return "-F fire_coverage_H1 -F coverage_H1"
+    elif wc.hp == "hap2":
+        return "-F fire_coverage_H2 -F coverage_H2"
+    else:
+        raise ValueError(f"Unknown haplotype {wc.hp}")

@@ -1,7 +1,6 @@
-# TODO
 rule percent_accessible:
     input:
-        bed=rules.fdr_track_filtered.output.bed,
+        bed=rules.fdr_track.output.bed,
         fai=ancient(f"{ref}.fai"),
     output:
         tmp=temp("temp/{sm}/{hp}/percent.accessible.bed"),
@@ -13,10 +12,13 @@ rule percent_accessible:
         conda
     resources:
         mem_mb=get_mem_mb,
+    params:
+        cols=hap_hck_columns,
     shell:
         """
-        bgzip -@{threads} -cd {input.bed} \
-            | awk -v OFS='\t' '$5 + $6 + $7 > 0 {{print $1,$2,$3,100*$5/($5+$6+$7)}}' \
+        zcat {input.bed} \
+            | hck -f 1-3 {params.cols} \
+            | awk -v OFS='\t' '$5 > 0 {{print $1,$2,$3,$4/$5}}' \
         > {output.tmp}
         
         bedGraphToBigWig {output.tmp} {input.fai} {output.bw}
