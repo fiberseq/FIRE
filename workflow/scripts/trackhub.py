@@ -272,7 +272,7 @@ def main(
     reference: Optional[str] = None,
     sample: Optional[str] = None,
     max_bins: Optional[int] = None,
-    ave_coverage: Optional[int] = 60,
+    average_coverage: Optional[int] = 60,
     verbose: int = 0,
 ):
     """
@@ -283,7 +283,7 @@ def main(
     log_level = 10 * (3 - verbose)
     logging.basicConfig(format=log_format)
     logger.setLevel(log_level)
-    generate_trackhub(trackhub_dir, reference, sample, max_bins, ave_coverage)
+    generate_trackhub(trackhub_dir, reference, sample, max_bins, average_coverage)
     return 0
 
 
