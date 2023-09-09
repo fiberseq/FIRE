@@ -204,7 +204,7 @@ rule fdr_peaks_by_fire_elements:
                     -o median,median,distinct_sort_num \
                     -c $FIRE_ST,$FIRE_EN,$FIRE_ID_COL \
         ) \
-            | hck -f 1,$FIRE_ST,$FIRE_EN,2- \
+            | hck -f 1,$FIRE_ST,$FIRE_EN,2-$NC \
             | bgzip -@ {threads} \
             >> {output.bed}
         """
