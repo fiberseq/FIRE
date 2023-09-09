@@ -194,7 +194,6 @@ rule fdr_peaks_by_fire_elements:
         echo $FIRE_ST $FIRE_EN $FIRE_ID_COL
 
         printf "$OUT_HEADER\\n" | hck -f $FIRE_ST,$FIRE_EN,$FIRE_ID_COL,$NC
-        exit 
 
         ( \
             printf "$OUT_HEADER\\n"; \
