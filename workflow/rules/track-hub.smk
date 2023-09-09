@@ -154,15 +154,12 @@ rule hap_differences_track:
         """
 
 
-# TODO
 rule trackhub:
     input:
         fai=ancient(f"{ref}.fai"),
-        fire=rules.fire_bw.output.bb,
+        fire=rules.fdr_peaks_by_fire_elements_to_bb.output.bb,
         cov=rules.coverage.output.cov,
-        hap_diffs=rules.hap_differences.output.bed,
-        hap_diffs2=rules.hap_differences_track.output.bb,
-        bed=expand(rules.merge_model_results.output.bed, hp=haps, allow_missing=True),
+        hap_diffs=rules.hap_differences_track.output.bb,
     output:
         hub="results/{sm}/trackHub/hub.txt",
     benchmark:
