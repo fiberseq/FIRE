@@ -195,12 +195,12 @@ rule fdr_track_filtered:
         """
 
 
-rule fdr_peaks_by_fire_elements:
+rule helper_fdr_peaks_by_fire_elements:
     input:
         bed=rules.fdr_track_filtered.output.bed,
         fire=rules.fire_sites.output.bed,
     output:
-        bed="results/{sm}/FDR-peaks/FDR-FIRE-peaks.bed.gz",
+        bed=temp("temp/{sm}/FDR-peaks/FDR-FIRE-peaks.bed.gz"),
     threads: 8
     conda:
         conda
@@ -240,3 +240,23 @@ rule fdr_peaks_by_fire_elements:
             | bgzip -@ {threads} \
             > {output.bed}
         """
+
+
+rule fdr_peaks_by_fire_elements:
+    input:
+        bed=rules.helper_fdr_peaks_by_fire_elements.outfile.bed,
+    output:
+        bed="results/{sm}/FDR-peaks/FDR-FIRE-peaks.bed.gz",
+    threads: 8
+    conda:
+        "../envs/python.yaml"
+    params:
+        script=workflow.source_path("../scripts/merge_fire_peaks.py"),
+    shell:
+        """
+        zcat \
+            | python {params.script} \
+            | bgzip -@ {threads} \
+        > {output.bed}
+        """
+

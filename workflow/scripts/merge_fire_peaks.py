@@ -52,24 +52,24 @@ def main(
         .with_columns(
             (~pl.col("shares_FIREs")).cumsum().alias("group"),
         )
-        .sort(["#chrom", "start"])
+        .sort(["#chrom", "peak_start"])
     )
     logging.info(f"\n{df.columns}")
     logging.info(f"\n{df}")
     df = (
         df.with_columns(
             pl.col("score").max().over("group").suffix("_max"),
-            start=pl.col("peak_start").min().over("group").cast(pl.UInt32),
-            end=pl.col("peak_end").max().over("group").cast(pl.UInt32),
+            peak_start=pl.col("peak_start").min().over("group").cast(pl.UInt32),
+            peak_end=pl.col("peak_end").max().over("group").cast(pl.UInt32),
             local_max_count=pl.col("group").len().over("group"),
         )
         .filter(pl.col("score") == pl.col("score_max"))
         .with_columns(
-            peak_length=pl.col("end") - pl.col("start"),
+            peak_length=pl.col("peak_end") - pl.col("peak_start"),
         )
     ).drop("score_max", "group", "FIRE_IDs", "shares_FIREs", "is_local_max")
     logging.info(f"\n{df}")
-    df.write_csv("/dev/stdout", separator="\t")
+    df.sort(["#chrom", "peak_start"]).write_csv("/dev/stdout", separator="\t")
     return 0
 
 
