@@ -244,7 +244,7 @@ rule helper_fdr_peaks_by_fire_elements:
 
 rule fdr_peaks_by_fire_elements:
     input:
-        bed=rules.helper_fdr_peaks_by_fire_elements.outfile.bed,
+        bed=rules.helper_fdr_peaks_by_fire_elements.output.bed,
     output:
         bed="results/{sm}/FDR-peaks/FDR-FIRE-peaks.bed.gz",
     threads: 8
