@@ -232,7 +232,7 @@ rule fdr_peaks_by_fire_elements:
                     -o first,median,median,distinct_sort_num \
                     -c $FIRE_CT,$FIRE_ST,$FIRE_EN,$FIRE_ID_COL \
         ) \
-            | hck -f 1,$FIRE_ST,$FIRE_EN,2-$NC \
+            | hck -f 1,$FIRE_ST,$FIRE_EN,2-$NC,$FIRE_ID_COL \
             | csvtk round -tT -C '$' -n 0 -f 2,3 \
             | bedtools sort -header -i - \
             | bgzip -@ {threads} \
