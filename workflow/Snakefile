@@ -117,25 +117,3 @@ rule all:
             el_type=el_types,
         ),
         expand(rules.trackhub.output, sm=data.index),
-        # misc
-
-
-"""
-        expand("results/{sm}/trackHub/hub.txt", sm=data.index),
-        expand(
-            "results/{sm}/{hp}/fire.peaks.and.coverages.bed.gz", sm=data.index, hp=haps
-        ),
-        expand(
-            rules.merge_binned_fire_calls.output.bb,
-            sm=data.index,
-            bin=bins,
-            hp=not_all,
-        ),
-        expand(rules.clustering_vs_null.output.bed, sm=data.index),
-        expand(rules.percent_in_clusters.output, sm=data.index),
-        expand(rules.hap_differences.output, sm=data.index),
-        expand(rules.hap_differences_track.output.bb, sm=data.index),
-        expand(rules.fire_with_coverage.output, sm=data.index),
-        expand(rules.peaks_vs_percent.output, sm=data.index),
-        expand(rules.percent_accessible.output.bw, sm=data.index, hp=not_unk),
-"""
