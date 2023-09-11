@@ -206,7 +206,6 @@ rule helper_fdr_peaks_by_fire_elements:
         conda
     params:
         max_peak_fdr=max_peak_fdr,
-        script=workflow.source_path("../scripts/merge_fire_peaks.py"),
     shell:
         """
         HEADER=$(zcat {input.bed} | head -n 1 || true)
@@ -235,7 +234,6 @@ rule helper_fdr_peaks_by_fire_elements:
         ) \
             | hck -f 1,$FIRE_ST,$FIRE_EN,2-$NC,$FIRE_ID_COL \
             | csvtk round -tT -C '$' -n 0 -f 2,3 \
-            | python {params.script} \
             | bedtools sort -header -i - \
             | bgzip -@ {threads} \
             > {output.bed}
