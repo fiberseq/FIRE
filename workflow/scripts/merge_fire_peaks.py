@@ -12,7 +12,11 @@ from numba import njit
 
 
 def is_grouped_with_previous(
-    list_of_lists, starts, ends, min_frac_overlap=0.5, min_reciprocal_overlap=0.75
+    list_of_lists,
+    starts,
+    ends,
+    min_frac_overlap=0.5,
+    min_reciprocal_overlap=0.75,
 ):
     condition = []
     pre_st = 0
@@ -28,7 +32,7 @@ def is_grouped_with_previous(
         )
         if (
             overlap_frac >= min_frac_overlap
-            or reciprocal_overlap >= min_reciprocal_overlap
+            and reciprocal_overlap >= min_reciprocal_overlap
         ):
             condition.append(True)
         else:
