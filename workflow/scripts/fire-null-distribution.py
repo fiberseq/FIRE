@@ -60,7 +60,7 @@ def bed_rle(inarray):
 
 @njit
 def is_local_max(array):
-    output = np.zeros(array.shape, dtype=bool)
+    output = np.zeros(array.shape[0], dtype=bool)
     for idx in array.shape[0]:
         if idx - 1 < 0 or idx + 1 >= array.shape[0]:
             continue
