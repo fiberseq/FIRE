@@ -60,15 +60,19 @@ def bed_rle(inarray):
 
 @njit
 def is_local_max(array):
-    output = np.zeros(array.shape[0], dtype=bool)
+    output = []
     for idx in array.shape[0]:
         if idx - 1 < 0 or idx + 1 >= array.shape[0]:
+            output.append(False)
             continue
+        cur_res = False
         pre = array[idx - 1]
         cur = array[idx]
         next = array[idx + 1]
         if cur > pre and cur >= next:
-            output[idx] = True
+            cur_res = True
+        output.append(cur_res)
+
     return output
 
 
@@ -399,7 +403,7 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
     # is_local_max = np.zeros(chrom_length, dtype=bool)
     # is_local_max[local_max] = True
     # return_data[f"is_local_max"] = is_local_max
-    return_data[f"is_local_max"] = is_local_max(return_data["score"])
+    return_data["is_local_max"] = is_local_max(return_data["score"])
 
     for key, data in return_data.items():
         if isinstance(data, np.ndarray):
