@@ -43,9 +43,10 @@ SUB_COMP_TRACK = """
     maxHeightPixels 1:1:1
 """
 
+# type bigBed 6 + 4
 FIRE_TEMPLATE = """
 track FIRE.peaks.{sample}
-type bigBed 6 + 4
+type bigNarrowPeak
 bigDataUrl {file}
 shortLabel FIRE.peaks.{sample}
 longLabel FIRE.peaks.{sample}
