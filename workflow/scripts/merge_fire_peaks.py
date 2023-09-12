@@ -28,7 +28,8 @@ def is_grouped_with_previous(list_of_lists, min_frac_overlap=0.5):
 
 def group_peaks(df, min_frac_overlap=0.5):
     df = (
-        df.with_columns(
+        df.sort(["#chrom", "peak_start"])
+        .with_columns(
             pl.Series(
                 name="shares_FIREs",
                 values=is_grouped_with_previous(
