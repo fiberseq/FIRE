@@ -229,7 +229,7 @@ rule helper_fdr_peaks_by_fire_elements:
                 | bedtools intersect -wa -wb -sorted -a - \
                     -b <(zcat {input.fire} | cut -f 1-3 | awk -v OFMT="%f" '{{print $0"\t"NR}}') \
                 | bedtools groupby -g 1-$NC \
-                    -o first,median,median,distinct_sort_num \
+                    -o first,median,median,collapse \
                     -c $FIRE_CT,$FIRE_ST,$FIRE_EN,$FIRE_ID_COL \
         ) \
         | tail
