@@ -58,7 +58,7 @@ def main(
     *,
     max_score_every: int = 100,
     min_frac_overlap: float = 0.5,
-    max_grouping_iterations: int = 10,
+    max_grouping_iterations: int = 0,
     verbose: int = 0,
 ):
     """
