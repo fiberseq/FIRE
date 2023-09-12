@@ -323,8 +323,8 @@ def write_bed(chrom, output_dict, out, first=True):
         .select(["#chrom", "start", "end"] + original_columns)
     ).to_pandas()
 
+    # can only find local maxes after de duplicating
     df["is_local_max"] = is_local_max(df["score"].values)
-    # can only find local maxes after
 
     # checks
     final_end = df.end.max()
