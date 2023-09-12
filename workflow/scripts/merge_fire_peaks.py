@@ -15,8 +15,8 @@ def is_grouped_with_previous(
     list_of_lists, starts, ends, min_frac_overlap=0.5, min_reciprocal_overlap=0.75
 ):
     condition = []
-    pre_st = None
-    pre_en = None
+    pre_st = 0
+    pre_en = 1
     pre_list = set([])
     for cur_list, cur_st, cur_en in zip(list_of_lists, starts, ends):
         cur_list = set(cur_list)
@@ -46,7 +46,10 @@ def group_peaks(df, min_frac_overlap=0.5):
             pl.Series(
                 name="shares_FIREs",
                 values=is_grouped_with_previous(
-                    df["FIRE_IDs"], min_frac_overlap=min_frac_overlap
+                    df["FIRE_IDs"],
+                    df["peak_start"],
+                    df["peak_end"],
+                    min_frac_overlap=min_frac_overlap,
                 ),
             ),
         )
