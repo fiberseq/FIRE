@@ -227,7 +227,7 @@ rule helper_fdr_peaks_by_fire_elements:
                 | rg -w "#chrom|True" \
                 | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}" \
                 | bedtools intersect -wa -wb -sorted -a - \
-                    -b <(zcat {input.fire} | cut -f 1-3 | awk '{{print $0"\t"NR}}') \
+                    -b <(zcat {input.fire} | cut -f 1-3 | awk -v OFMT="%f" '{{print $0"\t"NR}}') \
                 | bedtools groupby -g 1-$NC \
                     -o first,median,median,distinct_sort_num \
                     -c $FIRE_CT,$FIRE_ST,$FIRE_EN,$FIRE_ID_COL \
