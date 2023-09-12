@@ -218,10 +218,7 @@ rule helper_fdr_peaks_by_fire_elements:
 
         OUT_HEADER=$(printf "$HEADER\\tpeak_chrom\\tpeak_start\\tpeak_end\\tFIRE_IDs\\tFIRE_size_mean\\tFIRE_size_ssd\\tFIRE_start_ssd\\tFIRE_end_ssd")
         echo $OUT_HEADER
-        echo $FIRE_ST $FIRE_EN $FIRE_ID
-
-        printf "$OUT_HEADER\\n" | hck -f $FIRE_ST,$FIRE_EN,$FIRE_ID,$NC
-
+        
         ( \
             printf "$OUT_HEADER\\n"; \
             zcat {input.bed} \
