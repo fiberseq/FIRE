@@ -39,7 +39,7 @@ def is_grouped_with_previous(
     return condition
 
 
-def group_peaks(df, min_frac_overlap=0.5):
+def group_peaks(df, min_frac_overlap=0.5, min_reciprocal_overlap=0.75):
     df = (
         df.sort(["#chrom", "peak_start"])
         .with_columns(
@@ -50,6 +50,7 @@ def group_peaks(df, min_frac_overlap=0.5):
                     df["peak_start"],
                     df["peak_end"],
                     min_frac_overlap=min_frac_overlap,
+                    min_reciprocal_overlap=min_reciprocal_overlap,
                 ),
             ),
         )
@@ -74,6 +75,7 @@ def main(
     *,
     max_score_every: int = 100,
     min_frac_overlap: float = 0.5,
+    min_reciprocal_overlap: float = 0.75,
     max_grouping_iterations: int = 10,
     verbose: int = 0,
 ):
@@ -110,7 +112,11 @@ def main(
     n_row = None
     i = 0
     while i < max_grouping_iterations:
-        df = group_peaks(df, min_frac_overlap=min_frac_overlap)
+        df = group_peaks(
+            df,
+            min_frac_overlap=min_frac_overlap,
+            min_reciprocal_overlap=min_reciprocal_overlap,
+        )
         if n_row == df.shape[0]:
             break
         n_row = df.shape[0]
