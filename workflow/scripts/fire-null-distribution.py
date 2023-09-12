@@ -319,13 +319,11 @@ def write_bed(chrom, output_dict, out, first=True):
         .with_columns(
             pl.col("end").shift_and_fill(periods=1, fill_value=0).alias("start"),
             pl.lit(chrom).alias("#chrom"),
-            pl.Series(
-                name="is_local_max", values=is_local_max(pl.col("score").to_numpy())
-            ),
         )
         .select(["#chrom", "start", "end"] + original_columns)
     ).to_pandas()
 
+    df["is_local_max"] = is_local_max(df["score"].values)
     # can only find local maxes after
 
     # checks
