@@ -225,6 +225,7 @@ rule helper_fdr_peaks_by_fire_elements:
         ( \
             printf "$OUT_HEADER\\n"; \
             zcat {input.bed} \
+                | rg -w "#chrom|chr11" \
                 | rg -w "#chrom|True" \
                 | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}" \
                 | bedtools intersect -wa -wb -sorted -a - \
