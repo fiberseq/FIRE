@@ -80,7 +80,7 @@ rule fdr_peaks_by_fire_elements_to_bb:
         | bioawk -tc hdr '{{print $1,$2,$3,FDR,"0",".",score,"-1",log_FDR,start-peak_start}}' \
         > {output.tmp} 
         bedToBigBed \
-            -type=bed6+4 -as {params.bedfmt} \
+            -type=bed6+4 -as={params.bedfmt} \
             {output.tmp} {input.fai} {output.bb}
         """
 
