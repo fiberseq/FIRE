@@ -213,13 +213,14 @@ rule helper_fdr_peaks_by_fire_elements:
         FIRE_CT=$((NC+1))
         FIRE_ST=$((NC+2))
         FIRE_EN=$((NC+3))
-        FIRE_ID_COL=$((NC+4))
+        FIRE_SIZE=$((NC+4))
+        FIRE_ID=$((NC+5))
 
         OUT_HEADER=$(printf "$HEADER\\tpeak_chrom\\tpeak_start\\tpeak_end\\tFIRE_IDs")
         echo $OUT_HEADER
-        echo $FIRE_ST $FIRE_EN $FIRE_ID_COL
+        echo $FIRE_ST $FIRE_EN $FIRE_ID
 
-        printf "$OUT_HEADER\\n" | hck -f $FIRE_ST,$FIRE_EN,$FIRE_ID_COL,$NC
+        printf "$OUT_HEADER\\n" | hck -f $FIRE_ST,$FIRE_EN,$FIRE_ID,$NC
 
         ( \
             printf "$OUT_HEADER\\n"; \
@@ -227,12 +228,15 @@ rule helper_fdr_peaks_by_fire_elements:
                 | rg -w "#chrom|True" \
                 | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}" \
                 | bedtools intersect -wa -wb -sorted -a - \
-                    -b <(zcat {input.fire} | cut -f 1-3 | awk -v OFMT="%f" '{{print $0"\t"NR}}') \
+                    -b <(zcat {input.fire} \
+                            | cut -f 1-3 \
+                            | awk -v OFMT="%f" '{{print $0"\t"$3-$2"\t"NR}}' \
+                        ) \
                 | bedtools groupby -g 1-$NC \
-                    -o first,median,median,collapse \
-                    -c $FIRE_CT,$FIRE_ST,$FIRE_EN,$FIRE_ID_COL \
+                    -o first,median,median,collapse,mean,sstdev,mean,sstdev,mean,sstdev \
+                    -c $FIRE_CT,$FIRE_ST,$FIRE_EN,$FIRE_ID,$FIRE_SIZE,$FIRE_SIZE,2,2,3,3 \
         ) \
-            | hck -f 1,$FIRE_ST,$FIRE_EN,2-$NC,$FIRE_ID_COL \
+            | hck -f 1,$FIRE_ST,$FIRE_EN,2-$NC,$FIRE_ID \
             | csvtk round -tT -C '$' -n 0 -f 2,3 \
             | bedtools sort -header -i - \
             | bgzip -@ {threads} \
@@ -253,7 +257,7 @@ rule fdr_peaks_by_fire_elements:
     shell:
         """
         zcat {input.bed} \
-            | python {params.script} -v 1\
+            | python {params.script} -v 1 \
             | bgzip -@ {threads} \
         > {output.bed}
         """

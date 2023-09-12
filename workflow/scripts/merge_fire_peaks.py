@@ -56,6 +56,8 @@ def group_peaks(df, min_frac_overlap=0.5):
 
 def main(
     *,
+    max_score_every: int = 50,
+    max_grouping_iterations: int = 10,
     verbose: int = 0,
 ):
     """
@@ -68,26 +70,41 @@ def main(
     logger.setLevel(log_level)
 
     inf = io.StringIO(sys.stdin.read())
-    df = pl.read_csv(inf, separator="\t").with_columns(
-        FIRE_IDs=pl.col("FIRE_IDs").str.split(",").cast(pl.List(pl.UInt32)),
+    df = (
+        pl.read_csv(inf, separator="\t")
+        # group into sliding X bp windows and only keep the highest score
+        .with_columns(roll_start=pl.col("start"))
+        .sort(["#chrom", "roll_start"])
+        .groupby_rolling("roll_start", period=f"{max_score_every}i", by="#chrom")
+        .agg([pl.exclude("roll_start").sort_by("score").last()])
+        .drop("roll_start")
+        # remove any peaks that are the highest score for multiple X bp windows
+        .unique(subset=["#chrom", "peak_start", "peak_end", "start", "end"])
+        .sort(["#chrom", "peak_start"])
+        # convert the FIRE IDs strings to lists of ints
+        .with_columns(
+            FIRE_IDs=pl.col("FIRE_IDs").str.split(",").cast(pl.List(pl.UInt32)),
+        )
     )
-    logging.info(f"{df.shape}")
+    logging.info(
+        f"Dynamic window merging over {max_score_every} bp is done: {df.shape[0]:,}"
+    )
     # group data 5 times
     n_row = None
     i = 0
-    while i < 20:
+    while i < max_grouping_iterations:
         df = group_peaks(df, min_frac_overlap=0.5)
-        logging.info(f"{df.shape}")
         if n_row == df.shape[0]:
             break
         n_row = df.shape[0]
         i += 1
+        logging.info(f"Iterative merging round {i} complete. Rows:{n_row:,}")
 
-    df = df.sort(["#chrom", "peak_start"]).drop(
-        "score_max", "group", "FIRE_IDs", "shares_FIREs", "is_local_max"
+    (
+        df.sort(["#chrom", "peak_start"])
+        .drop("score_max", "group", "FIRE_IDs", "shares_FIREs", "is_local_max")
+        .write_csv("/dev/stdout", separator="\t")
     )
-    logging.info(f"\n{df}")
-    df.write_csv("/dev/stdout", separator="\t")
     return 0
 
 
