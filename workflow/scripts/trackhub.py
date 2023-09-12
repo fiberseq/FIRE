@@ -45,7 +45,7 @@ SUB_COMP_TRACK = """
 
 FIRE_TEMPLATE = """
 track FIRE.peaks.{sample}
-type bigBed 6+4
+type bigBed 6+
 bigDataUrl {file}
 shortLabel FIRE.peaks.{sample}
 longLabel FIRE.peaks.{sample}
