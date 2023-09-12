@@ -253,7 +253,7 @@ rule fdr_peaks_by_fire_elements:
     shell:
         """
         zcat {input.bed} \
-            | python -v1 {params.script} \
+            | python {params.script} -v 1\
             | bgzip -@ {threads} \
         > {output.bed}
         """
