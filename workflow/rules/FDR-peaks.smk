@@ -252,7 +252,7 @@ rule fdr_peaks_by_fire_elements:
         script=workflow.source_path("../scripts/merge_fire_peaks.py"),
     shell:
         """
-        zcat \
+        zcat {input.bed} \
             | python {params.script} \
             | bgzip -@ {threads} \
         > {output.bed}
