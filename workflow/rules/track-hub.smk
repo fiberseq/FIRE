@@ -72,10 +72,16 @@ rule fdr_peaks_by_fire_elements_to_bb:
     threads: 4
     conda:
         conda
+    params:
+        bedfmt=script=workflow.source_path("../templates/fire_peak.as"),
     shell:
         """
-        hck -z -f 1-3 {input.bed} -F FDR > {output.tmp} 
-        bedToBigBed -type=bed4 {output.tmp} {input.fai} {output.bb}
+        zcat {input.bed} \
+        | bioawk -tc hdr '{{print $1,$2,$3,FDR,"0",".",score,"-1",log_FDR,start-peak_start}}' \
+        > {output.tmp} 
+        bedToBigBed \
+            -type=bed6+4 -as {params.bedfmt} \
+            {output.tmp} {input.fai} {output.bb}
         """
 
 
