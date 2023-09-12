@@ -216,7 +216,7 @@ rule helper_fdr_peaks_by_fire_elements:
         FIRE_SIZE=$((NC+4))
         FIRE_ID=$((NC+5))
 
-        OUT_HEADER=$(printf "$HEADER\\tpeak_chrom\\tpeak_start\\tpeak_end\\tFIRE_IDs\\tFIRE_size_mean\\tFIRE_size_ssd\\tFIRE_start_ssd\\tFIRE_end_ssd")
+        OUT_HEADER=$(printf "$HEADER\\tpeak_chrom\\tpeak_start\\tpeak_end\\tFIRE_IDs\\tFIRE_size_mean\\tFIRE_size_ssd\\tFIRE_start_ssd\\tFIRE_end_ssd\\tFIRE_count")
         echo $OUT_HEADER
         echo $FIRE_ST $FIRE_EN $FIRE_ID
 
@@ -233,8 +233,8 @@ rule helper_fdr_peaks_by_fire_elements:
                             | awk -v OFMT="%f" '{{print $0"\t"$3-$2"\t"NR}}' \
                         ) \
                 | bedtools groupby -g 1-$NC \
-                    -o first,median,median,collapse,mean,sstdev,sstdev,sstdev \
-                    -c $FIRE_CT,$FIRE_ST,$FIRE_EN,$FIRE_ID,$FIRE_SIZE,$FIRE_SIZE,$FIRE_ST,$FIRE_EN \
+                    -o first,median,median,collapse,mean,sstdev,sstdev,sstdev,count \
+                    -c $FIRE_CT,$FIRE_ST,$FIRE_EN,$FIRE_ID,$FIRE_SIZE,$FIRE_SIZE,$FIRE_ST,$FIRE_EN,1 \
         ) \
             | hck -f 1,$FIRE_ST,$FIRE_EN,2-$NC,$FIRE_SIZE- \
             | csvtk round -tT -C '$' -n 0 -f 2,3 \
