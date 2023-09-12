@@ -11,18 +11,31 @@ import sys
 from numba import njit
 
 
-def is_grouped_with_previous(list_of_lists, min_frac_overlap=0.5):
+def is_grouped_with_previous(
+    list_of_lists, starts, ends, min_frac_overlap=0.5, min_reciprocal_overlap=0.75
+):
     condition = []
+    pre_st = None
+    pre_en = None
     pre_list = set([])
-    for cur_list in list_of_lists:
+    for cur_list, cur_st, cur_en in zip(list_of_lists, starts, ends):
         cur_list = set(cur_list)
         overlap = len(cur_list.intersection(pre_list))
         overlap_frac = overlap / max(len(cur_list), len(pre_list))
-        if overlap_frac >= min_frac_overlap:
+        overlap_bp = pre_en - cur_st
+        reciprocal_overlap = min(
+            overlap_bp / (pre_en - pre_st), overlap_bp / (cur_en - cur_st)
+        )
+        if (
+            overlap_frac >= min_frac_overlap
+            or reciprocal_overlap >= min_reciprocal_overlap
+        ):
             condition.append(True)
         else:
             condition.append(False)
         pre_list = cur_list
+        pre_st = cur_st
+        pre_en = cur_en
     return condition
 
 
@@ -56,8 +69,8 @@ def group_peaks(df, min_frac_overlap=0.5):
 
 def main(
     *,
-    max_score_every: int = 200,
-    min_frac_overlap: float = 0.75,
+    max_score_every: int = 300,
+    min_frac_overlap: float = 0.5,
     max_grouping_iterations: int = 10,
     verbose: int = 0,
 ):
