@@ -73,7 +73,7 @@ rule fdr_peaks_by_fire_elements_to_bb:
     conda:
         conda
     params:
-        bedfmt=script=workflow.source_path("../templates/fire_peak.as"),
+        bedfmt=workflow.source_path("../templates/fire_peak.as"),
     shell:
         """
         zcat {input.bed} \
