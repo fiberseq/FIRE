@@ -71,7 +71,7 @@ def main(
 
     inf = io.StringIO(sys.stdin.read())
     df = (
-        pl.read_csv(inf, separator="\t")
+        pl.read_csv(inf, separator="\t", null_values=".")
         # group into sliding X bp windows and only keep the highest score
         .with_columns(roll_start=pl.col("start"))
         .sort(["#chrom", "roll_start"])
