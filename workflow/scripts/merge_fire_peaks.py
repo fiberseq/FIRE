@@ -8,9 +8,11 @@ from typing import Optional
 import polars as pl
 import io
 import sys
+from numba import njit
 
 
-def is_grouped_with_previous(list_of_lists, min_frac_overlap=0.25):
+@njit
+def is_grouped_with_previous(list_of_lists, min_frac_overlap=0.5):
     condition = []
     pre_list = set([])
     for cur_list in list_of_lists:
@@ -23,6 +25,33 @@ def is_grouped_with_previous(list_of_lists, min_frac_overlap=0.25):
             condition.append(False)
         pre_list = cur_list
     return condition
+
+
+def group_peaks(df, min_frac_overlap=0.5):
+    df = (
+        df.with_columns(
+            pl.Series(
+                name="shares_FIREs",
+                values=is_grouped_with_previous(
+                    df["FIRE_IDs"], min_frac_overlap=min_frac_overlap
+                ),
+            ),
+        )
+        .with_columns(
+            (~pl.col("shares_FIREs")).cumsum().alias("group"),
+        )
+        .with_columns(
+            pl.col("score").max().over("group").suffix("_max"),
+            peak_start=pl.col("peak_start").min().over("group").cast(pl.UInt32),
+            peak_end=pl.col("peak_end").max().over("group").cast(pl.UInt32),
+            local_max_count=pl.col("group").len().over("group"),
+        )
+        .filter(pl.col("score") == pl.col("score_max"))
+        .with_columns(
+            peak_length=pl.col("peak_end") - pl.col("peak_start"),
+        )
+    )
+    return df
 
 
 def main(
@@ -42,34 +71,15 @@ def main(
     df = pl.read_csv(inf, separator="\t").with_columns(
         FIRE_IDs=pl.col("FIRE_IDs").str.split(",").cast(pl.List(pl.UInt32)),
     )
+    # group data 5 times
+    for i in range(5):
+        df = group_peaks(df, min_frac_overlap=0.5)
 
-    df = (
-        df.with_columns(
-            pl.Series(
-                name="shares_FIREs", values=is_grouped_with_previous(df["FIRE_IDs"])
-            ),
-        )
-        .with_columns(
-            (~pl.col("shares_FIREs")).cumsum().alias("group"),
-        )
-        .sort(["#chrom", "peak_start"])
+    df = df.sort(["#chrom", "peak_start"]).drop(
+        "score_max", "group", "FIRE_IDs", "shares_FIREs", "is_local_max"
     )
-    logging.info(f"\n{df.columns}")
     logging.info(f"\n{df}")
-    df = (
-        df.with_columns(
-            pl.col("score").max().over("group").suffix("_max"),
-            peak_start=pl.col("peak_start").min().over("group").cast(pl.UInt32),
-            peak_end=pl.col("peak_end").max().over("group").cast(pl.UInt32),
-            local_max_count=pl.col("group").len().over("group"),
-        )
-        .filter(pl.col("score") == pl.col("score_max"))
-        .with_columns(
-            peak_length=pl.col("peak_end") - pl.col("peak_start"),
-        )
-    ).drop("score_max", "group", "FIRE_IDs", "shares_FIREs", "is_local_max")
-    logging.info(f"\n{df}")
-    df.sort(["#chrom", "peak_start"]).write_csv("/dev/stdout", separator="\t")
+    df.write_csv("/dev/stdout", separator="\t")
     return 0
 
 
