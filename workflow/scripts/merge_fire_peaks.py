@@ -11,7 +11,6 @@ import sys
 from numba import njit
 
 
-@njit
 def is_grouped_with_previous(list_of_lists, min_frac_overlap=0.5):
     condition = []
     pre_list = set([])
