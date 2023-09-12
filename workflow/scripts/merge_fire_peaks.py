@@ -56,7 +56,7 @@ def group_peaks(df, min_frac_overlap=0.5):
 
 def main(
     *,
-    max_score_every: int = 100,
+    max_score_every: int = 200,
     min_frac_overlap: float = 0.75,
     max_grouping_iterations: int = 10,
     verbose: int = 0,
