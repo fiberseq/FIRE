@@ -69,7 +69,7 @@ def is_local_max(array):
         pre = array[idx - 1]
         cur = array[idx]
         next = array[idx + 1]
-        if cur > pre and cur >= next:
+        if cur >= pre and cur >= next:
             cur_res = True
         output.append(cur_res)
 
