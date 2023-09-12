@@ -1,6 +1,5 @@
 table fire_peaks "FIRE Peaks"
 (
-
 string  chrom;  "Reference sequence chromosome or scaffold"
 uint    chromStart; "Alignment start"
 uint    chromEnd;   "Alignment end"
