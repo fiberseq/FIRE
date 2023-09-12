@@ -319,9 +319,12 @@ def write_bed(chrom, output_dict, out, first=True):
         .with_columns(
             pl.col("end").shift_and_fill(periods=1, fill_value=0).alias("start"),
             pl.lit(chrom).alias("#chrom"),
+            pl.Series(name="is_local_max", values=is_local_max(pl.col("score"))),
         )
         .select(["#chrom", "start", "end"] + original_columns)
     ).to_pandas()
+
+    # can only find local maxes after
 
     # checks
     final_end = df.end.max()
@@ -397,9 +400,6 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
         tmp_FDR[tmp_FDR <= 0] = tmp_FDR[tmp_FDR > 0].min()
         log_FDRs = -10 * np.log10(tmp_FDR)
         return_data[f"log_FDR{tag}"] = log_FDRs
-
-    # find local maxima in the scores
-    return_data["is_local_max"] = is_local_max(return_data["score"])
 
     for key, data in return_data.items():
         if isinstance(data, np.ndarray):
