@@ -77,9 +77,9 @@ def group_peaks(df, min_frac_overlap=0.5, min_reciprocal_overlap=0.75):
 
 def main(
     *,
-    max_score_every: int = 100,
-    min_frac_overlap: float = 0.5,
-    min_reciprocal_overlap: float = 0.8,
+    max_score_every: int = 200,
+    min_frac_overlap: float = 0.50,
+    min_reciprocal_overlap: float = 0.0,
     max_grouping_iterations: int = 10,
     verbose: int = 0,
 ):
