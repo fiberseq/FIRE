@@ -233,8 +233,8 @@ rule helper_fdr_peaks_by_fire_elements:
                             | awk -v OFMT="%f" '{{print $0"\t"$3-$2"\t"NR}}' \
                         ) \
                 | bedtools groupby -g 1-$NC \
-                    -o first,median,median,collapse,mean,sstdev,mean,sstdev,mean,sstdev \
-                    -c $FIRE_CT,$FIRE_ST,$FIRE_EN,$FIRE_ID,$FIRE_SIZE,$FIRE_SIZE,2,2,3,3 \
+                    -o first,median,median,collapse,mean,sstdev,sstdev,sstdev \
+                    -c $FIRE_CT,$FIRE_ST,$FIRE_EN,$FIRE_ID,$FIRE_SIZE,$FIRE_SIZE,2,3 \
         ) \
             | hck -f 1,$FIRE_ST,$FIRE_EN,2-$NC,$FIRE_ID \
             | csvtk round -tT -C '$' -n 0 -f 2,3 \
