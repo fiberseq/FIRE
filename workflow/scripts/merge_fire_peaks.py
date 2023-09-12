@@ -10,13 +10,13 @@ import io
 import sys
 
 
-def is_grouped_with_previous(list_of_lists, min_frac_overlap=0.5):
+def is_grouped_with_previous(list_of_lists, min_frac_overlap=0.25):
     condition = []
     pre_list = set([])
     for cur_list in list_of_lists:
         cur_list = set(cur_list)
         overlap = len(cur_list.intersection(pre_list))
-        overlap_frac = overlap / max(len(cur_list), len(pre_list))
+        overlap_frac = overlap / min(len(cur_list), len(pre_list))
         if overlap_frac >= min_frac_overlap:
             condition.append(True)
         else:
