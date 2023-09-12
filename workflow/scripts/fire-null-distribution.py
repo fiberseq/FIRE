@@ -59,6 +59,20 @@ def bed_rle(inarray):
 
 
 @njit
+def is_local_max(array):
+    output = np.zeros(array.shape, dtype=bool)
+    for idx in array.shape[0]:
+        if idx - 1 < 0 or idx + 1 >= array.shape[0]:
+            continue
+        pre = array[idx - 1]
+        cur = array[idx]
+        next = array[idx + 1]
+        if cur > pre and cur >= next:
+            output[idx] = True
+    return output
+
+
+@njit
 def fire_scores_per_chrom(
     starts,
     ends,
@@ -381,10 +395,11 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
         return_data[f"log_FDR{tag}"] = log_FDRs
 
     # find local maxima in the scores
-    local_max = argrelextrema(return_data["score"], np.greater)
-    is_local_max = np.zeros(chrom_length, dtype=bool)
-    is_local_max[local_max] = True
-    return_data[f"is_local_max"] = is_local_max
+    # local_max = argrelextrema(return_data["score"], np.greater)
+    # is_local_max = np.zeros(chrom_length, dtype=bool)
+    # is_local_max[local_max] = True
+    # return_data[f"is_local_max"] = is_local_max
+    return_data[f"is_local_max"] = is_local_max(return_data["score"])
 
     for key, data in return_data.items():
         if isinstance(data, np.ndarray):
