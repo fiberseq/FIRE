@@ -234,7 +234,7 @@ rule helper_fdr_peaks_by_fire_elements:
                         ) \
                 | bedtools groupby -g 1-$NC \
                     -o first,median,median,collapse,mean,sstdev,sstdev,sstdev \
-                    -c $FIRE_CT,$FIRE_ST,$FIRE_EN,$FIRE_ID,$FIRE_SIZE,$FIRE_SIZE,2,3 \
+                    -c $FIRE_CT,$FIRE_ST,$FIRE_EN,$FIRE_ID,$FIRE_SIZE,$FIRE_SIZE,$FIRE_ST,$FIRE_EN \
         ) \
             | hck -f 1,$FIRE_ST,$FIRE_EN,2-$NC,$FIRE_ID- \
             | csvtk round -tT -C '$' -n 0 -f 2,3 \
