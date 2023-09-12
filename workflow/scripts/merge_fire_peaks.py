@@ -75,7 +75,7 @@ def main(
     *,
     max_score_every: int = 100,
     min_frac_overlap: float = 0.5,
-    min_reciprocal_overlap: float = 0.75,
+    min_reciprocal_overlap: float = 0.8,
     max_grouping_iterations: int = 10,
     verbose: int = 0,
 ):
