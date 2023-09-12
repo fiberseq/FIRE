@@ -72,9 +72,13 @@ def main(
     )
     logging.info(f"{df.shape}")
     # group data 5 times
-    for i in range(5):
+    n_row = None
+    while i < 20:
         df = group_peaks(df, min_frac_overlap=0.5)
         logging.info(f"{df.shape}")
+        if n_row == df.shape[0]:
+            break
+        n_row = df.shape[0]
 
     df = df.sort(["#chrom", "peak_start"]).drop(
         "score_max", "group", "FIRE_IDs", "shares_FIREs", "is_local_max"
