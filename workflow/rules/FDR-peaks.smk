@@ -232,7 +232,6 @@ rule helper_fdr_peaks_by_fire_elements:
                     -o first,median,median,collapse \
                     -c $FIRE_CT,$FIRE_ST,$FIRE_EN,$FIRE_ID_COL \
         ) \
-        | tail
             | hck -f 1,$FIRE_ST,$FIRE_EN,2-$NC,$FIRE_ID_COL \
             | csvtk round -tT -C '$' -n 0 -f 2,3 \
             | bedtools sort -header -i - \
