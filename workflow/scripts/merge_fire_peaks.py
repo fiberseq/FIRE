@@ -32,7 +32,7 @@ def group_peaks(df, min_frac_overlap=0.5):
             pl.Series(
                 name="shares_FIREs",
                 values=is_grouped_with_previous(
-                    df["FIRE_IDs"].to_numpy(), min_frac_overlap=min_frac_overlap
+                    df["FIRE_IDs"], min_frac_overlap=min_frac_overlap
                 ),
             ),
         )
