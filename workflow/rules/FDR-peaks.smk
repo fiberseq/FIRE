@@ -150,6 +150,8 @@ rule fdr_track_chromosome:
         fai=ancient(f"{ref}.fai"),
         fdr_tbl=rules.fdr_table.output.tbl,
     output:
+        fire=temp("temp/{sm}/FDR-peaks/{chrom}-fire.bed"),
+        fiber=temp("temp/{sm}/FDR-peaks/{chrom}-fiber.bed"),
         bed=temp("temp/{sm}/FDR-peaks/{chrom}-FDR.track.bed"),
     threads: 8
     conda:
@@ -160,9 +162,10 @@ rule fdr_track_chromosome:
         mem_mb=get_mem_mb,
     shell:
         """
+        tabix -h {input.fire} {wildcards.chrom} > {output.fire}
+        tabix -h {input.fiber_locations} {wildcards.chrom} > {output.fiber}
         python {params.script} -v 1 \
-            <(tabix -h {input.fire} {wildcards.chrom}) \
-            <(tabix -h {input.fiber_locations} {wildcards.chrom}) \
+            {output.fire} {output.fiber} \
             {input.fai} -f {input.fdr_tbl} \
             -o {output.bed}
         """
