@@ -26,7 +26,7 @@ def is_grouped_with_previous(
         cur_list = set(cur_list)
         overlap = len(cur_list.intersection(pre_list))
         overlap_frac = overlap / max(len(cur_list), len(pre_list))
-        overlap_bp = pre_en - cur_st
+        overlap_bp = min(pre_en, cur_en) - max(pre_st, cur_st)
         reciprocal_overlap = min(
             overlap_bp / (pre_en - pre_st), overlap_bp / (cur_en - cur_st)
         )
