@@ -67,7 +67,7 @@ def group_peaks(df, min_frac_overlap=0.5, min_reciprocal_overlap=0.75):
             peak_start=pl.col("peak_start").min().over("group").cast(pl.UInt32),
             peak_end=pl.col("peak_end").max().over("group").cast(pl.UInt32),
             local_max_count=pl.col("group").len().over("group"),
-            # FIRE_IDs=pl.col("FIRE_IDs").flatten().over("group"),
+            FIRE_IDs=pl.col("FIRE_IDs").flatten().over("group").list(),
         )
         .filter(pl.col("score") == pl.col("score_max"))
         .with_columns(
