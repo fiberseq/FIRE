@@ -81,7 +81,7 @@ def main(
     *,
     max_score_every: int = 25,
     min_frac_overlap: float = 0.5,
-    min_reciprocal_overlap: float = 0.80,
+    min_reciprocal_overlap: float = 0.90,
     max_grouping_iterations: int = 1,
     verbose: int = 0,
 ):
@@ -114,14 +114,28 @@ def main(
     logging.info(
         f"Dynamic window merging over {max_score_every} bp is done: {df.shape[0]:,}"
     )
-    # group data 5 times
+    # group data based on reciprocal overlap
+    n_row = None
+    i = 0
+    while i < max_grouping_iterations:
+        df = group_peaks(
+            df,
+            min_frac_overlap=1.0,
+            min_reciprocal_overlap=min_reciprocal_overlap,
+        )
+        if n_row == df.shape[0]:
+            break
+        n_row = df.shape[0]
+        i += 1
+        logging.info(f"Reciprocal overlap merging round {i} is done: {df.shape[0]:,}")
+    # group data based on fire overlap
     n_row = None
     i = 0
     while i < max_grouping_iterations:
         df = group_peaks(
             df,
             min_frac_overlap=min_frac_overlap,
-            min_reciprocal_overlap=min_reciprocal_overlap,
+            min_reciprocal_overlap=1.0,
         )
         if n_row == df.shape[0]:
             break
