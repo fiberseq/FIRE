@@ -11,6 +11,8 @@ import numpy as np
 from numba import njit
 from scipy.signal import argrelextrema
 
+ROLLING_FIRE_SCORE_WINDOW_SIZE = 25
+
 FIRE_COLUMNS = [
     "chrom",
     "start",
@@ -325,7 +327,11 @@ def write_bed(chrom, output_dict, out, first=True):
     ).to_pandas()
 
     # can only find local maxes after de duplicating
-    rolling_score = df.rolling(25, on="start", center=True).mean().values
+    rolling_score = (
+        df.rolling(ROLLING_FIRE_SCORE_WINDOW_SIZE, on="start", center=True)
+        .score.mean()
+        .values
+    )
     df["is_local_max"] = is_local_max(rolling_score)  # df["score"].values
 
     # checks
