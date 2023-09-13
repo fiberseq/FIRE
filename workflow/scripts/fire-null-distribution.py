@@ -321,10 +321,12 @@ def write_bed(chrom, output_dict, out, first=True):
             pl.lit(chrom).alias("#chrom"),
         )
         .select(["#chrom", "start", "end"] + original_columns)
+        .sort(["#chrom", "start", "end"])
     ).to_pandas()
 
     # can only find local maxes after de duplicating
-    df["is_local_max"] = is_local_max(df["score"].values)
+    rolling_score = df.rolling(25, on="start", center=True).mean().values
+    df["is_local_max"] = is_local_max(rolling_score)  # df["score"].values
 
     # checks
     final_end = df.end.max()
