@@ -224,7 +224,8 @@ rule helper_fdr_peaks_by_fire_elements:
             zcat {input.bed} \
                 | rg -w "#chrom|chr11" \
                 | rg -w "#chrom|True" \
-                | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}" -f "fire_coverage>1" \
+                | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}" \
+                | csvtk filter -tT -C '$' -f "fire_coverage>1" \
                 | bedtools intersect -wa -wb -sorted -a - \
                     -b <(zcat {input.fire} \
                             | cut -f 1-3 \
