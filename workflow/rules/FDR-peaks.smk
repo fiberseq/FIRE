@@ -150,6 +150,7 @@ rule fdr_track:
         fdr_tbl=rules.fdr_table.output.tbl,
     output:
         bed="results/{sm}/FDR-peaks/FDR.track.bed.gz",
+        tbi="results/{sm}/FDR-peaks/FDR.track.bed.gz.tbi",
     threads: 8
     conda:
         "../envs/python.yaml"
@@ -167,6 +168,7 @@ rule fdr_track:
             -o $TMP_OUT
         
         bgzip -@ {threads} $TMP_OUT
+        tabix -f -p bed {output.bed}
         """
 
 
@@ -198,9 +200,11 @@ rule fdr_track_filtered:
 rule helper_fdr_peaks_by_fire_elements:
     input:
         bed=rules.fdr_track_filtered.output.bed,
+        tbi=rules.fdr_track_filtered.output.tbi,
         fire=rules.fire_sites.output.bed,
+        fire_tbi=rules.fire_sites_index.output.tbi,
     output:
-        bed=temp("temp/{sm}/FDR-peaks/FDR-FIRE-peaks.bed.gz"),
+        bed=temp("temp/{sm}/FDR-peaks/{chrom}-FDR-FIRE-peaks.bed.gz"),
     threads: 8
     conda:
         conda
@@ -221,12 +225,12 @@ rule helper_fdr_peaks_by_fire_elements:
         
         ( \
             printf "$OUT_HEADER\\n"; \
-            zcat {input.bed} \
+            tabix -h {input.bed} {wildcards.chrom} \
                 | rg -w "#chrom|True" \
                 | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}" \
                 | csvtk filter -tT -C '$' -f "fire_coverage>1" \
                 | bedtools intersect -wa -wb -sorted -a - \
-                    -b <(zcat {input.fire} \
+                    -b <(tabix {input.fire} {wildcards.chrom} \
                             | cut -f 1-3 \
                             | awk -v OFMT="%f" '{{print $0"\t"$3-$2"\t"NR}}' \
                         ) \
@@ -242,11 +246,11 @@ rule helper_fdr_peaks_by_fire_elements:
         """
 
 
-rule fdr_peaks_by_fire_elements:
+rule fdr_peaks_by_fire_elements_chromosome:
     input:
         bed=rules.helper_fdr_peaks_by_fire_elements.output.bed,
     output:
-        bed="results/{sm}/FDR-peaks/FDR-FIRE-peaks.bed.gz",
+        bed=temp("temp/{sm}/FDR-peaks/grouped-{chrom}-FDR-FIRE-peaks.bed.gz"),
     threads: 8
     conda:
         "../envs/python.yaml"
@@ -260,3 +264,25 @@ rule fdr_peaks_by_fire_elements:
         > {output.bed}
         """
 
+
+rule fdr_peaks_by_fire_elements:
+    input:
+        beds=expand(
+            rules.fdr_peaks_by_fire_elements_chromosome.output.bed,
+            chrom=get_chroms(),
+            allow_missing=True,
+        ),
+    output:
+        bed="results/{sm}/FDR-peaks/FDR-FIRE-peaks.bed.gz",
+    threads: 8
+    conda:
+        conda
+    shell:
+        """
+        ( \
+            zcat {input.beds} | rg "^#" | head -n 1; \
+            zcat {input.beds} | rg -v "^#" \
+        ) \
+            | bgzip -@ {threads} \
+            > {output.bed}
+        """

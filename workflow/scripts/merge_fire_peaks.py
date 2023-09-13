@@ -94,11 +94,11 @@ def iterative_merge(
         i += 1
         if min_frac_overlap >= 1.0:
             logging.info(
-                f"{min_reciprocal_overlap:%} reciprocal overlap merging round {i} is done: {df.shape[0]:,}"
+                f"{min_reciprocal_overlap:.0%} reciprocal overlap merging round {i} is done: {df.shape[0]:,}"
             )
         else:
             logging.info(
-                f"Merging when {min_frac_overlap:%} of FIRE elements are shared. Round {i} is done. {n_row:,}"
+                f"Merging when {min_frac_overlap:.0%} of FIRE elements are shared. Round {i} is done. {n_row:,}"
             )
     return df
 

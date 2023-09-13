@@ -153,6 +153,20 @@ rule fire_sites:
         """
 
 
+rule fire_sites_index:
+    input:
+        bed=rules.fire_sites.output.bed,
+    output:
+        tbi="results/{sm}/fiber-calls/FIRE.bed.gz.tbi",
+    threads: 1
+    conda:
+        conda
+    shell:
+        """
+        tabix -p bed {input.bed}
+        """
+
+
 rule element_coverages_by_type:
     input:
         bed=rules.merge_model_results.output.bed,
