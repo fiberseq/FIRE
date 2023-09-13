@@ -327,7 +327,7 @@ def write_bed(chrom, output_dict, out, first=True):
 
     # can only find local maxes after de duplicating
     rolling_score = (
-        df.rolling(ROLLING_FIRE_SCORE_WINDOW_SIZE, on="start", center=True)
+        df.rolling(ROLLING_FIRE_SCORE_WINDOW_SIZE, on="start")  # , center=True)
         .score.mean()
         .values
     )
