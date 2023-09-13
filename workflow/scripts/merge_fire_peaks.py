@@ -121,10 +121,13 @@ def main(
     logger.setLevel(log_level)
 
     inf = io.StringIO(sys.stdin.read())
+    df = pl.read_csv(inf, separator="\t", null_values=".")
+    if df.shape[0] == 0:
+        logging.info("No peaks to merge")
+        return 0
     df = (
-        pl.read_csv(inf, separator="\t", null_values=".")
         # group into sliding X bp windows and only keep the highest score
-        .with_columns(roll_start=pl.col("start"))
+        df.with_columns(roll_start=pl.col("start"))
         .sort(["#chrom", "roll_start"])
         .groupby_rolling("roll_start", period=f"{max_score_every}i", by="#chrom")
         .agg([pl.exclude("roll_start").sort_by("score").last()])
