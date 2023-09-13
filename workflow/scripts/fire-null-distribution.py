@@ -9,7 +9,6 @@ import pandas as pd
 import polars as pl
 import numpy as np
 from numba import njit
-from scipy.signal import argrelextrema
 
 ROLLING_FIRE_SCORE_WINDOW_SIZE = 25
 
