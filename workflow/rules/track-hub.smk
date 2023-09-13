@@ -77,7 +77,7 @@ rule fdr_peaks_by_fire_elements_to_bb:
     shell:
         """
         zcat {input.bed} \
-        | bioawk -tc hdr '{{print $1,$2,$3,"peak-"NR,int($fire_coverage/$coverage*1000),".",$score,"-1",$log_FDR,int($start/2+$end/2)-$peak_start}}' \
+        | bioawk -tc hdr '{{print $1,$2,$3,"peak-"NR,int(1000 * $fire_coverage/$coverage),".",$score,"-1",$log_FDR,int($start/2+$end/2)-$peak_start}}' \
         > {output.tmp} 
         bedToBigBed \
             -type=bed6+4 -as={params.bedfmt} \
