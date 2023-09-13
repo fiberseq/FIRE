@@ -274,6 +274,7 @@ rule fdr_peaks_by_fire_elements:
         ),
     output:
         bed="results/{sm}/FDR-peaks/FDR-FIRE-peaks.bed.gz",
+        tbi="results/{sm}/FDR-peaks/FDR-FIRE-peaks.bed.gz.tbi",
     threads: 8
     conda:
         conda
@@ -285,4 +286,5 @@ rule fdr_peaks_by_fire_elements:
         ) \
             | bgzip -@ {threads} \
             > {output.bed}
+        tabix -f -p bed {output.bed}
         """
