@@ -153,7 +153,7 @@ rule fdr_track_chromosome:
         fire=temp("temp/{sm}/FDR-peaks/{chrom}-fire.bed"),
         fiber=temp("temp/{sm}/FDR-peaks/{chrom}-fiber.bed"),
         bed=temp("temp/{sm}/FDR-peaks/{chrom}-FDR.track.bed"),
-    threads: 8
+    threads: 4
     conda:
         "../envs/python.yaml"
     params:
