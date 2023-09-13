@@ -142,15 +142,15 @@ rule fdr_table:
         """
 
 
-rule fdr_track:
+rule fdr_track_chromosome:
     input:
         fire=rules.fire_sites.output.bed,
+        fire_tbi=rules.fire_sites_index.output.tbi,
         fiber_locations=rules.fiber_locations.output.bed,
         fai=ancient(f"{ref}.fai"),
         fdr_tbl=rules.fdr_table.output.tbl,
     output:
-        bed="results/{sm}/FDR-peaks/FDR.track.bed.gz",
-        tbi="results/{sm}/FDR-peaks/FDR.track.bed.gz.tbi",
+        bed=temp("temp/{sm}/FDR-peaks/{chrom}-FDR.track.bed"),
     threads: 8
     conda:
         "../envs/python.yaml"
@@ -160,14 +160,35 @@ rule fdr_track:
         mem_mb=get_mem_mb,
     shell:
         """
-        OUT={output.bed}
-        TMP_OUT="${{OUT%.*}}"
-        echo $TMP_OUT
-        python {params.script} \
-            -v 1 {input.fire} {input.fiber_locations} {input.fai} -f {input.fdr_tbl} \
-            -o $TMP_OUT
-        
-        bgzip -@ {threads} $TMP_OUT
+        python {params.script} -v 1 \
+            <(tabix -h {input.fire} {wildcards.chrom}) \
+            <(tabix -h {input.fiber_locations} {wildcards.chrom}) \
+            {input.fai} -f {input.fdr_tbl} \
+            -o {output.bed}
+        """
+
+
+rule fdr_track:
+    input:
+        beds=expand(
+            rules.fdr_track_chromosome.output.bed,
+            chrom=get_chroms(),
+            allow_missing=True,
+        ),
+    output:
+        bed="results/{sm}/FDR-peaks/FDR.track.bed.gz",
+        tbi="results/{sm}/FDR-peaks/FDR.track.bed.gz.tbi",
+    threads: 8
+    conda:
+        conda
+    shell:
+        """
+        ( \
+            cat {input.beds} | rg "^#" | head -n 1; \
+            cat {input.beds} | rg -v "^#" \
+        ) \
+            | bgzip -@ {threads} \
+        > {output.bed}
         tabix -f -p bed {output.bed}
         """
 
