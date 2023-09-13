@@ -77,6 +77,30 @@ def group_peaks(df, min_frac_overlap=0.5, min_reciprocal_overlap=0.75):
     return df
 
 
+def iterative_merge(
+    df, min_frac_overlap=0.5, min_reciprocal_overlap=0.75, max_grouping_iterations=10
+):
+    n_row = None
+    i = 0
+    while i < max_grouping_iterations:
+        df = group_peaks(
+            df,
+            min_frac_overlap=min_frac_overlap,
+            min_reciprocal_overlap=min_reciprocal_overlap,
+        )
+        if n_row == df.shape[0]:
+            break
+        n_row = df.shape[0]
+        i += 1
+        if min_frac_overlap >= 1.0:
+            logging.info(
+                f"Reciprocal overlap merging round {i} is done: {df.shape[0]:,}"
+            )
+        else:
+            logging.info(f"Iterative merging round {i} complete. Rows:{n_row:,}")
+    return df
+
+
 def main(
     *,
     max_score_every: int = 100,
@@ -114,35 +138,28 @@ def main(
     logging.info(
         f"Dynamic window merging over {max_score_every} bp is done: {df.shape[0]:,}"
     )
-    # group data based on reciprocal overlap
-    n_row = None
-    i = 0
-    while i < max_grouping_iterations:
-        df = group_peaks(
-            df,
-            min_frac_overlap=1.0,
-            min_reciprocal_overlap=min_reciprocal_overlap,
-        )
-        if n_row == df.shape[0]:
-            break
-        n_row = df.shape[0]
-        i += 1
-        logging.info(f"Reciprocal overlap merging round {i} is done: {df.shape[0]:,}")
-    # group data based on fire overlap
-    n_row = None
-    i = 0
-    while i < max_grouping_iterations:
-        df = group_peaks(
-            df,
-            min_frac_overlap=min_frac_overlap,
-            min_reciprocal_overlap=1.0,
-        )
-        if n_row == df.shape[0]:
-            break
-        n_row = df.shape[0]
-        i += 1
-        logging.info(f"Iterative merging round {i} complete. Rows:{n_row:,}")
-
+    # reciprocal overlap merging
+    df = iterative_merge(
+        df,
+        min_frac_overlap=2.0,
+        min_reciprocal_overlap=min_reciprocal_overlap,
+        max_grouping_iterations=2,
+    )
+    #  fire overlap merging
+    df = iterative_merge(
+        df,
+        min_frac_overlap=min_frac_overlap,
+        min_reciprocal_overlap=2.0,
+        max_grouping_iterations=max_grouping_iterations,
+    )
+    # one final round of reciprocal overlap merging
+    df = iterative_merge(
+        df,
+        min_frac_overlap=1.0,
+        min_reciprocal_overlap=min_reciprocal_overlap,
+        max_grouping_iterations=1,
+    )
+    # write to stdout
     (
         df.sort(["#chrom", "peak_start", "peak_end"])
         .drop("score_max", "group", "FIRE_IDs", "shares_FIREs", "is_local_max")
