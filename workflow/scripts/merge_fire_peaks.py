@@ -149,7 +149,7 @@ def main(
         df,
         min_frac_overlap=2.0,
         min_reciprocal_overlap=min_reciprocal_overlap,
-        max_grouping_iterations=2,
+        max_grouping_iterations=max_grouping_iterations,
     )
     #  fire overlap merging
     df = iterative_merge(
@@ -163,7 +163,7 @@ def main(
         df,
         min_frac_overlap=1.0,
         min_reciprocal_overlap=min_reciprocal_overlap,
-        max_grouping_iterations=1,
+        max_grouping_iterations=2,
     )
     # write to stdout
     (
