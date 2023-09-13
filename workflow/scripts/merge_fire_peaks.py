@@ -105,7 +105,7 @@ def iterative_merge(
 
 def main(
     *,
-    max_score_every: int = 50,
+    max_score_every: int = None,
     min_frac_overlap: float = 0.5,
     min_reciprocal_overlap: float = 0.90,
     max_grouping_iterations: int = 10,
@@ -125,21 +125,22 @@ def main(
     if df.shape[0] == 0:
         logging.info("No peaks to merge")
         return 0
-    df = (
-        # group into sliding X bp windows and only keep the highest score
-        df.with_columns(roll_start=pl.col("start"))
-        .sort(["#chrom", "roll_start"])
-        .groupby_rolling("roll_start", period=f"{max_score_every}i", by="#chrom")
-        .agg([pl.exclude("roll_start").sort_by("score").last()])
-        .drop("roll_start")
-        # remove any peaks that are the highest score for multiple X bp windows
-        .unique(subset=["#chrom", "peak_start", "peak_end", "start", "end"])
-        .sort(["#chrom", "peak_start"])
-        # convert the FIRE IDs strings to lists of ints
-        .with_columns(
-            FIRE_IDs=pl.col("FIRE_IDs").str.split(",").cast(pl.List(pl.UInt32)),
-        )
+    df = df.with_columns(
+        FIRE_IDs=pl.col("FIRE_IDs").str.split(",").cast(pl.List(pl.UInt32)),
     )
+
+    if max_score_every is not None:
+        df = (
+            # group into sliding X bp windows and only keep the highest score
+            df.with_columns(roll_start=pl.col("start"))
+            .sort(["#chrom", "roll_start"])
+            .groupby_rolling("roll_start", period=f"{max_score_every}i", by="#chrom")
+            .agg([pl.exclude("roll_start").sort_by("score").last()])
+            .drop("roll_start")
+            # remove any peaks that are the highest score for multiple X bp windows
+            .unique(subset=["#chrom", "peak_start", "peak_end", "start", "end"])
+            .sort(["#chrom", "peak_start"])
+        )
     logging.info(
         f"Dynamic window merging over {max_score_every} bp is done: {df.shape[0]:,}"
     )

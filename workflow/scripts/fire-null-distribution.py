@@ -10,7 +10,7 @@ import polars as pl
 import numpy as np
 from numba import njit
 
-ROLLING_FIRE_SCORE_WINDOW_SIZE = 50
+ROLLING_FIRE_SCORE_WINDOW_SIZE = 30
 
 FIRE_COLUMNS = [
     "chrom",
