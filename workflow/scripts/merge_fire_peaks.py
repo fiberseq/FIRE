@@ -32,7 +32,7 @@ def is_grouped_with_previous(
         )
         if (
             overlap_frac >= min_frac_overlap
-            and reciprocal_overlap >= min_reciprocal_overlap
+            or reciprocal_overlap >= min_reciprocal_overlap
         ):
             condition.append(True)
         else:
@@ -81,7 +81,7 @@ def main(
     *,
     max_score_every: int = 25,
     min_frac_overlap: float = 0.5,
-    min_reciprocal_overlap: float = 0.0,
+    min_reciprocal_overlap: float = 0.80,
     max_grouping_iterations: int = 1,
     verbose: int = 0,
 ):
