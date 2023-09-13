@@ -98,7 +98,7 @@ def iterative_merge(
             )
         else:
             logging.info(
-                f"{min_frac_overlap:%} FIRE elements shared merging round {i} is done. {n_row:,}"
+                f"Merging when {min_frac_overlap:%} of FIRE elements are shared. Round {i} is done. {n_row:,}"
             )
     return df
 
