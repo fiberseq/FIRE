@@ -144,7 +144,7 @@ def main(
         logging.info(f"Iterative merging round {i} complete. Rows:{n_row:,}")
 
     (
-        df.sort(["#chrom", "peak_start"])
+        df.sort(["#chrom", "peak_start", "peak_end"])
         .drop("score_max", "group", "FIRE_IDs", "shares_FIREs", "is_local_max")
         .write_csv("/dev/stdout", separator="\t")
     )
