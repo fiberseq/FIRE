@@ -10,7 +10,7 @@ import polars as pl
 import numpy as np
 from numba import njit
 
-ROLLING_FIRE_SCORE_WINDOW_SIZE = 25
+ROLLING_FIRE_SCORE_WINDOW_SIZE = 50
 
 FIRE_COLUMNS = [
     "chrom",
@@ -326,12 +326,14 @@ def write_bed(chrom, output_dict, out, first=True):
     ).to_pandas()
 
     # can only find local maxes after de duplicating
-    rolling_score = (
-        df.rolling(ROLLING_FIRE_SCORE_WINDOW_SIZE, on="start")  # , center=True)
-        .score.mean()
+    window_score = (
+        df.rolling(ROLLING_FIRE_SCORE_WINDOW_SIZE, on="start", center=True)
+        .score.max()
         .values
     )
-    df["is_local_max"] = is_local_max(rolling_score)  # df["score"].values
+    df["is_local_max"] = df["score"] == window_score  # df["score"].values
+
+    logging.info(f"Found {df.is_local_max.sum():,} local maximums.")
 
     # checks
     final_end = df.end.max()
