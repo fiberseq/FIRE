@@ -61,11 +61,13 @@ def group_peaks(df, min_frac_overlap=0.5, min_reciprocal_overlap=0.75):
         .with_columns(
             (~pl.col("shares_FIREs")).cumsum().alias("group"),
         )
+        .sort("group")
         .with_columns(
             pl.col("score").max().over("group").suffix("_max"),
             peak_start=pl.col("peak_start").min().over("group").cast(pl.UInt32),
             peak_end=pl.col("peak_end").max().over("group").cast(pl.UInt32),
             local_max_count=pl.col("group").len().over("group"),
+            # FIRE_IDs=pl.col("FIRE_IDs").over("group").flatten(),
         )
         .filter(pl.col("score") == pl.col("score_max"))
         .with_columns(
@@ -77,10 +79,10 @@ def group_peaks(df, min_frac_overlap=0.5, min_reciprocal_overlap=0.75):
 
 def main(
     *,
-    max_score_every: int = 200,
+    max_score_every: int = 100,
     min_frac_overlap: float = 0.5,
     min_reciprocal_overlap: float = 0.0,
-    max_grouping_iterations: int = 10,
+    max_grouping_iterations: int = 1,
     verbose: int = 0,
 ):
     """
