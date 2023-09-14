@@ -70,6 +70,10 @@ def group_peaks(df, min_frac_overlap=0.5, min_reciprocal_overlap=0.75):
             # FIRE_IDs=pl.col("FIRE_IDs").flatten().over("group"),
         )
         .filter(pl.col("score") == pl.col("score_max"))
+        # filter if multiple have the same score_max
+        .groupby(["#chrom", "group"])
+        .agg(pl.all().head(pl.count() * 0.2))
+        # add the peak length
         .with_columns(
             peak_length=pl.col("peak_end") - pl.col("peak_start"),
         )
