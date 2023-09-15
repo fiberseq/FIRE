@@ -9,7 +9,6 @@ dependencies:
   - defopt
   - numpy==1.24 # use this version to avoid cxx errors
   - numba::numba>=0.56
-  - scipy==1.6 # use this version to avoid cxx errors
   - pandas==1.4 # pandas versions later than this have cxx errors
   - pysam>=0.19
   - htslib>=1.17
