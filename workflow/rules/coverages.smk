@@ -105,7 +105,7 @@ rule exclude_from_shuffle:
         fai=ancient(f"{ref}.fai"),
         exclude=excludes,
     output:
-        bed="results/{sm}/coverage/exlude-from-shuffles.bed.gz",
+        bed="results/{sm}/coverage/exclude-from-shuffles.bed.gz",
     threads: 4
     conda:
         conda
