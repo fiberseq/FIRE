@@ -89,6 +89,7 @@ rule all:
         # coverage information
         expand(rules.genome_bedgraph.output, sm=data.index),
         expand(rules.coverage.output, sm=data.index),
+        expand(rules.exclude_from_shuffle.output, sm=data.index),
         # model results
         expand(rules.merge_model_results.output, sm=data.index),
         expand(rules.index_model_results.output, sm=data.index),
