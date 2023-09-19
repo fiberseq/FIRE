@@ -209,15 +209,14 @@ rule element_coverages:
         conda
     params:
         names="\t".join(el_types),
+        chrom=get_chroms()[0],
     threads: 4
     shell:
         """
         HAS_LINES=$(zcat {input.beds} | grep -cv '^#') || true
         if [ $HAS_LINES -eq 0 ]; then
             echo "No element coverages found for {wildcards.sm} {wildcards.hp}"
-            printf "#chrom\\tstart\\tend\\t{params.names}\\n" \
-                | bgzip -@{threads} \
-                > {output.bed}
+            printf "{params.chrom}\t0\t1\t0\t0\t0" | bgzip -@{threads} > {output.bed}
         else
             bedtools unionbedg -header -i {input.beds} -names {params.names} \
                 | sed 's/^chrom/#chrom/' \
