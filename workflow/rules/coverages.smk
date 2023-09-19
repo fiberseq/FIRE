@@ -103,7 +103,7 @@ rule exclude_from_shuffle:
     input:
         filtered=rules.fiber_locations.output.filtered,
         fai=ancient(f"{ref}.fai"),
-        exclude=excludes,
+        #exclude=excludes,
     output:
         bed="results/{sm}/coverage/exclude-from-shuffles.bed.gz",
     threads: 4
