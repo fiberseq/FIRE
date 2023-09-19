@@ -21,8 +21,13 @@ rule percent_accessible:
             | grep -v "^#" \
             | awk -v OFS='\t' '$5 > 0 {{print $1,$2,$3,$4/$5}}' \
         > {output.tmp}
-        
-        bedGraphToBigWig {output.tmp} {input.fai} {output.bw}
+
+        # skip if the file is empty
+        if [[ -s {output.tmp} ]]; then
+            bedGraphToBigWig {output.tmp} {input.fai} {output.bw}
+        else
+            touch {output.bw}
+        fi
         
         bgzip -@{threads} -c {output.tmp} > {output.bed}
         tabix -p bed {output.bed}
