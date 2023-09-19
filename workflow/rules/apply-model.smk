@@ -212,7 +212,7 @@ rule element_coverages:
     threads: 4
     shell:
         """
-        HAS_LINES=$(zcat {input.beds} | grep -v '^#' | head | wc -l)
+        HAS_LINES=$(zcat {input.beds} | grep -cv '^#')
         if [ $HAS_LINES -eq 0 ]; then
             echo "No element coverages found for {wildcards.sm} {wildcards.hp}"
             touch {output.bed}
