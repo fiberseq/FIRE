@@ -208,7 +208,7 @@ rule element_coverages:
     conda:
         conda
     params:
-        names=" ".join(el_types),
+        names="\t".join(el_types),
     threads: 4
     shell:
         """
