@@ -88,7 +88,7 @@ rule fiber_locations:
         # get filtered fiber locations
         MIN=$(cat {input.minimum})
         MAX=$(cat {input.maximum})
-        bedtools intersect -v -f 0.2 \
+        bedtools intersect -header -v -f 0.2 \
             -a {output.bed} \
             -b <(zcat {input.bg} | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX') \
         | bgzip -@ {threads} \

@@ -45,7 +45,7 @@ rule filtered_and_shuffled_fiber_locations:
 rule fdr_table:
     input:
         fire=rules.fire_sites.output.bed,
-        fiber_locations=rules.filtered_and_shuffled_fiber_locations.output.bed,
+        fiber_locations=rules.fiber_locations.output.filtered,
         shuffled=rules.filtered_and_shuffled_fiber_locations.output.shuffled,
         fai=ancient(f"{ref}.fai"),
     output:
