@@ -85,6 +85,13 @@ rule fdr_track_chromosome:
         """
         tabix -h {input.fire} {wildcards.chrom} > {output.fire}
         tabix -h {input.fiber_locations} {wildcards.chrom} > {output.fiber}
+        # check if file is empty
+        if [ ! -s {output.fire} ]; then
+            echo "No FIRE sites for {wildcards.chrom}"
+            touch {output}
+            exit 0
+        fi
+
         python {params.script} -v 1 \
             {output.fire} {output.fiber} \
             {input.fai} -f {input.fdr_tbl} \
