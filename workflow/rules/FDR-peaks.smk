@@ -29,7 +29,7 @@ rule filtered_and_shuffled_fiber_locations:
             allow_missing=True,
         ),
     output:
-        shuffled="results/{sm}/FDR-peaks/filtered-for-fdr/fiber-locations-shuffled.bed.gz",
+        shuffled="results/{sm}/coverage/filtered-for-coverage/fiber-locations-shuffled.bed.gz",
     threads: 1
     conda:
         conda
@@ -85,7 +85,7 @@ rule fdr_track_chromosome:
         """
         tabix -h {input.fire} {wildcards.chrom} > {output.fire}
         tabix -h {input.fiber_locations} {wildcards.chrom} > {output.fiber}
-        
+
         # check if file is empty
         if [ ! -s {output.fire} ]; then
             echo "No FIRE sites for {wildcards.chrom}"

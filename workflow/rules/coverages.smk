@@ -75,8 +75,8 @@ rule fiber_locations:
     output:
         bed="results/{sm}/coverage/fiber-locations.bed.gz",
         bed_tbi="results/{sm}/coverage/fiber-locations.bed.gz.tbi",
-        filtered="results/{sm}/FDR-peaks/filtered-for-fdr/fiber-locations.bed.gz",
-        filtered_tbi="results/{sm}/FDR-peaks/filtered-for-fdr/fiber-locations.bed.gz.tbi",
+        filtered="results/{sm}/coverage/filtered-for-coverage/fiber-locations.bed.gz",
+        filtered_tbi="results/{sm}/coverage/filtered-for-coverage/fiber-locations.bed.gz.tbi",
     threads: 4
     conda:
         conda
