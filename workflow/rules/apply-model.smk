@@ -147,7 +147,7 @@ rule fire_sites:
     shell:
         """
         bgzip -cd -@{threads} {input.bed} \
-            | awk '$10<={params.min_fdr}' \
+            | bioawk -tc hdr '$10<={params.min_fdr}' \
             | bgzip -@{threads} \
             > {output.bed}
         """
