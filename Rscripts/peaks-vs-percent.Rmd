@@ -18,6 +18,7 @@ library(glue)
 library(patchwork)
 library(ggpubr)
 library(valr)
+library(pals)
 
 
 FONT_SIZE=6
@@ -168,7 +169,6 @@ my_ggsave("Figures/peaks-vs-percent.pdf", height=3, width=5)
 ```
 
 ```{r}
-library(pals)
 x = df %>% 
     separate_rows(encode_anno, sep=";") %>%
     group_by(group, encode_anno) %>%
@@ -458,4 +458,70 @@ p.df[p.df$position==width-smooth& p.df$exp=="ENCFF658WKQ_DNase",]
 
 df_bp %>%
     filter(group == 0.05) 
+```
+
+
+
+# Figure out 5mC over low peaks
+```{r}
+# this is slow
+low_acc = df[acc_percent < 0.25]
+low_acc %>%
+    sample_n(250) %>%
+    select(chrom,start,end) %>%
+    fwrite("temp/low_acc_peaks.bed", row.names=F, col.names=F, quote=F, sep="\t")
+low_acc
+system("ft center -t $(nproc) -d 500 -r ../k-mer-variant-phasing/results/GM12878/GM12878.haplotagged.bam temp/low_acc_peaks.bed | rg '5mC|type'| bgzip -@ $(nproc) > temp/low_acc_center.tbl.gz")
+```
+
+```{r}
+center=fread("temp/low_acc_center.tbl.gz") %>%
+    select(-subset_sequence) %>%
+    filter(centered_position_type=="5mC") %>%
+    filter(centered_qual >= 256/2) %>%
+    data.table()
+center
+
+system("tabix -R temp/low_acc_peaks.bed results/GM12878_130X/FIRE.bed.gz > temp/low_acc_fires.bed")
+fires = my_read_bed("temp/low_acc_fires.bed")
+
+center$fire = FALSE
+center[query_name %in% fires$V4, "fire"] = TRUE
+sum(center$fire)
+
+```
+
+```{r}
+sum_data = center %>% 
+    filter(centered_start < 250 & centered_start > 0) %>%
+    group_by(chrom, centering_position, fire) %>%
+    summarise(
+        count = n()/length(unique(query_name)),
+        w_count = sum(centered_qual)/length(unique(query_name)) * 1/256
+    ) %>%
+    data.table()
+
+sum_data %>%
+    ggplot(
+        aes(color=fire, x=w_count)
+    ) +
+    facet_col(~fire, scales="free_y") + 
+    geom_histogram(
+        binwidth=0.25,
+    ) +
+    scale_x_continuous(
+        "# of 5mC events in the peak",
+        #trans="log10",
+        label=comma
+    )+
+    theme_minimal_grid()
+
+my_ggsave("Figures/5mC_in_FIRE_fibers.pdf")
+sum_data %>% 
+    group_by(fire) %>%
+    summarise(
+        mean(count),
+        median(count),
+        mean(w_count)
+    )
 ```
