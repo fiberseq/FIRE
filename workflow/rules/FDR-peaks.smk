@@ -1,92 +1,20 @@
-#
-# fiber locations and coverages
-#
-rule fiber_locations_chromosome:
-    input:
-        bam=lambda wc: data.loc[wc.sm, "bam"],
-    output:
-        bed=temp("temp/{sm}/coverage/{chrom}.fiber-locations.bed.gz"),
-    threads: 8
-    conda:
-        conda
-    shell:
-        """
-        # get fiber locations
-        (samtools view -@ {threads} -F 2308 -u {input.bam} {wildcards.chrom} \
-            | ft extract -t {threads} -s --all - \
-            | hck -F '#ct' -F st -F en -F fiber -F strand -F HP ) \
-            | (grep -v "^#" || true) \
-            | bgzip -@ {threads} \
-        > {output.bed}
-        """
-
-
-rule fiber_locations:
-    input:
-        fibers=expand(
-            rules.fiber_locations_chromosome.output.bed,
-            chrom=get_chroms(),
-            allow_missing=True,
-        ),
-    output:
-        bed="results/{sm}/coverage/fiber-locations.bed.gz",
-        bed_tbi="results/{sm}/coverage/fiber-locations.bed.gz.tbi",
-    threads: 1
-    conda:
-        conda
-    shell:
-        """
-        cat {input.fibers} > {output.bed}
-        tabix -f -p bed {output.bed}
-        """
-
-
 rule filtered_and_shuffled_fiber_locations_chromosome:
     input:
-        bed=rules.fiber_locations_chromosome.output.bed,
+        filtered=rules.fiber_locations.output.filtered,
+        exclude=rules.exclude_from_shuffle.output.bed,
         fai=ancient(f"{ref}.fai"),
-        # required for the coverage function to work
-        bg=rules.genome_bedgraph.output.bg,
-        minimum=rules.coverage.output.minimum,
-        maximum=rules.coverage.output.maximum,
     output:
-        bed=temp("temp/{sm}/coverage/{chrom}.fiber-locations-filtered.bed.gz"),
-        bg=temp("temp/{sm}/coverage/{chrom}.fiber-locations-filtered.coverage.bed.gz"),
         shuffled=temp("temp/{sm}/coverage/{chrom}.fiber-locations-shuffled.bed.gz"),
     threads: 4
     conda:
         conda
     shell:
         """
-        MIN=$(cat {input.minimum})
-        MAX=$(cat {input.maximum})
-
-        # check if file is empty
-        if [ -n "$(gunzip <{input.bed} | head -c 1 | tr '\\0\\n' __)" ]; then
-            echo "input is not empty"
-        else
-            echo "input is empty"
-            bgzip -c <(printf "") > {output.bed}
-            bgzip -c <(printf "") > {output.bg}
-            bgzip -c <(printf "") > {output.shuffled}
-            exit 0
-        fi
-
-        # get fiber locations
-        bedtools intersect -v -f 0.2 \
-            -a {input.bed} \
-            -b <(zcat {input.bg} | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX') \
-        | bgzip -@ {threads} \
-        > {output.bed}
-
-        # get bedgraph
-        bedtools genomecov -bga -i {output.bed} -g {input.fai} | bgzip -@ {threads} > {output.bg}
-
-        # make shuffled fiber locations
-        bedtools shuffle -chrom \
-            -excl <(zcat {output.bg} | awk '$4 == 0') \
-            -i {output.bed} \
-            -g {input.fai} \
+        tabix -h {input.filtered} {wildcards.chrom} \
+            | bedtools shuffle -chrom \
+                -excl {input.exclude} \
+                -i - \
+                -g {input.fai} \
             |  sort -k1,1 -k2,2n -k3,3n -k4,4 \
             | bgzip -@ {threads} \
         > {output.shuffled}
@@ -95,25 +23,18 @@ rule filtered_and_shuffled_fiber_locations_chromosome:
 
 rule filtered_and_shuffled_fiber_locations:
     input:
-        bed=expand(
-            rules.filtered_and_shuffled_fiber_locations_chromosome.output.bed,
-            chrom=get_chroms(),
-            allow_missing=True,
-        ),
         shuffled=expand(
             rules.filtered_and_shuffled_fiber_locations_chromosome.output.shuffled,
             chrom=get_chroms(),
             allow_missing=True,
         ),
     output:
-        bed="results/{sm}/FDR-peaks/filtered-for-fdr/fiber-locations.bed.gz",
         shuffled="results/{sm}/FDR-peaks/filtered-for-fdr/fiber-locations-shuffled.bed.gz",
     threads: 1
     conda:
         conda
     shell:
         """
-        cat {input.bed} > {output.bed}
         cat {input.shuffled} > {output.shuffled}
         """
 

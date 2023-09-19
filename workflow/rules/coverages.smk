@@ -37,3 +37,87 @@ rule coverage:
             min_out=output["minimum"],
             max_out=output["maximum"],
         )
+
+
+#
+# fiber locations and coverages
+#
+rule fiber_locations_chromosome:
+    input:
+        bam=lambda wc: data.loc[wc.sm, "bam"],
+    output:
+        bed=temp("temp/{sm}/coverage/{chrom}.fiber-locations.bed.gz"),
+    threads: 8
+    conda:
+        conda
+    shell:
+        """
+        # get fiber locations
+        (samtools view -@ {threads} -F 2308 -u {input.bam} {wildcards.chrom} \
+            | ft extract -t {threads} -s --all - \
+            | hck -F '#ct' -F st -F en -F fiber -F strand -F HP ) \
+            | (grep -v "^#" || true) \
+            | bgzip -@ {threads} \
+        > {output.bed}
+        """
+
+
+rule fiber_locations:
+    input:
+        fibers=expand(
+            rules.fiber_locations_chromosome.output.bed,
+            chrom=get_chroms(),
+            allow_missing=True,
+        ),
+        bg=rules.genome_bedgraph.output.bg,
+        minimum=rules.coverage.output.minimum,
+        maximum=rules.coverage.output.maximum,
+    output:
+        bed="results/{sm}/coverage/fiber-locations.bed.gz",
+        bed_tbi="results/{sm}/coverage/fiber-locations.bed.gz.tbi",
+        filtered="results/{sm}/FDR-peaks/filtered-for-fdr/fiber-locations.bed.gz",
+        filtered_tbi="results/{sm}/FDR-peaks/filtered-for-fdr/fiber-locations.bed.gz.tbi",
+    threads: 4
+    conda:
+        conda
+    shell:
+        """
+        cat {input.fibers} > {output.bed}
+        tabix -f -p bed {output.bed}
+        
+        # get filtered fiber locations
+        MIN=$(cat {input.minimum})
+        MAX=$(cat {input.maximum})
+        bedtools intersect -v -f 0.2 \
+            -a {output.bed} \
+            -b <(zcat {input.bg} | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX') \
+        | bgzip -@ {threads} \
+        > {output.filtered}
+        tabix -f -p bed {output.filtered}
+        """
+
+#
+#
+#
+rule exclude_from_shuffle:
+    input:
+        filtered=rules.fiber_locations.output.filtered,
+        exclude=excludes,
+    output:
+        bed="results/{sm}/coverage/exlude-from-shuffles.bed.gz",
+    threads: 4
+    conda:
+        conda
+    shell:
+        """
+
+        ( \
+            bedtools genomecov -bga -i {input.filtered} -g {input.fai} | awk '$4 == 0'; \
+            less {input.exclude} \
+        ) \
+            | cut -f 1-3 \
+            | bedtools sort \
+            | bedtools merge \
+            | bgzip -@ {threads} \
+        > {output.bed}
+        """
