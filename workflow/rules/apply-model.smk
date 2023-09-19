@@ -216,7 +216,7 @@ rule element_coverages:
         HAS_LINES=$(zcat {input.beds} | grep -cv '^#') || true
         if [ $HAS_LINES -eq 0 ]; then
             echo "No element coverages found for {wildcards.sm} {wildcards.hp}"
-            printf "{params.chrom}\t0\t1\t0\t0\t0" | bgzip -@{threads} > {output.bed}
+            printf "#chrom\\tstart\\tend\\t{params.names}\\n{params.chrom}\\t0\\t1\\t0\\t0\\t0\\n" | bgzip -@{threads} > {output.bed}
         else
             bedtools unionbedg -header -i {input.beds} -names {params.names} \
                 | sed 's/^chrom/#chrom/' \
