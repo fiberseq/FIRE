@@ -183,10 +183,13 @@ rule element_coverages_by_type:
     threads: 4
     shell:
         """
-        bgzip -cd -@{threads} {input.bed} \
-            | (rg -w {params.filter_hap} || true) \
-            | {params.filter_cmd} \
-            | bedtools genomecov -bg -i - -g {input.fai} \
+        ( \
+            printf "#chrom\\tstart\\tend\\tcoverage\\n"; \
+            bgzip -cd -@{threads} {input.bed} \
+                | (rg -w {params.filter_hap} || true) \
+                | {params.filter_cmd} \
+                | bedtools genomecov -bg -i - -g {input.fai} \
+        ) \
             | bgzip -@{threads} \
             > {output.bed}
         """
