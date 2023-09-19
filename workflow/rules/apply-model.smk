@@ -212,9 +212,15 @@ rule element_coverages:
     threads: 4
     shell:
         """
-        bedtools unionbedg -header -i {input.beds} -names {params.names} \
-            | sed 's/^chrom/#chrom/' \
-            | bgzip -@ {threads} \
-        > {output.bed}
+        HAS_LINES=$(zcat {input.beds} | grep -v '^#' | head | wc -l)
+        if [ $HAS_LINES -eq 0 ]; then
+            echo "No element coverages found for {wildcards.sm} {wildcards.hp}"
+            touch {output.bed}
+        else
+            bedtools unionbedg -header -i {input.beds} -names {params.names} \
+                | sed 's/^chrom/#chrom/' \
+                | bgzip -@ {threads} \
+            > {output.bed}
+        fi
         tabix -p bed {output.bed}
         """
