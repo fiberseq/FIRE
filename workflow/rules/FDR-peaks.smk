@@ -241,3 +241,37 @@ rule fdr_peaks_by_fire_elements:
             > {output.bed}
         tabix -f -p bed {output.bed}
         """
+
+
+rule wide_fdr_peaks:
+    input:
+        bed=rules.fdr_peaks_by_fire_elements.output.bed,
+        track=rules.fdr_track_filtered.output.bed,
+        fai=ancient(f"{ref}.fai"),
+    output:
+        bed="results/{sm}/FDR-peaks/FDR-wide-peaks.bed.gz",
+        tbi="results/{sm}/FDR-peaks/FDR-wide-peaks.bed.gz.tbi",
+        bb="results/{sm}/trackHub/bb/FDR-wide-peaks.bb",
+    conda:
+        conda
+    threads: 4
+    params:
+        nuc_size=config.get("nucleosome_size", 146),
+        max_peak_fdr=max_peak_fdr,
+    shell:
+        """
+        FILE={output.bed}
+        TMP="${{FILE%.*}}"
+        echo $TMP
+        ( \
+            zcat {input.bed}; \
+            bioawk -tc hdr '$FDR<={params.max_peak_fdr}' {input.track} \
+        ) \
+            | cut -f 1-3 \
+            | bedtools sort \
+            | bedtools merge -d 146 \
+        > $TMP
+        bedToBigBed $TMP {input.fai} {output.bb}        
+        bgzip -f -@ {threads} $TMP
+        tabix -p bed {output.bed}
+        """
