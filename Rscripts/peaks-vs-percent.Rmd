@@ -49,6 +49,7 @@ my_read_bed = function(...){
 }
 
 in_file="results/GM12878_130X/FIRE.peaks.with.coverage.bed"
+in_file="results/GM12878_FDR/FDR-peaks/FDR-FIRE-peaks.bed.gz"
 out_file="Figures/peaks-vs-percentage.pdf"
 encode=my_read_bed("data/ENCODE3_consensus_DHS_ENCFF503GCK.tsv")
 sds=my_read_bed("data/T2T_SDs.bed")
@@ -59,24 +60,21 @@ tss=my_read_bed("data/gencode.v42.annotation_TSS.gff3")
 dnase=my_read_bed("compare_fdr_and_dnase/ucsc/ENCFF960FMM.bedGraph")
 colnames(dnase)[4] = "dnase_sig"
 dnase
+
 ```
 
 
 ```{r}
-df=my_read_bed(in_file)
-df$peak_cov = df$peak_acc + df$peak_nuc + df$peak_link
-df$acc_percent = df$peak_acc/df$peak_cov
+df=fread(in_file)
+df$peak_cov = df$coverage
+df$acc_percent = df$fire_coverage/df$peak_cov
+colnames(df)[1:5]=c("chrom", "start","end","ostart","oend")
+
+dnase=head(df)
+dnase$dnase_sig=0
+
 df = df %>%
-    group_by(sample) %>%
     arrange(-acc_percent) %>%
-    mutate(
-        min_cov = cov - 5*sqrt(cov),
-        max_cov = cov + 5*sqrt(cov),
-    ) %>%
-    filter(
-        peak_cov > min_cov,
-        peak_cov < max_cov,
-    ) %>%
     mutate(
         n=seq(n()),
         min_percent_acc=min(acc_percent)
@@ -232,7 +230,7 @@ plot_encode_anno=x %>%
         legend.position="top",
         plot.margin = unit(c(0, 0, 0, 0), "cm"),
     )
-kk=p+plot_spacer()+percent_plots+plot_layout(heights = c(1,-0.3, 3))
+kk=plot_encode_anno+plot_spacer()+percent_plots+plot_layout(heights = c(1,-0.3, 3))
 my_ggsave("Figures/peaks-vs-encode-annotations.pdf", height=4, width=6, plot=kk)
 ```
 
@@ -316,7 +314,7 @@ my_ggsave("Figures/peaks-vs-percent.pdf", height=4, width=5)
 ```{r}
 df %>%
     filter(dnase_max > 0) %>%
-    ggplot(aes(x=peak_acc, y=dnase_max+1)) +
+    ggplot(aes(x=score, y=dnase_max+1)) +
     geom_hex(bins=30) +
     scale_fill_distiller("", palette = "Spectral", trans="log10") +
     stat_cor()+

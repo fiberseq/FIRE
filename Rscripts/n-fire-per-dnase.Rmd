@@ -1,0 +1,159 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, echo=FALSE}
+system("mkdir -p Figures")
+system("mkdir -p Tables")
+source('Rscripts/utils.R')
+library(valr)
+```
+
+```{r}
+d_f="data/ENCODE3_consensus_DHS_ENCFF503GCK.tsv"
+d_f="config/annotations/GM12878_DHS.bed.gz"
+slop = 200
+dhs=my_read_bed(d_f) %>%
+    mutate(
+        o_start=start,
+        o_end=end,
+        start=start-slop,
+        end=end+slop,
+    )
+fire=my_read_bed("results/GM12878_130X/FIRE.peaks.with.coverage.bed")
+
+dhs_with_fire_count = bed_map(dhs,fire, fire_count=n()) %>%
+    replace_na(list(fire_count=0)) %>%
+    filter(fire_count>0) %>%
+    data.table()
+
+dhs_with_fire_count
+```
+
+```{r}
+x_max=max(dhs_with_fire_count$fire_count)
+
+dhs_c=nrow(dhs_with_fire_count)
+fire_c=sum(dhs_with_fire_count$fire_count)
+dhs_c
+fire_c
+
+x=seq(1,x_max,1)
+y=ecdf(dhs_with_fire_count$fire_count)(x)
+s=data.table(x,y)
+s
+p=dhs_with_fire_count %>%
+    ggplot(aes(x=fire_count)) +
+    stat_ecdf(color="black") +
+    geom_text_repel(
+        data=s %>% filter(x<6),
+        aes(x=x+0.5, y=y, label=percent(round(y,3))),
+        size=1.5,
+        direction="y",
+        nudge_y=-0.01,
+    )+
+    scale_y_continuous("Cumulative percent of DHS sites", label=percent)+
+    scale_x_continuous("# of FIRE peaks per DHS", label=comma, breaks=seq(1,x_max))+
+    my_grid()
+my_ggsave("Figures/FIRE-count-in-DHS.pdf", height=3,width=4)
+```
+
+
+
+```{r}
+intersect = bed_intersect(dhs, fire,  suffix = c("", ".FIRE")) %>%
+    mutate(
+        dhs_center = round((o_end+o_start)/2),
+        fire_center_start=start.FIRE - dhs_center,
+        fire_center_end=end.FIRE-dhs_center,
+        dhs_center_start=o_start-dhs_center,
+        dhs_center_end=o_end-dhs_center,
+    ) %>%
+    pivot_longer(
+        ends_with("_center_start"),
+        names_to="center_type",
+        values_to="center_start"
+    ) %>%
+    pivot_longer(
+        ends_with("_center_end"),
+        names_to="center_type_2",
+        values_to="center_end"
+    ) %>%
+    filter(grepl("fire",center_type)==grepl("fire",center_type_2)) %>%
+    select(
+         contains("chrom") | contains("o_start")|contains("o_end") | contains("center")
+    ) %>% 
+    select(-center_type_2) %>%
+    mutate(
+        start=center_start,
+        end=center_end
+    ) %>%
+    unique() %>%
+    data.table()
+
+
+intersect_bp = intersect %>%
+    #sample_n(1e5) %>%
+    group_by(dhs_center, o_start,o_end, chrom, center_type, center_start, center_end) %>%
+    summarise(
+        pos = seq(center_start, center_end,1)
+    )
+intersect_bp
+```
+
+```{r}
+intersect_bp %>%
+    ggplot(
+        aes(color=center_type, x=pos)
+    ) + 
+    geom_density()+
+    scale_x_continuous("", limits=c(-2000,2000))+
+    my_grid()
+my_ggsave("Figures/FIRE-count-in-DHS-genomic.pdf", height=3,width=4)
+```
+
+
+
+```{r}
+dhs2=my_read_bed("data/ENCODE_GM12878/2023-08-03/narrow.peaks.ENCFF963JXP.bed")
+dhs2=my_read_bed("config/annotations/GM12878_DHS.bed.gz") 
+dhs2=my_read_bed("data/ENCODE_GM12878/2023-08-03/hotspot.ENCFF285FMT.bed")
+lengths = bind_rows(list(DHS=dhs2,FIRE=fire), .id="name") %>%
+    mutate(
+        length = end-start,
+        #z=o_end-o_start,
+        #length = pmin(length,z, na.rm=T)
+    )
+lengths %>%
+    filter(length<2000) %>%
+    ggplot(
+        aes(x=length, color=name)
+    ) +
+    geom_density()+
+    my_grid()
+my_ggsave("Figures/FIRE-vs-DHS-size.pdf", height=3,width=4)
+```
+
+
+```{r}
+range=1000
+get_cov_over=data.table(chrom="chr1", start=seq(-range,range), end=seq((-range+1), (range+1)) )
+pure_coverage=bind_rows(list(
+    fire=bed_coverage(get_cov_over, intersect[center_type=="fire_center_start"]), 
+    dhs=bed_coverage(get_cov_over, intersect[center_type=="dhs_center_start"])
+    ),
+    .id="name"
+)
+
+pure_coverage %>%
+    ggplot(
+        aes(x=start, y=.ints, fill=name, color=name)
+    ) +
+    #geom_bar(stat="identity", position="identity", alpha=0.5)+
+    geom_line()+
+    my_grid()
+my_ggsave("Figures/FIRE-vs-DHS-positional-genomic-coverage.pdf", height=3,width=4)
+```
