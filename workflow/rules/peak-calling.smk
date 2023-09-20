@@ -178,13 +178,3 @@ rule hap_differences:
         "../scripts/hap-diffs.R"
 
 
-rule peaks_vs_percent:
-    input:
-        bed=rules.fire_with_coverage.output.bed,
-    output:
-        fig1="results/{sm}/{sm}.peaks-vs-percent.pdf",
-    threads: 8
-    conda:
-        "../envs/R.yaml"
-    script:
-        "../scripts/peaks-vs-percent.R"

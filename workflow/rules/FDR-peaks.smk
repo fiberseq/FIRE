@@ -275,3 +275,16 @@ rule wide_fdr_peaks:
         bgzip -f -@ {threads} $TMP
         tabix -p bed {output.bed}
         """
+
+
+
+rule peaks_vs_percent:
+    input:
+        bed=rules.fdr_peaks_by_fire_elements.output.bed,
+    output:
+        fig1="results/{sm}/{sm}.peaks-vs-percent.pdf",
+    threads: 8
+    conda:
+        "../envs/R.yaml"
+    script:
+        "../scripts/peaks-vs-percent.R"

@@ -32,20 +32,19 @@ theme_no_x = function(...){
 in_file=snakemake@input[[1]]
 out_file=snakemake@output[[1]]
 
+# chrom  peak_start      peak_end        start   end     
+# fire_coverage   coverage        score   FDR     log_FDR 
+# fire_coverage_H1        coverage_H1     score_H1        FDR_H1  log_FDR_H1
+# fire_coverage_H2        coverage_H2  score_H2 FDR_H2  log_FDR_H2      
+# FIRE_size_mean  FIRE_size_ssd   FIRE_start_ssd  FIRE_end_ssd    local_max_count peak_length
+
+
 df=fread(in_file)
-df$peak_cov = df$peak_acc + df$peak_nuc + df$peak_link
-df$acc_percent = df$peak_acc/df$peak_cov
+df$peak_cov = df$coverage
+df$acc_percent = df$fire_coverage/df$peak_cov
 df = df %>%
     group_by(sample) %>%
     arrange(-acc_percent) %>%
-    mutate(
-        min_cov = cov - 5*sqrt(cov),
-        max_cov = cov + 5*sqrt(cov),
-    ) %>%
-    filter(
-        peak_cov > min_cov,
-        peak_cov < max_cov,
-    ) %>%
     group_by(sample) %>%
     mutate(
         count=row_number(),
