@@ -256,7 +256,7 @@ rule wide_fdr_peaks:
         conda
     threads: 4
     params:
-        nuc_size=config.get("nucleosome_size", 146),
+        nuc_size=config.get("nucleosome_size", 147),
         max_peak_fdr=max_peak_fdr,
     shell:
         """
@@ -269,7 +269,7 @@ rule wide_fdr_peaks:
         ) \
             | cut -f 1-3 \
             | bedtools sort \
-            | bedtools merge -d 146 \
+            | bedtools merge -d {params.nuc_size} \
         > $TMP
         bedToBigBed $TMP {input.fai} {output.bb}        
         bgzip -f -@ {threads} $TMP
