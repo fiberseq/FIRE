@@ -43,9 +43,7 @@ df=fread(in_file)
 df$peak_cov = df$coverage
 df$acc_percent = df$fire_coverage/df$peak_cov
 df = df %>%
-    group_by(sample) %>%
     arrange(-acc_percent) %>%
-    group_by(sample) %>%
     mutate(
         count=row_number(),
         min_percent_acc=min(acc_percent)
