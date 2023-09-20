@@ -92,7 +92,7 @@ by_5_per = df %>%
     slice_max(order_by = count, n = 1)
 
 p5hist=by_5_per %>%
-    ggplot(aes(x=acc_percent, y=count)) +
+    ggplot(aes(x=acc_percent-2.5, y=count)) +
     geom_bar(stat="identity")+
     geom_text_repel(
         aes(
