@@ -20,6 +20,16 @@ genome {ref}
 trackDb trackDb.txt
 """
 
+BB_TEMPLATE = """
+track {name}-{sample}
+shortLabel {name}-{sample}
+longLabel {name}-{sample}
+type bigBed 
+bigDataUrl {file}
+visibility dense
+maxItems 100000
+"""
+
 TRACK_COMP = """
 track reads-{sample}-{hap}
 compositeTrack on
@@ -221,6 +231,10 @@ def generate_trackhub(
             # add hap tracks
             file = f"bb/hap_differences.bb"
             trackDb.write(HAP_TEMPLATE.format(file=file, sample=sample))
+            file = "bb/FDR-wide-peaks.bb"
+            trackDb.write(
+                BB_TEMPLATE.format(file=file, name="FDR-wide-peaks", sample=sample)
+            )
 
         # add percent accessible tracks
         file = f"bw/{hap}.percent.accessible.bw"
