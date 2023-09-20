@@ -96,7 +96,7 @@ p5hist=by_5_per %>%
     geom_bar(stat="identity")+
     geom_text_repel(
         aes(
-            x=acc_percent,
+            x=acc_percent-2.5/100,
             label=paste(
                 comma(count)
             ),
