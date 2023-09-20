@@ -171,6 +171,7 @@ rule trackhub:
         fire=rules.fdr_peaks_by_fire_elements_to_bb.output.bb,
         cov=rules.coverage.output.cov,
         hap_diffs=rules.hap_differences_track.output.bb,
+        wide=rules.wide_fdr_peaks.output.bb,
     output:
         hub="results/{sm}/trackHub/hub.txt",
     benchmark:
