@@ -176,5 +176,3 @@ rule hap_differences:
         "../envs/R.yaml"
     script:
         "../scripts/hap-diffs.R"
-
-

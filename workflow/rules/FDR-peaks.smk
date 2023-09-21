@@ -277,7 +277,6 @@ rule wide_fdr_peaks:
         """
 
 
-
 rule peaks_vs_percent:
     input:
         bed=rules.fdr_peaks_by_fire_elements.output.bed,
