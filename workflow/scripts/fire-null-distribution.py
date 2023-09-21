@@ -340,7 +340,7 @@ def write_bed(chrom, output_dict, out, first=True):
     #    .values
     # )
     # df["is_local_max"] = df["score"] == window_score  # df["score"].values
-    df["is_local_max"] = df["score"] == df["max_window_score"]
+    df["is_local_max"] = (df["score"] == df["max_window_score"]) & (df["score"] > 0.0)
 
     logging.info(f"Found {df.is_local_max.sum():,} local maximums.")
 
