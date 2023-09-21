@@ -302,12 +302,20 @@ def write_bed(chrom, output_dict, out, first=True):
         mode = "a"
     logging.info(f"Making data frame")
     df = pl.DataFrame(output_dict)
-    original_columns = df.columns
     del output_dict
     gc.collect()
+
+    # finding maxes within windows
+    df = df.with_columns(
+        max_window_score=pl.col("score").rolling_max(
+            window_size=ROLLING_FIRE_SCORE_WINDOW_SIZE,
+            center=True,
+        )
+    )
+    original_columns = df.columns
     # find and clear the duplicates
-    # float array that says if a row is different from the previous row
     logging.info(f"Finding duplicates")
+    # float array that says if a row is different from the previous row
     diff = (((df != df.shift(periods=1)).sum(axis=1)) > 0) * 1.0
     # turn the diff array into a group number
     logging.info(f"Merging duplicates")
@@ -326,12 +334,13 @@ def write_bed(chrom, output_dict, out, first=True):
     ).to_pandas()
 
     # can only find local maxes after de duplicating
-    window_score = (
-        df.rolling(ROLLING_FIRE_SCORE_WINDOW_SIZE, on="start", center=True)
-        .score.max()
-        .values
-    )
-    df["is_local_max"] = df["score"] == window_score  # df["score"].values
+    # window_score = (
+    #    df.rolling(ROLLING_FIRE_SCORE_WINDOW_SIZE, on="start", center=True)
+    #    .score.max()
+    #    .values
+    # )
+    # df["is_local_max"] = df["score"] == window_score  # df["score"].values
+    df["is_local_max"] = df["score"] == df["max_window_score"]
 
     logging.info(f"Found {df.is_local_max.sum():,} local maximums.")
 
