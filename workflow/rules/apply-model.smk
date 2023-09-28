@@ -212,6 +212,8 @@ rule element_coverages:
     params:
         names="\t".join(el_types),
         chrom=get_chroms()[0],
+    resources:
+        time=300,
     threads: 4
     shell:
         """
