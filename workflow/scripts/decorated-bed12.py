@@ -116,6 +116,8 @@ def main(
         separator="\t",
         # comment_char="#",
     )
+    if df.shape[0] == 0:
+        return 0
     # df = df.filter(pl.col("color") != "230,230,230")
 
     # with Profiler(interval=0.1) as profiler:
