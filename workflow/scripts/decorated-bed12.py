@@ -44,13 +44,16 @@ def subgroup(df, ct, fiber, strand, hp):
     st = df["st"].min()
     en = df["en"].max()
     # tmp = df.filter(pl.col("color") != "230,230,230")
-    linker = df.filter(pl.col("color") == "147,112,219")
-    fire = df.filter(pl.col("color") == "255,0,0")
-    for el_type, gdf in zip(["Linker", "FIRE"], [linker, fire]):
-        if gdf.shape[0] == 0:
+    # linker = df.filter(pl.col("color") == "147,112,219")
+    # fire = df.filter(pl.col("color") == "255,0,0")
+    # for el_type, tdf in zip(["Linker", "FIRE"], [linker, fire]):
+    for (color, score), gdf in df.group_by(["color", "score"]):
+        if gdf.shape[0] == 0 or color == "230,230,230":
             continue
-        score = gdf["score"][0]
-        color = gdf["color"][0]
+        elif color == "147,112,219":
+            el_type = "Linker"
+        else:
+            el_type = "FIRE"
         decorator = make_decorator(
             ct,
             fiber,
