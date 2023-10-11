@@ -10,6 +10,7 @@ import polars as pl
 import numpy as np
 from numba import njit
 import io
+from pyinstrument import Profiler
 
 
 def make_decorator(ct, fiber, score, strand, color, el_type, hp, st, en, starts, ends):
@@ -37,16 +38,14 @@ def make_decorator(ct, fiber, score, strand, color, el_type, hp, st, en, starts,
 def subgroup(df, ct, fiber, strand, hp):
     st = df["st"].min()
     en = df["en"].max()
-    #  st      en      fiber   score   strand  tst     ten     color   qValue  HP
-    for (score, strand, color), gdf in df.groupby(["score", "strand", "color"]):
-        if color == "230,230,230":
-            el_type = "Nucleosome"
+    # tmp = df.filter(pl.col("color") != "230,230,230")
+    linker = df.filter(pl.col("color") == "147,112,219")
+    fire = df.filter(pl.col("color") == "255,0,0")
+    for el_type, gdf in zip(["Linker", "FIRE"], [linker, fire]):
+        if gdf.shape[0] == 0:
             continue
-        elif color == "147,112,219":
-            el_type = "Linker"
-        else:
-            el_type = "FIRE"
-
+        score = gdf["score"][0]
+        color = gdf["color"][0]
         decorator = make_decorator(
             ct,
             fiber,
@@ -57,18 +56,17 @@ def subgroup(df, ct, fiber, strand, hp):
             hp,
             st,
             en,
-            gdf["st"].to_numpy(),
-            gdf["en"].to_numpy(),
+            gdf["st"],
+            gdf["en"],
         )
         print(decorator)
 
-    score = 1
     return (
         ct,
         st,
         en,
         fiber,
-        score,
+        1,
         strand,
         0,
         0,
@@ -82,7 +80,7 @@ def subgroup(df, ct, fiber, strand, hp):
 
 def process(df, outfile):
     data = []
-    for (ct, fiber, strand, hp), gdf in df.groupby(["#ct", "fiber", "strand", "HP"]):
+    for (ct, fiber, strand, hp), gdf in df.group_by(["#ct", "fiber", "strand", "HP"]):
         bed12 = subgroup(gdf, ct, fiber, strand, hp)
         data.append(bed12)
     bed12 = pd.DataFrame(data).sort_values([0, 1, 2])
@@ -117,8 +115,13 @@ def main(
         separator="\t",
         # comment_char="#",
     )
-    logging.info(f"{df}")
-    process(df, outfile)
+    # df = df.filter(pl.col("color") != "230,230,230")
+
+    with Profiler(interval=0.1) as profiler:
+        logging.info(f"{df}")
+        process(df, outfile)
+    profiler.print()
+    profiler.open_in_browser()
     return 0
 
 
