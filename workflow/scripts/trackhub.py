@@ -192,37 +192,15 @@ alwaysZero on
 """
 
 DECORATED = """
-track {sample}-H1-fibers
-shortLabel {sample}-H1-fibers
-longLabel {sample}-H1-fibers
+track {sample}-{hap}-fibers
+shortLabel {sample}-{hap}-fibers
+longLabel {sample}-{hap}-fibers
 visibility squish
 type bigBed 12+
 itemRgb On
-filterText.keywords H1
+filterText.keywords {hap}
 bigDataUrl bb/fire-fibers.bb 
-decorator.default.bigDataUrl fire-fiber-decorators.bb 
-decorator.default.filterValues.keywords FIRE,Linker
-
-track {sample}-H2-fibers
-shortLabel {sample}-H2-fibers
-longLabel {sample}-H2-fibers
-visibility squish
-type bigBed 12+
-itemRgb On
-filterText.keywords H2
-bigDataUrl bb/fire-fibers.bb 
-decorator.default.bigDataUrl fire-fiber-decorators.bb
-decorator.default.filterValues.keywords FIRE,Linker
-
-track {sample}-UNK-fibers
-shortLabel {sample}-UNK-fibers
-longLabel {sample}-UNK-fibers
-visibility squish
-type bigBed 12+
-itemRgb On
-filterText.keywords UNK
-bigDataUrl bb/fire-fibers.bb
-decorator.default.bigDataUrl fire-fiber-decorators.bb 
+decorator.default.bigDataUrl bb/fire-fiber-decorators.bb 
 decorator.default.filterValues.keywords FIRE,Linker
 """
 
@@ -307,7 +285,8 @@ def generate_trackhub(
                     )
         # new bin files
         if hap == "all":
-            trackDb.write(DECORATED.format(sample=sample))
+            for z in ["H1", "H2", "UNK"]:
+                trackDb.write(DECORATED.format(sample=sample, hap=z))
 
     # FDR scores
     trackDb.write(
