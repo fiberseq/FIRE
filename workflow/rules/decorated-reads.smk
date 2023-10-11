@@ -48,7 +48,7 @@ rule decorate_fibers:
     shell:
         """
         cat {input.bed} > {output.bed}
-        bedToBigBed -type=bed12+ -as={params.bed_as} {output.bed} {input.fai} {output.bb}
+        bedToBigBed -allow1bpOverlap -type=bed12+ -as={params.bed_as} {output.bed} {input.fai} {output.bb}
         cat {input.decorated} > {output.decorated}
-        bedToBigBed -type=bed12+ -as={params.dec_as} {output.decorated} {input.fai} {output.bbd}
+        bedToBigBed -allow1bpOverlap -type=bed12+ -as={params.dec_as} {output.decorated} {input.fai} {output.bbd}
         """
