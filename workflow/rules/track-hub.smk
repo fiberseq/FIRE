@@ -172,6 +172,7 @@ rule trackhub:
         cov=rules.coverage.output.cov,
         hap_diffs=rules.hap_differences_track.output.bb,
         wide=rules.wide_fdr_peaks.output.bb,
+        decorators=rules.decorate_fibers.output.bb,
     output:
         hub="results/{sm}/trackHub/hub.txt",
     benchmark:

@@ -192,9 +192,9 @@ alwaysZero on
 """
 
 DECORATED = """
-track fibers
-shortLabel H1 fibers
-longLabel H1 Fibers
+track {sample}-H1-fibers
+shortLabel {sample}-H1-fibers
+longLabel {sample}-H1-fibers
 visibility squish
 type bigBed 12+
 itemRgb On
@@ -203,6 +203,27 @@ bigDataUrl bb/fire-fibers.bb fire-fiber-decorators.bb
 decorator.default.bigDataUrl 
 decorator.default.filterValues.keywords FIRE,Linker
 
+track {sample}-H2-fibers
+shortLabel {sample}-H2-fibers
+longLabel {sample}-H2-fibers
+visibility squish
+type bigBed 12+
+itemRgb On
+filterText.keywords H2
+bigDataUrl bb/fire-fibers.bb fire-fiber-decorators.bb
+decorator.default.bigDataUrl 
+decorator.default.filterValues.keywords FIRE,Linker
+
+track {sample}-UNK-fibers
+shortLabel {sample}-UNK-fibers
+longLabel {sample}-UNK-fibers
+visibility squish
+type bigBed 12+
+itemRgb On
+filterText.keywords UNK
+bigDataUrl bb/fire-fibers.bb fire-fiber-decorators.bb
+decorator.default.bigDataUrl 
+decorator.default.filterValues.keywords FIRE,Linker
 """
 
 
@@ -269,20 +290,24 @@ def generate_trackhub(
             )
 
         # bin files
-        max_coverage = ave_coverage * 3 * np.sqrt(ave_coverage)
-        if hap != "all":
-            trackDb.write(TRACK_COMP.format(sample=sample, hap=hap))
-            viz = "dense"
-            for i in range(max_bins):
-                if hap == "all":
-                    continue
-                if i >= max_coverage / 2 and hap != "all" and hap != "unk":
-                    continue
-                elif i >= max_coverage:
-                    continue
-                trackDb.write(
-                    SUB_COMP_TRACK.format(i=i + 1, viz=viz, sample=sample, hap=hap)
-                )
+        if False
+            max_coverage = ave_coverage * 3 * np.sqrt(ave_coverage)
+            if hap != "all":
+                trackDb.write(TRACK_COMP.format(sample=sample, hap=hap))
+                viz = "dense"
+                for i in range(max_bins):
+                    if hap == "all":
+                        continue
+                    if i >= max_coverage / 2 and hap != "all" and hap != "unk":
+                        continue
+                    elif i >= max_coverage:
+                        continue
+                    trackDb.write(
+                        SUB_COMP_TRACK.format(i=i + 1, viz=viz, sample=sample, hap=hap)
+                    )
+        # new bin files
+        if hap == "all":
+            trackDb.write(DECORATED.format(sample=sample))
 
     # FDR scores
     trackDb.write(
