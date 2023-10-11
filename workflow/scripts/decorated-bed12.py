@@ -10,7 +10,8 @@ import polars as pl
 import numpy as np
 from numba import njit
 import io
-from pyinstrument import Profiler
+
+# from pyinstrument import Profiler
 
 
 def make_decorator(ct, fiber, score, strand, color, el_type, hp, st, en, starts, ends):
@@ -117,11 +118,11 @@ def main(
     )
     # df = df.filter(pl.col("color") != "230,230,230")
 
-    with Profiler(interval=0.1) as profiler:
-        logging.info(f"{df}")
-        process(df, outfile)
-    profiler.print()
-    profiler.open_in_browser()
+    # with Profiler(interval=0.1) as profiler:
+    logging.info(f"{df}")
+    process(df, outfile)
+    # profiler.print()
+    # profiler.open_in_browser()
     return 0
 
 
