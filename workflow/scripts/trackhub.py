@@ -290,7 +290,7 @@ def generate_trackhub(
             )
 
         # bin files
-        if False
+        if False:
             max_coverage = ave_coverage * 3 * np.sqrt(ave_coverage)
             if hap != "all":
                 trackDb.write(TRACK_COMP.format(sample=sample, hap=hap))
