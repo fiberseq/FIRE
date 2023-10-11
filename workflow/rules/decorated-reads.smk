@@ -43,12 +43,12 @@ rule decorate_fibers:
     conda:
         conda
     params:
-        dec_as=workflow.source_path("../templates/decoration.as"),
         bed_as=workflow.source_path("../templates/bed12_filter.as"),
+        dec_as=workflow.source_path("../templates/decoration.as"),
     shell:
         """
         cat {input.bed} > {output.bed}
-        bedToBigBed {output.bed} {input.fai} {output.bb}
+        bedToBigBed -type=bed12+ -as={params.bed_as} {output.bed} {input.fai} {output.bb}
         cat {input.decorated} > {output.decorated}
-        bedToBigBed {output.decorated} {input.fai} {output.bbd}
+        bedToBigBed -type=bed12+ -as={params.dec_as} {output.decorated} {input.fai} {output.bbd}
         """

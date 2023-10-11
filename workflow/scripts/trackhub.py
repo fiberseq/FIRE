@@ -191,6 +191,20 @@ alwaysZero on
     viewLimits 0.0:100.0
 """
 
+DECORATED = """
+track fibers
+shortLabel H1 fibers
+longLabel H1 Fibers
+visibility squish
+type bigBed 12+
+itemRgb On
+filterText.keywords H1
+bigDataUrl bb/fire-fibers.bb fire-fiber-decorators.bb
+decorator.default.bigDataUrl 
+decorator.default.filterValues.keywords FIRE,Linker
+
+"""
+
 
 def generate_trackhub(
     trackhub_dir,
