@@ -199,8 +199,8 @@ visibility squish
 type bigBed 12+
 itemRgb On
 filterText.keywords H1
-bigDataUrl bb/fire-fibers.bb fire-fiber-decorators.bb
-decorator.default.bigDataUrl 
+bigDataUrl bb/fire-fibers.bb 
+decorator.default.bigDataUrl fire-fiber-decorators.bb 
 decorator.default.filterValues.keywords FIRE,Linker
 
 track {sample}-H2-fibers
@@ -210,8 +210,8 @@ visibility squish
 type bigBed 12+
 itemRgb On
 filterText.keywords H2
-bigDataUrl bb/fire-fibers.bb fire-fiber-decorators.bb
-decorator.default.bigDataUrl 
+bigDataUrl bb/fire-fibers.bb 
+decorator.default.bigDataUrl fire-fiber-decorators.bb
 decorator.default.filterValues.keywords FIRE,Linker
 
 track {sample}-UNK-fibers
@@ -221,8 +221,8 @@ visibility squish
 type bigBed 12+
 itemRgb On
 filterText.keywords UNK
-bigDataUrl bb/fire-fibers.bb fire-fiber-decorators.bb
-decorator.default.bigDataUrl 
+bigDataUrl bb/fire-fibers.bb
+decorator.default.bigDataUrl fire-fiber-decorators.bb 
 decorator.default.filterValues.keywords FIRE,Linker
 """
 
