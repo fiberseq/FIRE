@@ -5,6 +5,8 @@ rule decorate_reads_chromosome:
         bed=temp("temp/{sm}/decorate/{chrom}.bed.gz"),
         decorated=temp("temp/{sm}/decorate/{chrom}.dec.bed.gz"),
     threads: 4
+    resources:
+        mem_mb=get_large_mem_mb,
     conda:
         "../envs/python.yaml"
     params:
