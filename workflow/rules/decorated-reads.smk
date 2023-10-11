@@ -12,8 +12,8 @@ rule decorate_reads_chromosome:
     shell:
         """
         tabix -h {input.bed} {wildcards.chrom} \
-            | python {params.script} - {output.bed} \
-            |  sort -k1,1 -k2,2n -k3,3n -k4,4 \
+            | python {params.script} -v 1 - {output.bed} \
+            | sort -k1,1 -k2,2n -k3,3n -k4,4 \
             | bgzip -@ {threads} \
         > {output.decorated}
         """
