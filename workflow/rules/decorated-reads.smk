@@ -6,7 +6,7 @@ rule decorate_reads_chromosome:
         decorated=temp("temp/{sm}/decorate/{chrom}.dec.bed.gz"),
     threads: 4
     conda:
-        conda
+        "../envs/python.yaml"
     params:
         script=workflow.source_path("../scripts/decorated-bed12.py"),
     shell:
