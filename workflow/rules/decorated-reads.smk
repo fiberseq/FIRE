@@ -23,12 +23,12 @@ rule decorate_fibers:
     input:
         bed=expand(
             rules.decorate_reads_chromosome.output.bed,
-            chrom=get_chroms,
+            chrom=get_chroms(),
             allow_missing=True,
         ),
         decorated=expand(
             rules.decorate_reads_chromosome.output.decorated,
-            chrom=get_chroms,
+            chrom=get_chroms(),
             allow_missing=True,
         ),
         fai=f"{ref}.fai",
