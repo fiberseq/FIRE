@@ -90,7 +90,9 @@ def process(df, outfile):
     n = 0
     for batch_of_fibers in chunker(fibers, 10_000):
         tdf = df.filter(pl.col("fiber").is_in(batch_of_fibers))
-        logging.info(f"processing {n:,}-{n+len(batch_of_fibers):,} of {n_fibers:,}")
+        logging.info(
+            f"processing {n:,}-{n+len(batch_of_fibers):,} of {n_fibers:,} fibers"
+        )
         n += len(batch_of_fibers)
         for (ct, fiber, strand, hp), gdf in tdf.group_by(
             ["#ct", "fiber", "strand", "HP"]
