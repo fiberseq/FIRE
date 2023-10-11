@@ -11,7 +11,7 @@ rule decorate_reads_chromosome:
         script=workflow.source_path("../scripts/decorated-bed12.py"),
     shell:
         """
-        tabix -h {input.filtered} {wildcards.chrom} \
+        tabix -h {input.bed} {wildcards.chrom} \
             | python {params.script} - {output.bed} \
             |  sort -k1,1 -k2,2n -k3,3n -k4,4 \
             | bgzip -@ {threads} \
