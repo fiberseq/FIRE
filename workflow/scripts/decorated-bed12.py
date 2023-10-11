@@ -28,9 +28,10 @@ def make_decorator(ct, fiber, score, strand, color, el_type, hp, st, en, starts,
     # 382, 1 , 1
     # chr1:1-10000:LongRead
     # block 255,0,0,180 Ignored TypeA
+    prime_color = "0,0,0,0"
     return (
         # bed9
-        f"{ct}\t{start}\t{end}\t{el_type}\t{score}\t{strand}\t{start}\t{end}\t{color},0\t"
+        f"{ct}\t{start}\t{end}\t{el_type}\t{score}\t{strand}\t{start}\t{end}\t{prime_color}\t"
         # bed12
         f"{block_count}\t{lengths}\t{offsets}\t"
         # read tag for the decorator
