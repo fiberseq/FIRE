@@ -115,7 +115,7 @@ rule all:
         expand(rules.fdr_peaks_by_fire_elements_to_bb.output.bb, sm=data.index),
         expand(rules.percent_accessible.output.bw, hp=not_unk, sm=data.index),
         expand(
-            rules.element_coverages_bw.output,
+            rules.element_coverages_bw.output.bw,
             sm=data.index,
             hp=not_unk,
             el_type=el_types,
