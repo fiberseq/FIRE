@@ -50,6 +50,7 @@ include: "rules/train-model.smk"
 include: "rules/apply-model.smk"
 include: "rules/FDR-peaks.smk"
 include: "rules/peak-calling.smk"
+include: "rules/decorated-reads.smk"
 include: "rules/track-hub.smk"
 
 
@@ -120,3 +121,4 @@ rule all:
             el_type=el_types,
         ),
         expand(rules.trackhub.output, sm=data.index),
+        expand(rules.decorate_fibers.output, sm=data.index),
