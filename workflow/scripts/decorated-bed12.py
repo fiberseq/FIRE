@@ -14,6 +14,10 @@ import io
 # from pyinstrument import Profiler
 
 
+def chunker(seq, size):
+    return (seq[pos : pos + size] for pos in range(0, len(seq), size))
+
+
 def make_decorator(ct, fiber, score, strand, color, el_type, hp, st, en, starts, ends):
     start = starts[0]
     end = ends[-1]
@@ -81,9 +85,17 @@ def subgroup(df, ct, fiber, strand, hp):
 
 def process(df, outfile):
     data = []
-    for (ct, fiber, strand, hp), gdf in df.group_by(["#ct", "fiber", "strand", "HP"]):
-        bed12 = subgroup(gdf, ct, fiber, strand, hp)
-        data.append(bed12)
+    fibers = df["fiber"].unique()
+    n = 0
+    for batch_of_fibers in chunker(fibers, 10_000):
+        tdf = df.filter(pl.col("fiber").is_in(batch_of_fibers))
+        logging.info(f"processing {n:,}-{n+len(batch_of_fibers):,}")
+        n += len(batch_of_fibers)
+        for (ct, fiber, strand, hp), gdf in tdf.group_by(
+            ["#ct", "fiber", "strand", "HP"]
+        ):
+            bed12 = subgroup(gdf, ct, fiber, strand, hp)
+            data.append(bed12)
     bed12 = pd.DataFrame(data).sort_values([0, 1, 2])
     bed12.to_csv(outfile, sep="\t", header=False, index=False)
 
