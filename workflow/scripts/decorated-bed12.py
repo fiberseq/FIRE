@@ -115,7 +115,6 @@ def main(
     """
     if infile == "-":
         infile = io.StringIO(sys.stdin.read())
-    outfile = open(outfile, "w")
 
     logger = logging.getLogger()
     log_format = "[%(levelname)s][Time elapsed (ms) %(relativeCreated)d]: %(message)s"
@@ -129,6 +128,7 @@ def main(
         # comment_char="#",
     )
     if df.shape[0] == 0:
+        outfile = open(outfile, "w")
         return 0
     # df = df.filter(pl.col("color") != "230,230,230")
 
