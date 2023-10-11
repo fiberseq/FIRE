@@ -1,4 +1,4 @@
-rule decorate_reads_chromosome:
+rule decorate_fibers_chromosome:
     input:
         bed=rules.merge_model_results.output.bed,
     output:
@@ -24,12 +24,12 @@ rule decorate_reads_chromosome:
 rule decorate_fibers:
     input:
         bed=expand(
-            rules.decorate_reads_chromosome.output.bed,
+            rules.decorate_fibers_chromosome.output.bed,
             chrom=get_chroms(),
             allow_missing=True,
         ),
         decorated=expand(
-            rules.decorate_reads_chromosome.output.decorated,
+            rules.decorate_fibers_chromosome.output.decorated,
             chrom=get_chroms(),
             allow_missing=True,
         ),
