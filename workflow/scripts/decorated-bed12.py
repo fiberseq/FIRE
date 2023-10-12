@@ -122,8 +122,7 @@ def main(
     :param verbose: Set the logging level of the function
     """
     if infile == "-":
-        # infile = io.StringIO(sys.stdin.read())
-        infile = io.BytesIO(sys.stdin)
+        infile = io.StringIO(sys.stdin.read())
 
     logger = logging.getLogger()
     log_format = "[%(levelname)s][Time elapsed (ms) %(relativeCreated)d]: %(message)s"
