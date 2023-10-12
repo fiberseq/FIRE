@@ -131,7 +131,7 @@ def main(
     logging.basicConfig(format=log_format)
     logger.setLevel(log_level)
 
-    df = pl.scan_csv(
+    df = pl.read_csv(
         infile,
         separator="\t",
         columns=[
