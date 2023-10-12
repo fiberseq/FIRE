@@ -88,22 +88,25 @@ def subgroup(df, ct, fiber, strand, hp):
     )
 
 
-def process(df, outfile):
+def process(df, outfile, group_size=5_000):
     data = []
     fibers = df["fiber"].unique()
     n_fibers = len(fibers)
     n = 0
+    mode = "w"
     for (ct, fiber, strand, hp), gdf in df.group_by(
         ["#ct", "fiber", "strand", "HP"], maintain_order=True
     ):
-        bed12 = subgroup(gdf, ct, fiber, strand, hp)
-        data.append(bed12)
+        data.append(subgroup(gdf, ct, fiber, strand, hp))
         n += 1
-        if n % 5_000 == 0:
+        if n % group_size == 0 or n == n_fibers:
             logging.info(f"processed {n:,} fibers of {n_fibers:,}")
+            pd.DataFrame(data).sort_values([0, 1, 2]).to_csv(
+                outfile, sep="\t", header=False, index=False, mode=mode
+            )
+            mode = "a"
+            data = []
             gc.collect()
-    bed12 = pd.DataFrame(data).sort_values([0, 1, 2])
-    bed12.to_csv(outfile, sep="\t", header=False, index=False)
 
 
 def main(
