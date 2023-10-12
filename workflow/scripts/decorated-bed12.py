@@ -122,7 +122,8 @@ def main(
     :param verbose: Set the logging level of the function
     """
     if infile == "-":
-        infile = io.StringIO(sys.stdin.read())
+        # infile = io.StringIO(sys.stdin.read())
+        infile = io.BytesIO(sys.stdin)
 
     logger = logging.getLogger()
     log_format = "[%(levelname)s][Time elapsed (ms) %(relativeCreated)d]: %(message)s"
@@ -130,10 +131,19 @@ def main(
     logging.basicConfig(format=log_format)
     logger.setLevel(log_level)
 
-    df = pl.read_csv(
+    df = pl.scan_csv(
         infile,
         separator="\t",
-        # comment_char="#",
+        columns=[
+            "#ct",
+            "st",
+            "en",
+            "fiber",
+            "score",
+            "strand",
+            "HP",
+            "color",
+        ],
     )
     if df.shape[0] == 0:
         outfile = open(outfile, "w")
