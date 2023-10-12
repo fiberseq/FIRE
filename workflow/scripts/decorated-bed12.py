@@ -93,17 +93,15 @@ def process(df, outfile):
     fibers = df["fiber"].unique()
     n_fibers = len(fibers)
     n = 0
-    for batch_of_fibers in chunker(fibers, 10_000):
-        tdf = df.filter(pl.col("fiber").is_in(batch_of_fibers))
-        logging.info(
-            f"processing {n:,}-{n+len(batch_of_fibers):,} of {n_fibers:,} fibers"
-        )
-        n += len(batch_of_fibers)
-        for (ct, fiber, strand, hp), gdf in tdf.group_by(
-            ["#ct", "fiber", "strand", "HP"]
-        ):
-            bed12 = subgroup(gdf, ct, fiber, strand, hp)
-            data.append(bed12)
+    for (ct, fiber, strand, hp), gdf in df.group_by(
+        ["#ct", "fiber", "strand", "HP"], maintain_order=True
+    ):
+        bed12 = subgroup(gdf, ct, fiber, strand, hp)
+        data.append(bed12)
+        n += 1
+        if n % 5_000 == 0:
+            logging.info(f"processed {n:,} fibers of {n_fibers:,}")
+            gc.collect()
     bed12 = pd.DataFrame(data).sort_values([0, 1, 2])
     bed12.to_csv(outfile, sep="\t", header=False, index=False)
 
