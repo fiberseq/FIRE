@@ -94,9 +94,10 @@ def process(df, outfile, group_size=5_000):
     n_fibers = len(fibers)
     n = 0
     mode = "w"
-    for (ct, fiber, strand, hp), gdf in df.group_by(
-        ["#ct", "fiber", "strand", "HP"], maintain_order=True
+    for (ct, fiber, hp), gdf in df.group_by(
+        ["#ct", "fiber", "HP"], maintain_order=True
     ):
+        strand = "."
         data.append(subgroup(gdf, ct, fiber, strand, hp))
         n += 1
         if n % group_size == 0 or n == n_fibers:
@@ -117,7 +118,6 @@ def main(
 ):
     """
     Author Mitchell R. Vollger
-
     :param infile: Input file, stdin by default
     :param outfile: Output file, stdout by default
     :param verbose: Set the logging level of the function
@@ -134,13 +134,14 @@ def main(
     df = pl.read_csv(
         infile,
         separator="\t",
+        low_memory=True,
         columns=[
             "#ct",
             "st",
             "en",
             "fiber",
             "score",
-            "strand",
+            # "strand",
             "HP",
             "color",
         ],
