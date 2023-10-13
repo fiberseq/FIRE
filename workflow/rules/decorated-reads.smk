@@ -19,6 +19,7 @@ rule decorate_fibers_chromosome:
             | sort -k1,1 -k2,2n -k3,3n -k4,4 \
             | bgzip -@ {threads} \
         > {output.decorated}
+        rm $INBED
         """
 
 
