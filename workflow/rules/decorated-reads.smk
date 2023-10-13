@@ -13,8 +13,9 @@ rule decorate_fibers_chromosome:
         script=workflow.source_path("../scripts/decorated-bed12.py"),
     shell:
         """
-        tabix -h {input.bed} {wildcards.chrom} \
-            | python {params.script} -v 1 - {output.bed} \
+        INBED={resources.tmpdir}/tmp.{wildcards.sm}.{wildcards.chrom}.bed.gz
+        tabix -h {input.bed} {wildcards.chrom} | bgzip -@ {threads} > $INBED
+        python {params.script} -v 1 $INBED {output.bed} \
             | sort -k1,1 -k2,2n -k3,3n -k4,4 \
             | bgzip -@ {threads} \
         > {output.decorated}
