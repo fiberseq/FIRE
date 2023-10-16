@@ -57,7 +57,8 @@ tss=my_read_bed("data/gencode.v42.annotation_TSS.gff3")
 ```
 
 ```{r}
-dnase=my_read_bed("compare_fdr_and_dnase/ucsc/ENCFF960FMM.bedGraph")
+#  compare_fdr_and_dnase/ucsc/ENCFF960FMM.bedGraph
+dnase=my_read_bed("data/bedgraph_annotations/ENCFF960FMM_dnase_signal.bed")
 colnames(dnase)[4] = "dnase_sig"
 dnase
 
@@ -70,8 +71,6 @@ df$peak_cov = df$coverage
 df$acc_percent = df$fire_coverage/df$peak_cov
 colnames(df)[1:5]=c("chrom", "start","end","ostart","oend")
 
-dnase=head(df)
-dnase$dnase_sig=0
 
 df = df %>%
     arrange(-acc_percent) %>%
@@ -463,9 +462,9 @@ df_bp %>%
 # Figure out 5mC over low peaks
 ```{r}
 # this is slow
-low_acc = df[acc_percent < 0.25]
+low_acc = df[acc_percent < 0.25 & FDR <= 0.01]
 low_acc %>%
-    sample_n(250) %>%
+    sample_n(1000) %>%
     select(chrom,start,end) %>%
     fwrite("temp/low_acc_peaks.bed", row.names=F, col.names=F, quote=F, sep="\t")
 low_acc
@@ -480,7 +479,7 @@ center=fread("temp/low_acc_center.tbl.gz") %>%
     data.table()
 center
 
-system("tabix -R temp/low_acc_peaks.bed results/GM12878_130X/FIRE.bed.gz > temp/low_acc_fires.bed")
+system("tabix -R temp/low_acc_peaks.bed results/GM12878_FDR/fiber-calls/FIRE.bed.gz > temp/low_acc_fires.bed")
 fires = my_read_bed("temp/low_acc_fires.bed")
 
 center$fire = FALSE
@@ -501,7 +500,7 @@ sum_data = center %>%
 
 sum_data %>%
     ggplot(
-        aes(color=fire, x=w_count)
+        aes(color=fire, x=count)
     ) +
     facet_col(~fire, scales="free_y") + 
     geom_histogram(
@@ -513,6 +512,27 @@ sum_data %>%
         label=comma
     )+
     theme_minimal_grid()
+
+
+center %>% 
+    #filter(centered_start < 250 & centered_start > 0) %>%
+    group_by(chrom, centering_position, fire) %>%
+    summarise(
+        average_5mC_count = n()/length(unique(query_name))
+    ) %>% 
+    pivot_wider(
+        id_cols=c("chrom", "centering_position"),
+        names_from=fire, values_from=average_5mC_count
+    ) %>%
+    ggplot(aes(x=`FALSE`, y=`TRUE`)) +
+    stat_cor()+
+    geom_hex(bins=30) +  scale_fill_distiller("", palette = "Spectral", trans="log10") +
+    geom_smooth(se=F, method="lm")+
+    scale_x_continuous("Average number of 5mC events in reads without FIRE MSPs", trans="log10")+
+    scale_y_continuous("Average number of 5mC events in reads with FIRE MSPs", trans="log10")+
+    annotation_logticks(side="lb")+
+    theme_minimal_grid()
+
 
 my_ggsave("Figures/5mC_in_FIRE_fibers.pdf")
 sum_data %>% 
