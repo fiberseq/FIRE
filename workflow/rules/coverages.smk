@@ -104,18 +104,19 @@ rule exclude_from_shuffle:
     input:
         filtered=rules.fiber_locations.output.filtered,
         fai=ancient(f"{ref}.fai"),
-        exclude=excludes,
     output:
         bed="results/{sm}/coverage/exclude-from-shuffles.bed.gz",
     threads: 4
     conda:
         conda
+    params:
+        exclude=excludes,
     shell:
         """
 
         ( \
             bedtools genomecov -bga -i {input.filtered} -g {input.fai} | awk '$4 == 0'; \
-            less {input.exclude} \
+            less {params.exclude} \
         ) \
             | cut -f 1-3 \
             | bedtools sort \
