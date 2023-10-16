@@ -150,3 +150,6 @@ tmp*
 temp*
 config/**
 .test/**
+.cargo/*
+.conda/*
+*.tbl.gz
