@@ -80,8 +80,35 @@ ___ FIRE.hap.differences.bed # Large table of FIREs that are different between h
 ___ FIRE.hap.differences.bed9 # Same as above but in bed9 format
 ___ hap1-vs-hap2-volcano.pdf # Volcano plot of FIREs that are different between hap1 and hap2
 ___ hap1-vs-hap2.pdf # Scatter plot of FIREs and their percent accessibility for each hap
-trackHub/ # a trackhub directory that can be loaded into the UCSC browser
+trackHub/ #
 ```
+
+| Directory     | File                                            | Description                                                             |
+| ------------- | ----------------------------------------------- | ----------------------------------------------------------------------- |
+| coverage      |                                                 |                                                                         |
+|               | {all,hap1,hap2}\_element_coverages.bed.gz       | Coverage tracks for FIREs, nucleosomes, and linkers                     |
+|               | exclude-from-shuffles.bed.gz                    | Regions to exclude when making null distributions                       |
+|               | {sample}.{bed.gz,d4}                            | bedgraph of coverages                                                   |
+|               | {sample}.{median, maximum,minimum}.coverage.txt | Allowed coverage range for analysis                                     |
+| fiber-calls   |                                                 |                                                                         |
+|               | FIRE.bed.gz                                     | Every FIRE element in every FIRE                                        |
+|               | model.results.bed.gz                            | Every FIRE, linker, and nucleosome in every fiber                       |
+|               | fire-fibers.bed.gz                              | bed12 start and end of every fiber                                      |
+|               | fire-fiber-decorators.bed.gz                    | decorator file that adds annotations of FIRE elements to the bed12 file |
+| FDR-peaks     |                                                 |                                                                         |
+|               | asdf                                            |                                                                         |
+|               | asdf                                            |                                                                         |
+| all/hap1/hap2 |                                                 |                                                                         |
+|               | percent.accessible.bed.gz                       | % of fibers that are accessible on the haplotype                        |
+| hap1-vs-hap2  |                                                 |                                                                         |
+|               | asdf                                            |                                                                         |
+|               | asdf                                            |                                                                         |
+| trackHub      |                                                 |                                                                         |
+|               | \*                                              | a trackHub directory that can be loaded into the UCSC browser           |
+| .             |                                                 |                                                                         |
+|               | GM12878_FDR.peaks-vs-percent.pdf                | Number of peaks vs % accessible                                         |
+
+---
 
 ## Test data
 
