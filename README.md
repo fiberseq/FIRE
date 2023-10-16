@@ -76,7 +76,7 @@ hap1/ # results for hap1 fibers, same structure as the all directory
 hap2/ # results for hap2 fibers, same structure as the all directory
 unk/ # results for fibers from an unknown haplotype, same structure as the all directory
 hap1-vs-hap2 # results for comparing hap1 and hap2 fibers
-___ FIRE.hap.differences.bed # Large table of FIREs that are different between hap1 and hap2
+___ #
 ___ FIRE.hap.differences.bed9 # Same as above but in bed9 format
 ___ hap1-vs-hap2-volcano.pdf # Volcano plot of FIREs that are different between hap1 and hap2
 ___ hap1-vs-hap2.pdf # Scatter plot of FIREs and their percent accessibility for each hap
@@ -96,17 +96,18 @@ trackHub/ #
 |               | fire-fibers.bed.gz                              | bed12 start and end of every fiber                                      |
 |               | fire-fiber-decorators.bed.gz                    | decorator file that adds annotations of FIRE elements to the bed12 file |
 | FDR-peaks     |                                                 |                                                                         |
-|               | asdf                                            |                                                                         |
-|               | asdf                                            |                                                                         |
+|               | FDR-FIRE-peaks.bed.gz                           | Fiber-seq peak calls                                                    |
+|               | FDR-wide-peaks.bed.gz                           | Fiber-seq wide peak calls                                               |
+|               | FDR.track.bed.gz                                | Track of FDR significance of accessibility                              |
+|               | {sm}.peaks-vs-percent.pdf                       | Number of peaks vs % accessible                                         |
 | all/hap1/hap2 |                                                 |                                                                         |
-|               | percent.accessible.bed.gz                       | % of fibers that are accessible on the haplotype                        |
+|               | percent.accessible.bed.gz                       | % of (haplotype) fibers that are accessible                             |
 | hap1-vs-hap2  |                                                 |                                                                         |
-|               | asdf                                            |                                                                         |
-|               | asdf                                            |                                                                         |
+|               | FIRE.hap.differences.bed                        | Large table of FIREs that are different between hap1 and hap2           |
+|               | hap1-vs-hap2-volcano.pdf                        | Volcano plot of FIREs that are different between hap1 and hap2          |
+|               | hap1-vs-hap2.pdf                                | Scatter plot of FIREs and their percent accessibility for each hap      |
 | trackHub      |                                                 |                                                                         |
 |               | \*                                              | a trackHub directory that can be loaded into the UCSC browser           |
-| .             |                                                 |                                                                         |
-|               | GM12878_FDR.peaks-vs-percent.pdf                | Number of peaks vs % accessible                                         |
 
 ---
 
