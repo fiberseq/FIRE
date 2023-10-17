@@ -80,7 +80,6 @@ localrules:
     coverage,
     clustering_vs_null,
     percent_in_clusters,
-    fire_peaks,
     hap_differences,
     peaks_vs_percent,
 
