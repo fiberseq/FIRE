@@ -153,3 +153,7 @@ config/**
 .cargo/*
 .conda/*
 *.tbl.gz
+
+*code-workspace*
+.vscode/*
+.DS_Store
