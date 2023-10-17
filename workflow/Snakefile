@@ -49,7 +49,7 @@ include: "rules/coverages.smk"
 include: "rules/train-model.smk"
 include: "rules/apply-model.smk"
 include: "rules/FDR-peaks.smk"
-include: "rules/peak-calling.smk"
+include: "rules/peak-stats.smk"
 include: "rules/decorated-reads.smk"
 include: "rules/track-hub.smk"
 
