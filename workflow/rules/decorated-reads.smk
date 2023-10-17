@@ -1,6 +1,7 @@
 rule decorate_fibers_chromosome:
     input:
         bed=rules.merge_model_results.output.bed,
+        tbi=rules.index_model_results.output.tbi,
     output:
         bed=temp("temp/{sm}/decorate/{chrom}.bed.gz"),
         decorated=temp("temp/{sm}/decorate/{chrom}.dec.bed.gz"),
