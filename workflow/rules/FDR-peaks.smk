@@ -308,6 +308,7 @@ rule one_percent_fdr_peaks:
             | bedtools merge -d {params.nuc_size} \
             | bgzip -@ {threads} \
         > {output.wide}
+        tabix -f -p bed {output.wide}
         """
 
 
