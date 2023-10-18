@@ -48,11 +48,11 @@ my_read_bed = function(...){
     df
 }
 
-in_file="results/GM12878_130X/FIRE.peaks.with.coverage.bed"
 in_file="results/GM12878_FDR/FDR-peaks/FDR-FIRE-peaks.bed.gz"
 out_file="Figures/peaks-vs-percentage.pdf"
 encode=my_read_bed("data/ENCODE3_consensus_DHS_ENCFF503GCK.tsv")
 sds=my_read_bed("data/T2T_SDs.bed")
+sds=my_read_bed("config/annotations/SDs.merged.hg38.bed.gz")
 tss=my_read_bed("data/gencode.v42.annotation_TSS.gff3")
 ```
 
@@ -81,13 +81,17 @@ df = df %>%
     arrange(-n) %>%
     mutate(
         Mbp=cumsum(end-start)/1e6,
-        group = floor(acc_percent * 20) / 20
+        group = floor(acc_percent * 20) / 20,
+        group = case_when(
+            group == 1 ~ 0.95,
+            TRUE ~ group,
+        )
     ) %>%
     bed_map(encode,
         encode_count=length(core_end),
         encode_anno = paste0(unique(component), collapse=";")
     ) %>%
-    bed_map(sds, sd_count=length(V4)) %>%
+    bed_map(sds, sd_count=length(end)) %>%
     bed_map(dnase, dnase_max=max(dnase_sig)) %>%
     bed_map(tss, TSS=length(V4)) %>%
     replace_na(list(encode_count = 0, sd_count=0, TSS=0)) %>%
@@ -98,6 +102,7 @@ tail(df)
 dim(df)
 df %>%
     group_by(encode_anno) %>% summarise(n())
+table(df$group)
 ```
 
 ```{r}
@@ -175,7 +180,7 @@ x = df %>%
     group_by(
         group
     ) %>%
-    filter(sum(count)>10) %>%
+    filter(sum(count)>20) %>%
     mutate(
         percent=100*count/sum(count)
     )
