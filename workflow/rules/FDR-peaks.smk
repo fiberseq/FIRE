@@ -286,7 +286,7 @@ rule one_percent_fdr_peaks:
         tbi="results/{sm}/FDR-peaks/FDR-01-FIRE-peaks.bed.gz.tbi",
         wide="results/{sm}/FDR-peaks/FDR-01-FIRE-wide-peaks.bed.gz",
         wide_tbi="results/{sm}/FDR-peaks/FDR-01-FIRE-wide-peaks.bed.gz.tbi",
-    threads: 8
+    threads: 4
     conda:
         conda
     params:
