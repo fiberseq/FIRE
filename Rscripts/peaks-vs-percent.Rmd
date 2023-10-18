@@ -350,11 +350,11 @@ comma(sum(df$acc_percent)*2)
 ```{r}
 bp = fread("data/bedgraph_annotations/bo.10bp.bed.gz", nThread=8)
 
-bp
 bp[, c("chrom", "start", "end") := tstrsplit(key, "_", fixed=TRUE, type.convert=TRUE)]
 bp$mid = floor((bp$start + bp$end)/2)
 bp$position = bp$st - bp$mid
 dim(bp)/1e6
+bp
 
 df_bp = merge(bp, df[, c("chrom", "start", "end", "group")], by=c("chrom", "start", "end")) %>%
     replace_na(list(ENCFF658WKQ_DNase = 0)) %>%
@@ -373,7 +373,9 @@ width=1000
 smooth=10
 #df_bp %>% group_by(group) %>% summarise(length(unique((key))))
 p.df = df_bp %>% 
+    filter(chrom != "chrY", chrom != "chrX") %>%
     filter(position > -width & position < width) %>%
+    filter(exp=="ENCFF658WKQ_DNase") %>%
     mutate(
         position = smooth * floor(position/smooth),
     ) %>%
@@ -388,8 +390,8 @@ p.df = df_bp %>%
         value2 = value/mean(n_sites),
     ) %>%
     filter(n_sites>100) %>%
-    filter(exp=="ENCFF658WKQ_DNase") %>%
     arrange(exp, group, position) 
+
 mmin=min(p.df$group)
 mmax=max(p.df$group)
 labels = seq(mmin,mmax,0.05)
