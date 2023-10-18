@@ -328,7 +328,7 @@ df %>%
     scale_x_continuous(
         "FIRE peak score",
         labels=comma,
-        trans="log10",
+        #trans="log10",
     ) +
     scale_y_continuous(
         "DNase signal",
@@ -336,15 +336,10 @@ df %>%
         trans="log10",
     ) + 
     my_grid()
-my_ggsave("Figures/DNase-vs-FIRE.pdf", height=3*3, width=4*3)
+my_ggsave("Figures/DNase-vs-FIRE.pdf", height=3, width=4)
 ```
 
 
-```{r}
-genome=fread("~/assemblies/hg38.analysisSet.fa.fai")
-colnames(genome)[1:2] = c("chrom", "size")
-fire_dnase = bed_intersect(bed_slop(df, genome, both=30), dnase)
-```
 
 # number of regulatory elements per cell
 ```{r}
@@ -393,8 +388,12 @@ p.df = df_bp %>%
         value2 = value/mean(n_sites),
     ) %>%
     filter(n_sites>100) %>%
-    arrange(exp, group, position)
-
+    filter(exp=="ENCFF658WKQ_DNase") %>%
+    arrange(exp, group, position) 
+mmin=min(p.df$group)
+mmax=max(p.df$group)
+labels = seq(mmin,mmax,0.05)
+labels
 z = p.df %>% 
     ggplot(
         aes(
@@ -409,15 +408,16 @@ z = p.df %>%
     ) +
     geom_line(linewidth=0.2)+
     #geom_density(alpha=0.8, linewidth=.3) +
-    facet_wrap(~exp, scales="free")+
+    #facet_wrap(~exp, scales="free")+
     scale_x_continuous("Relative position") +
-    scale_y_continuous("count", trans="log10") + annotation_logticks(side="l")+
-    scale_colour_steps2(n.breaks=20, nice.breaks=TRUE) +
+    scale_y_continuous("DNase read count", trans="log10") + annotation_logticks(side="l")+
+    scale_colour_steps2("", breaks=labels-0.5,  labels=labels) +
     my_grid() +
     theme(
-        legend.key.size=unit(0.3, "inch")
+        #legend.position="top",
+        legend.key.size=unit(0.2, "inch")
     )
-my_ggsave("Figures/DNase-over-FIRE-peaks.pdf", height=3, width=5)
+my_ggsave("Figures/DNase-over-FIRE-peaks.pdf", height=2, width=2.75)
 ```
 
 ```{r}
