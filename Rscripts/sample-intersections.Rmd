@@ -8,7 +8,10 @@ getwd()
 ```{r}
 # run scripts/fire-correlations.sh
 comparisons=my_read_bed("Tables/fire-correlations.tbl.gz") %>%
-    mutate(bin = round(PS00388)) 
+    mutate(
+        bin = round(GM12878),
+        dnase_bin = round(10*log2(DNase))
+        ) 
 
 comparisons  
 ```
@@ -32,12 +35,43 @@ my_ggsave("Figures/FIRE-peak-corelation.pdf", height=3, width=7)
 ```
 
 ```{r}
-z=comparisons %>% 
+
+logit_e = function(x, a=1, b=0) {
+    z=x**exp(1)
+    log(z/(1-z))
+}
+
+
+anti_logit_e = function(x, a=1, b=0) {
+    z=exp(b)*x**a
+    (z/(1+z))**exp(-1)
+}
+
+trans_anti_logit_e <- trans_new(
+  name      = "trans_anti_logit_e",
+  transform = anti_logit_e,
+  inverse   = logit_e,
+  #domain    = c(-Inf, Inf)
+)
+
+data="Tables/DNase-peaks-vs-percent-fire.bed.gz"
+d=fread(data)
+colnames(d) = c("chrom", "start", "end", "DNase", "GM12878")
+min(d$DNase)
+max(d$DNase)
+z=d %>%
+    filter(chrom != "chrX", chrom != "chrY") %>%
+    mutate(
+        #DNase=anti_logit_e(DNase, a=1.75, b=-2)
+    ) %>%
     ggplot(aes(x=DNase, y=GM12878)) +
     geom_hex(bins=50) + scale_fill_distiller("", palette = "Spectral", trans="log10") +
     stat_cor(size=2.5)+
-    #scale_x_continuous("FIRE score of PS00388") + 
-    scale_y_continuous("DNase signal", trans="log10") + 
+    #geom_smooth(se=F, method="lm", color="black", linetype="dashed")+
+    scale_x_continuous("DNase peak signal", trans="log2") + 
+    scale_y_continuous("% actuation in Fiber-seq data", label=percent) + 
+    annotation_logticks(side="b") + 
     my_grid() 
-my_ggsave("Figures/FIRE-peak-DNase-corelation.pdf", height=3, width=4)
+#zz=z+geom_xsidedensity(aes(y=stat(density))) + geom_ysidedensity(aes(x=stat(density))) 
+my_ggsave("Figures/DNase-peaks-vs-percent-fire.pdf", height=3, width=4)
 ```
