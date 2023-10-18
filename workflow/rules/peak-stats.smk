@@ -24,6 +24,7 @@ rule clustering_vs_null:
         > {output.bed}
         """
 
+
 rule percent_in_clusters:
     input:
         bed=rules.clustering_vs_null.output.bed,
@@ -39,6 +40,7 @@ rule percent_in_clusters:
         """
         bash {params.script} {input.bed} {input.fire} {output.txt}
         """
+
 
 rule hap_differences:
     input:

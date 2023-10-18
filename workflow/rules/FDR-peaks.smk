@@ -277,6 +277,40 @@ rule wide_fdr_peaks:
         """
 
 
+rule one_percent_fdr_peaks:
+    input:
+        bed=rules.fdr_peaks_by_fire_elements.output.bed,
+        track=rules.fdr_track_filtered.output.bed,
+    output:
+        bed="results/{sm}/FDR-peaks/FDR-01-FIRE-peaks.bed.gz",
+        tbi="results/{sm}/FDR-peaks/FDR-01-FIRE-peaks.bed.gz.tbi",
+        wide="results/{sm}/FDR-peaks/FDR-01-FIRE-wide-peaks.bed.gz",
+        wide_tbi="results/{sm}/FDR-peaks/FDR-01-FIRE-wide-peaks.bed.gz.tbi",
+    threads: 8
+    conda:
+        conda
+    params:
+        nuc_size=config.get("nucleosome_size", 147),
+    shell:
+        """
+        zcat {input.bed} \
+            | csvtk filter -tT -C '$' -f "FDR<=0.01" \
+            | bgzip -@ {threads} \
+            > {output.bed}
+        tabix -f -p bed {output.bed}
+
+        ( \
+            zcat {output.bed}; \
+            bioawk -tc hdr '$FDR<=0.01' {input.track} \
+        ) \
+            | cut -f 1-3 \
+            | bedtools sort \
+            | bedtools merge -d {params.nuc_size} \
+            | bgzip -@ {threads} \
+        > {output.wide}
+        """
+
+
 rule peaks_vs_percent:
     input:
         bed=rules.fdr_peaks_by_fire_elements.output.bed,
