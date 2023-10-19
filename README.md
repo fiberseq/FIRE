@@ -16,6 +16,8 @@ export SNAKEMAKE_CONDA_PREFIX=/mmfs1/gscratch/stergachislab/snakemake-conda-envs
 
 Then snakemake should install all the additional requirements as a conda env in that directory.
 
+You will also need all the **UCSC Kent utilities** and the **latest version** of them (v455).
+
 ## Model
 
 Unless directed otherwise it would be best to use this model for your data:
