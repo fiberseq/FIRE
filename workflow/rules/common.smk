@@ -40,7 +40,6 @@ def get_load(wc):
     return 50
 
 
-
 def get_min_coverage(median):
     sd = math.sqrt(median)
     mmin = median - coverage_within_n_sd * sd

@@ -34,7 +34,7 @@ rule coverage:
         "../envs/python.yaml"
     script:
         "../scripts/cov.py"
-    
+
 
 #
 # fiber locations and coverages
