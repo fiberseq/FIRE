@@ -39,6 +39,13 @@ def get_load(wc):
     return 50
 
 
+def weighted_median(df, val, weight):
+    df_sorted = df.sort_values(val)
+    cumsum = df_sorted[weight].cumsum()
+    cutoff = df_sorted[weight].sum() / 2.
+    return df_sorted[cumsum >= cutoff][val].iloc[0]
+
+
 def find_median_coverage(file, outfile=None, min_out=None, max_out=None):
     if force_coverage is not None:
         coverage = force_coverage
@@ -50,9 +57,11 @@ def find_median_coverage(file, outfile=None, min_out=None, max_out=None):
         df = df[df.coverage > 0]
         df = df[df["chr"].isin(get_chroms())]
         df = df[~df["chr"].isin(["chrX", "chrY", "chrM", "chrEBV"])]
-        print(df, file=sys.stderr)
-        total = (df.end - df.start).sum()
-        coverage = (df.coverage * (df.end - df.start)).sum() / total
+        df["weight"] = df["end"] - df["start"]
+        #print(df, file=sys.stderr)
+        #total = (df.end - df.start).sum()
+        #coverage = (df.coverage * (df.end - df.start)).sum() / total
+        coverage = weighted_median(df, "coverage", "weight")
 
     min_coverage = get_min_coverage(coverage)
     max_coverage = get_max_coverage(coverage)
