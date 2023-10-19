@@ -2,6 +2,7 @@ import re
 import logging
 import sys
 
+
 def get_chroms():
     chroms = fai["chr"]
     chroms = sorted([chrom for chrom in fai["chr"] if "chrUn_" not in chrom])
@@ -42,51 +43,8 @@ def get_load(wc):
 def weighted_median(df, val, weight):
     df_sorted = df.sort_values(val)
     cumsum = df_sorted[weight].cumsum()
-    cutoff = df_sorted[weight].sum() / 2.
+    cutoff = df_sorted[weight].sum() / 2.0
     return df_sorted[cumsum >= cutoff][val].iloc[0]
-
-
-def find_median_coverage(file, outfile=None, min_out=None, max_out=None):
-    if force_coverage is not None:
-        coverage = force_coverage
-    else:
-        df = pd.read_csv(
-            file, sep="\t", header=None, names=["chr", "start", "end", "coverage"]
-        )
-        logging.info(f"Calculating median coverage from {file}\n{df}")
-        df = df[df.coverage > 0]
-        df = df[df["chr"].isin(get_chroms())]
-        df = df[~df["chr"].isin(["chrX", "chrY", "chrM", "chrEBV"])]
-        df["weight"] = df["end"] - df["start"]
-        #print(df, file=sys.stderr)
-        #total = (df.end - df.start).sum()
-        #coverage = (df.coverage * (df.end - df.start)).sum() / total
-        coverage = weighted_median(df, "coverage", "weight")
-
-    min_coverage = get_min_coverage(coverage)
-    max_coverage = get_max_coverage(coverage)
-    
-    print(coverage, file=sys.stderr)
-
-    if coverage <= 1:
-        raise ValueError(
-            f"Median coverage is {coverage}! Did you use the correct reference, or is data missing from most of your genome. If so consider the keep_chromosomes parameter in config.yaml"
-        )
-
-    if outfile is not None:
-        open(outfile, "w").write(str(round(coverage)) + "\n")
-    if min_out is not None:
-        open(min_out, "w").write(str(round(min_coverage)) + "\n")
-    if max_out is not None:
-        open(max_out, "w").write(str(round(max_coverage)) + "\n")
-    return round(coverage)
-
-
-def get_median_coverage(wc):
-    if force_coverage is not None:
-        return force_coverage
-    median_coverages = expand(rules.genome_bedgraph.output.median, sm=wc.sm)
-    return find_median_coverage(median_coverages[0])
 
 
 def get_min_coverage(median):

@@ -22,9 +22,6 @@ rule genome_bedgraph:
         > {output.median}
         """
 
-def help_find_median_coverage(file, outfile, min_out, max_out):
-    return find_median_coverage(file, outfile, min_out, max_out)
-
 
 rule coverage:
     input:
@@ -34,12 +31,32 @@ rule coverage:
         minimum="results/{sm}/coverage/{sm}.minimum.coverage.txt",
         maximum="results/{sm}/coverage/{sm}.maximum.coverage.txt",
     run:
-        help_find_median_coverage(
-            input["median"],
-            outfile=output["cov"],
-            min_out=output["minimum"],
-            max_out=output["maximum"],
-        )
+        if force_coverage is not None:
+            coverage = force_coverage
+        else:
+            df = pd.read_csv(
+                input.median,
+                sep="\t",
+                header=None,
+                names=["chr", "start", "end", "coverage"],
+            )
+            df = df[df.coverage > 0]
+            df = df[df["chr"].isin(get_chroms())]
+            df = df[~df["chr"].isin(["chrX", "chrY", "chrM", "chrEBV"])]
+            df["weight"] = df["end"] - df["start"]
+            print(df, file=sys.stderr)
+            coverage = weighted_median(df, "coverage", "weight")
+
+        min_coverage = get_min_coverage(coverage)
+        max_coverage = get_max_coverage(coverage)
+        print(coverage, file=sys.stderr)
+        if coverage <= 1:
+            raise ValueError(
+                f"Median coverage is {coverage}! Did you use the correct reference, or is data missing from most of your genome. If so consider the keep_chromosomes parameter in config.yaml"
+            )
+        open(output.cov, "w").write(str(round(coverage)) + "\n")
+        open(output.minimum, "w").write(str(round(min_coverage)) + "\n")
+        open(output.maximum, "w").write(str(round(max_coverage)) + "\n")
 
 
 #
