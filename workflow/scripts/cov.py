@@ -1,4 +1,6 @@
 import pandas as pd
+import sys
+import os
 
 
 def weighted_median(df, val, weight):
@@ -28,6 +30,6 @@ if coverage <= 1:
     raise ValueError(
         f"Median coverage is {coverage}! Did you use the correct reference, or is data missing from most of your genome. If so consider the keep_chromosomes parameter in config.yaml"
     )
-open(output.cov, "w").write(str(round(coverage)) + "\n")
-open(output.minimum, "w").write(str(round(min_coverage)) + "\n")
-open(output.maximum, "w").write(str(round(max_coverage)) + "\n")
+open(snakemake.output.cov, "w").write(str(round(coverage)) + "\n")
+open(snakemake.output.minimum, "w").write(str(round(min_coverage)) + "\n")
+open(snakemake.output.maximum, "w").write(str(round(max_coverage)) + "\n")
