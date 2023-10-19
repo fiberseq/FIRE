@@ -142,7 +142,7 @@ rule fdr_track_filtered:
         MAX=$(cat {input.maximum})
 
         ( \
-            (zcat {input.bed} | head -n 1) || true; \
+            zcat {input.bed} | head -n 1 || true; \
             zcat {input.bed} | bioawk -tc hdr -v MAX=$MAX -v MIN=$MIN  '$coverage > MIN && $coverage < MAX' \
         ) \
             | bgzip -@ {threads} \
