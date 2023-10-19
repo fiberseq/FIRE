@@ -1,6 +1,6 @@
 import re
 import logging
-
+import sys
 
 def get_chroms():
     chroms = fai["chr"]
@@ -50,11 +50,14 @@ def find_median_coverage(file, outfile=None, min_out=None, max_out=None):
         df = df[df.coverage > 0]
         df = df[df["chr"].isin(get_chroms())]
         df = df[~df["chr"].isin(["chrX", "chrY", "chrM", "chrEBV"])]
+        print(df, file=sys.stderr)
         total = (df.end - df.start).sum()
         coverage = (df.coverage * (df.end - df.start)).sum() / total
 
     min_coverage = get_min_coverage(coverage)
     max_coverage = get_max_coverage(coverage)
+    
+    print(coverage, file=sys.stderr)
 
     if coverage <= 1:
         raise ValueError(
