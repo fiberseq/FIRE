@@ -142,8 +142,9 @@ rule fdr_track_filtered:
         MAX=$(cat {input.maximum})
 
         zcat {input.bed} \
-            | csvtk filter -tT -C '$' \
-                -f "coverage>=$MIN" -f "coverage<=$MAX" \
+            | bioawk \
+                -v MAX=$MAX -v MIN=$MIN -tc hdr \
+                '$coverage > MIN && $coverage < MAX' \
             | bgzip -@ {threads} \
             > {output.bed}
         tabix -f -p bed {output.bed}
