@@ -13,8 +13,18 @@ ref = config["ref"]
 ref_name = config["ref_name"]
 n_chunks = config["n_chunks"]
 chunks = [f"{i+1}-of-{n_chunks}" for i in range(n_chunks)]
-excludes = [workflow.source_path(os.path.abspath(file)) for file in config["excludes"]]
-dhs = config["dhs"]
+
+dhs = config.get("dhs", workflow.source_path("annotations/GM12878_DHS.bed.gz"))
+excludes = config.get("excludes", [])
+if ref_name == "hg38" or ref_name == "GRCh38":
+    workflow / annotations / GM12878_DHS.bed.gz
+    files = [
+        "annotations/hg38.blacklist.ENCFF356LFX.bed.gz",
+        "annotations/hg38.gap.bed.gz",
+        "annotations/SDs.merged.hg38.bed.gz",
+    ]
+    excludes += [workflow.source_path(file) for file in files]
+
 max_t = config.get("max_t", 4)
 max_bins = config.get("max_bins", 75)
 keep_chrs = config.get("keep_chromosomes", ".*")

@@ -1,21 +1,21 @@
 ref: /mmfs1/gscratch/stergachislab/assemblies/hg38.analysisSet.fa
 ref_name: hg38
 n_chunks: 100 # split bam file across x chunks
-#keep_chromosomes: chr20
 max_t: 4 # use X threaeds per chunk
 manifest: config/config.tbl # table with samples to process
+model: models/model.dat # if not provided will train a new model
+
+#keep_chromosomes: chr20 # only keep chrs matching this regex.
+
+# regions of suspected regulatory elements, can be anything if not traing a model,  only used in model training
+# dhs: workflow/annotations/GM12878_DHS.bed.gz
 
 # Force a read coverage instead of calulating it genome wide from the bam file.
 # This can be useful if only a subset of the genome has reads.
 # force_coverage: 30
 
-#model: results/GM12878_v0.1.5/model.dat # if not provided will train a new model
-
-#
-# only used in model training
-#
-dhs: config/annotations/GM12878_DHS.bed.gz # regions of suspected regulatory elements, can be anything if not traing a model
-excludes: # regions to not use when identifying null regions that should not have RE
-  - config/annotations/hg38.blacklist.ENCFF356LFX.bed.gz
-  - config/annotations/hg38.gap.bed.gz
-  - config/annotations/SDs.merged.hg38.bed.gz
+# regions to not use when identifying null regions that should not have RE, below are the defaults auto used for hg38.
+#excludes:
+#- workflow/annotations/hg38.blacklist.ENCFF356LFX.bed.gz
+#- workflow/annotations/hg38.gap.bed.gz
+#- workflow/annotations/SDs.merged.hg38.bed.gz

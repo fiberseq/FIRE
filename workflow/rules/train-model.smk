@@ -1,7 +1,7 @@
 rule dhs_null:
     input:
         fai=ancient(f"{ref}.fai"),
-        dhs=dhs,
+        dhs=ancient(dhs),
         exclude=excludes,
     output:
         bed="results/{sm}/dhs_with_null.bed.gz",
