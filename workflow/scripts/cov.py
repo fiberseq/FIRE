@@ -1,6 +1,18 @@
 import pandas as pd
 import sys
 import os
+import math
+
+
+def get_min_coverage(median):
+    sd = math.sqrt(median)
+    mmin = median - coverage_within_n_sd * sd
+    return max(mmin, min_coverage)
+
+
+def get_max_coverage(median):
+    sd = math.sqrt(median)
+    return median + coverage_within_n_sd * sd
 
 
 def weighted_median(df, val, weight):
