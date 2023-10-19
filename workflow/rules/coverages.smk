@@ -33,7 +33,7 @@ rule coverage:
     conda:
         "../envs/python.yaml"
     script:
-        "scripts/cov.py"
+        "../scripts/cov.py"
     
 
 #
