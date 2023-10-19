@@ -62,6 +62,7 @@ def find_median_coverage(file, outfile=None, min_out=None, max_out=None):
         #total = (df.end - df.start).sum()
         #coverage = (df.coverage * (df.end - df.start)).sum() / total
         coverage = weighted_median(df, "coverage", "weight")
+        coverage = 1
 
     min_coverage = get_min_coverage(coverage)
     max_coverage = get_max_coverage(coverage)
