@@ -22,6 +22,9 @@ rule genome_bedgraph:
         > {output.median}
         """
 
+def help_find_median_coverage(file, outfile, min_out, max_out):
+    return find_median_coverage(file, outfile, min_out, max_out)
+
 
 rule coverage:
     input:
@@ -31,7 +34,7 @@ rule coverage:
         minimum="results/{sm}/coverage/{sm}.minimum.coverage.txt",
         maximum="results/{sm}/coverage/{sm}.maximum.coverage.txt",
     run:
-        find_median_coverage(
+        help_find_median_coverage(
             input["median"],
             outfile=output["cov"],
             min_out=output["minimum"],
