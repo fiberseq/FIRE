@@ -49,6 +49,7 @@ def find_median_coverage(file, outfile=None, min_out=None, max_out=None):
         logging.info(f"Calculating median coverage from {file}\n{df}")
         df = df[df.coverage > 0]
         df = df[df["chr"].isin(get_chroms())]
+        df = df[~df["chr"].isin(["chrX", "chrY", "chrM", "chrEBV"])]
         total = (df.end - df.start).sum()
         coverage = (df.coverage * (df.end - df.start)).sum() / total
 
