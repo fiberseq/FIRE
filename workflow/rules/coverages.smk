@@ -32,6 +32,8 @@ rule coverage:
         maximum="results/{sm}/coverage/{sm}.maximum.coverage.txt",
     conda:
         "../envs/python.yaml"
+    params:
+        chrom=get_chroms(),
     script:
         "../scripts/cov.py"
 
