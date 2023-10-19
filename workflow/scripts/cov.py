@@ -4,12 +4,13 @@ import os
 import math
 
 coverage_within_n_sd = snakemake.params.coverage_within_n_sd
+MIN_coverage = snakemake.params.min_coverage
 
 
 def get_min_coverage(median):
     sd = math.sqrt(median)
     mmin = median - coverage_within_n_sd * sd
-    return max(mmin, min_coverage)
+    return max(mmin, MIN_coverage)
 
 
 def get_max_coverage(median):

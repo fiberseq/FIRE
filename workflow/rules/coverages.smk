@@ -35,6 +35,7 @@ rule coverage:
     params:
         chrom=get_chroms(),
         coverage_within_n_sd=coverage_within_n_sd,
+        min_coverage=min_coverage,
     script:
         "../scripts/cov.py"
 
