@@ -51,7 +51,7 @@ rule extract_and_split:
 
 def get_model(wc):
     if config.get("train") == True:
-        ancient(return rules.train_model.output.model)
+        return ancient(rules.train_model.output.model)
     if config.get("model") is not None:
         return config.get("model")
     return workflow.source_path("models/model.dat")
