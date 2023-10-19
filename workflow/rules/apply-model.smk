@@ -54,7 +54,7 @@ def get_model(wc):
         return ancient(rules.train_model.output.model)
     if config.get("model") is not None:
         return config.get("model")
-    return workflow.source_path("models/model.dat")
+    return ancient(workflow.source_path("models/model.dat"))
 
 
 rule apply_model:
