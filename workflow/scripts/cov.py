@@ -3,6 +3,8 @@ import sys
 import os
 import math
 
+coverage_within_n_sd = snakemake.params.coverage_within_n_sd
+
 
 def get_min_coverage(median):
     sd = math.sqrt(median)

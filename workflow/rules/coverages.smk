@@ -34,6 +34,7 @@ rule coverage:
         "../envs/python.yaml"
     params:
         chrom=get_chroms(),
+        coverage_within_n_sd=coverage_within_n_sd,
     script:
         "../scripts/cov.py"
 
