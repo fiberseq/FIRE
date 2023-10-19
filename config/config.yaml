@@ -3,19 +3,24 @@ ref_name: hg38
 n_chunks: 100 # split bam file across x chunks
 max_t: 4 # use X threaeds per chunk
 manifest: config/config.tbl # table with samples to process
-model: models/model.dat # if not provided will train a new model
 
-#keep_chromosomes: chr20 # only keep chrs matching this regex.
+# keep_chromosomes: chr20 # only keep chrs matching this regex.
 
-# regions of suspected regulatory elements, can be anything if not traing a model,  only used in model training
-# dhs: workflow/annotations/GM12878_DHS.bed.gz
-
-# Force a read coverage instead of calulating it genome wide from the bam file.
-# This can be useful if only a subset of the genome has reads.
+## Force a read coverage instead of calulating it genome wide from the bam file.
+## This can be useful if only a subset of the genome has reads.
 # force_coverage: 30
 
-# regions to not use when identifying null regions that should not have RE, below are the defaults auto used for hg38.
+## regions to not use when identifying null regions that should not have RE, below are the defaults auto used for hg38.
 #excludes:
 #- workflow/annotations/hg38.blacklist.ENCFF356LFX.bed.gz
 #- workflow/annotations/hg38.gap.bed.gz
 #- workflow/annotations/SDs.merged.hg38.bed.gz
+
+## you can optionally specify a model that is not the default.
+# model: models/my-custom-model.dat
+
+##
+## only used if training a new model
+##
+# train: True
+# dhs: workflow/annotations/GM12878_DHS.bed.gz # regions of suspected regulatory elements

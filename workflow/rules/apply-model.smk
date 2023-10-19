@@ -50,9 +50,11 @@ rule extract_and_split:
 
 
 def get_model(wc):
-    if "model" in config:
-        return ancient(config["model"])
-    return ancient(rules.make_model.output.model)
+    if config.get("train") == True:
+        ancient(return rules.train_model.output.model)
+    if config.get("model") is not None:
+        return config.get("model")
+    return workflow.source_path("models/model.dat")
 
 
 rule apply_model:
