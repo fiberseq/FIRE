@@ -40,12 +40,6 @@ def get_load(wc):
     return 50
 
 
-def weighted_median(df, val, weight):
-    df_sorted = df.sort_values(val)
-    cumsum = df_sorted[weight].cumsum()
-    cutoff = df_sorted[weight].sum() / 2.0
-    return df_sorted[cumsum >= cutoff][val].iloc[0]
-
 
 def get_min_coverage(median):
     sd = math.sqrt(median)
