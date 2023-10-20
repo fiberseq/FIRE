@@ -18,14 +18,6 @@ Then snakemake should install all the additional requirements as a conda env in 
 
 You will also need all the **UCSC Kent utilities** and the **latest version** of them (v455).
 
-## Model
-
-Unless directed otherwise it would be best to use this model for your data:
-
-```bash
-models/model.dat
-```
-
 ## Run
 
 We have a run script that executes the FIRE snakemake called `fire`, and any extra parameters are passed directly to snakemake. For example:

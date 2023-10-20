@@ -40,7 +40,6 @@ def get_load(wc):
     return 50
 
 
-
 def grep_command_for_el_type(wc):
     if wc.el_type == "nucleosome":
         return "(rg '230,230,230' || true)"
