@@ -8,15 +8,15 @@ See `config/config.yaml` and `config/config.tbl` for configuration options.
 
 ## Install
 
+You will need **snakemake** and all the **UCSC Kent utilities** and the **latest version** of them (v455).
+
 Add a snakemake conda prefix to your `bashrc`, e.g. in the Stergachis lab add:
 
 ```bash
 export SNAKEMAKE_CONDA_PREFIX=/mmfs1/gscratch/stergachislab/snakemake-conda-envs
 ```
 
-Then snakemake should install all the additional requirements as a conda env in that directory.
-
-You will also need all the **UCSC Kent utilities** and the **latest version** of them (v455).
+Then snakemake installs all the additional requirements as conda envs in that directory.
 
 ## Run
 
