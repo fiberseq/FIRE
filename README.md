@@ -16,13 +16,7 @@ export SNAKEMAKE_CONDA_PREFIX=/mmfs1/gscratch/stergachislab/snakemake-conda-envs
 
 Then snakemake should install all the additional requirements as a conda env in that directory.
 
-## Model
-
-Unless directed otherwise it would be best to use this model for your data:
-
-```bash
-models/model.dat
-```
+You will also need all the **UCSC Kent utilities** and the **latest version** of them (v455).
 
 ## Run
 
@@ -55,33 +49,33 @@ snakemake \
 
 # Outputs
 
-```bash
-FIRE.bed.gz # Every FIRE element on every fiber
-FIRE.peaks.with.coverage.bed # Every FIRE peak in the genome, filtered for coverage
-percent-in-clusters.txt # Percent of FIREs that are in clusters (QC metric)
-{sample name}.peaks-vs-percent.pdf # Plot of of the above
-clustering-vs-null.bed.gz # A null distribution of FIRE.bed.gz for measuring clustering
-coverage/ # Whole genome coverage tracks
-___ {sample name}.bed.gz # bed graph of coverage
-___ {sample name}.d4 # bed graph of coverage in d4 format
-___ {sample name}.median.chromosome.coverage.bed # median coverage per chromosome
-___ {sample name}.median.coverage.txt # median coverage across the genome ignoring regions with zero coverage
-all/ # results for all fibers
-___ acc.model.results.bed.gz # All nucleosomes and MSPs with their FIRE scores for all fibers
-___ acc.model.results.bed.gz.tbi # index for above
-___ peak.calls.bed # FIRE peaks without coverage or significance filtering
-___ fire.peaks.and.coverages.bed.gz # FIRE peaks with coverage but no significance filtering
-___ fire.peaks.and.coverages.bed.gz.tbi # index for above
-hap1/ # results for hap1 fibers, same structure as the all directory
-hap2/ # results for hap2 fibers, same structure as the all directory
-unk/ # results for fibers from an unknown haplotype, same structure as the all directory
-hap1-vs-hap2 # results for comparing hap1 and hap2 fibers
-___ FIRE.hap.differences.bed # Large table of FIREs that are different between hap1 and hap2
-___ FIRE.hap.differences.bed9 # Same as above but in bed9 format
-___ hap1-vs-hap2-volcano.pdf # Volcano plot of FIREs that are different between hap1 and hap2
-___ hap1-vs-hap2.pdf # Scatter plot of FIREs and their percent accessibility for each hap
-trackHub/ # a trackhub directory that can be loaded into the UCSC browser
-```
+| Directory     | File                                            | Description                                                             |
+| ------------- | ----------------------------------------------- | ----------------------------------------------------------------------- |
+| coverage      |                                                 |                                                                         |
+|               | {all,hap1,hap2}\_element_coverages.bed.gz       | Coverage tracks for FIREs, nucleosomes, and linkers                     |
+|               | exclude-from-shuffles.bed.gz                    | Regions to exclude when making null distributions                       |
+|               | {sample}.{bed.gz,d4}                            | bedgraph of coverages                                                   |
+|               | {sample}.{median, maximum,minimum}.coverage.txt | Allowed coverage range for analysis                                     |
+| fiber-calls   |                                                 |                                                                         |
+|               | FIRE.bed.gz                                     | Every FIRE element in every FIRE                                        |
+|               | model.results.bed.gz                            | Every FIRE, linker, and nucleosome in every fiber                       |
+|               | fire-fibers.bed.gz                              | bed12 start and end of every fiber                                      |
+|               | fire-fiber-decorators.bed.gz                    | decorator file that adds annotations of FIRE elements to the bed12 file |
+| FDR-peaks     |                                                 |                                                                         |
+|               | FDR-FIRE-peaks.bed.gz                           | Fiber-seq peak calls                                                    |
+|               | FDR-wide-peaks.bed.gz                           | Fiber-seq wide peak calls                                               |
+|               | FDR.track.bed.gz                                | Track of FDR significance of accessibility                              |
+|               | {sm}.peaks-vs-percent.pdf                       | Number of peaks vs % accessible                                         |
+| all/hap1/hap2 |                                                 |                                                                         |
+|               | percent.accessible.bed.gz                       | % of (haplotype) fibers that are accessible                             |
+| hap1-vs-hap2  |                                                 |                                                                         |
+|               | FIRE.hap.differences.bed                        | Large table of FIREs that are different between hap1 and hap2           |
+|               | hap1-vs-hap2-volcano.pdf                        | Volcano plot of FIREs that are different between hap1 and hap2          |
+|               | hap1-vs-hap2.pdf                                | Scatter plot of FIREs and their percent accessibility for each hap      |
+| trackHub      |                                                 |                                                                         |
+|               | \*                                              | a trackHub directory that can be loaded into the UCSC browser           |
+
+---
 
 ## Test data
 

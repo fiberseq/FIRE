@@ -9,4 +9,5 @@ restart-times: 2
 printshellcmds: True
 reason: True
 use-conda: True
+use-singularity: True
 show-failed-logs: True

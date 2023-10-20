@@ -1,0 +1,145 @@
+```{r}
+source("Rscripts/utils.R")
+library(valr)
+setwd("~/projects/phased-fdr-and-peaks/")
+getwd()
+```
+
+```{r}
+# run scripts/fire-correlations.sh
+comparisons=my_read_bed("Tables/fire-correlations.tbl.gz") %>%
+    mutate(
+        bin = round(GM12878),
+        dnase_bin = round(10*log2(DNase))
+        ) 
+
+comparisons  
+```
+
+```{r}
+compare_plot = function(z, x_col, y_col){
+    z %>%
+        ggplot(aes(x=.data[[x_col]], y=.data[[y_col]])) +
+        geom_hex(bins=50) + scale_fill_distiller("", palette = "Spectral", trans="log10") +
+        stat_cor(size=2.5)+
+        geom_smooth(se=F, method="lm", color="black", linetype="dashed", size=.3)+
+        scale_x_continuous(glue("FIRE score of {x_col}"), limits=c(0,100)) + 
+        scale_y_continuous(glue("FIRE score of {y_col}"), limits=c(0,100)) + 
+        #facet_row(~name,    strip.position = "left") + 
+        my_grid()
+}
+
+z=compare_plot(comparisons, "GM12878", "PS00356")    
+my_ggsave("Figures/FIRE-peak-corelation-GM12878-PS00356.pdf", height=2, width=2.5)
+z=compare_plot(comparisons, "PS00388", "PS00356")    
+my_ggsave("Figures/FIRE-peak-corelation-PS000388-PS00356.pdf", height=2, width=2.5)
+z=compare_plot(comparisons, "GM12878", "GM12878_30X")    
+my_ggsave("Figures/FIRE-peak-corelation-GM12878-30X.pdf", height=2, width=2.5)
+```
+
+```{r}
+
+logit_e = function(x, a=1, b=0) {
+    z=x**exp(1)
+    log(z/(1-z))
+}
+
+
+anti_logit_e = function(x, a=1, b=0) {
+    z=exp(b)*x**a
+    (z/(1+z))**exp(-1)
+}
+
+trans_anti_logit_e <- trans_new(
+  name      = "trans_anti_logit_e",
+  transform = anti_logit_e,
+  inverse   = logit_e,
+  #domain    = c(-Inf, Inf)
+)
+
+data="Tables/DNase-peaks-vs-percent-fire.bed.gz"
+d=fread(data)
+colnames(d) = c("chrom", "start", "end", "DNase", "GM12878")
+min(d$DNase)
+max(d$DNase)
+z=d %>%
+    filter(chrom != "chrX", chrom != "chrY") %>%
+    mutate(
+        #DNase=anti_logit_e(DNase, a=1.75, b=-2)
+    ) %>%
+    ggplot(aes(x=DNase, y=GM12878)) +
+    geom_hex(bins=50) + scale_fill_distiller("", palette = "Spectral", trans="log10") +
+    stat_cor(size=2.5)+
+    #geom_smooth(se=F, method="lm", color="black", linetype="dashed")+
+    scale_x_continuous("DNase peak signal", trans="log10") + 
+    scale_y_continuous("% actuation in Fiber-seq data", label=percent) + 
+    annotation_logticks(side="b") + 
+    my_grid() 
+#zz=z+geom_xsidedensity(aes(y=stat(density))) + geom_ysidedensity(aes(x=stat(density))) 
+my_ggsave("Figures/DNase-peaks-vs-percent-fire.pdf", height=2, width=2.75)
+```
+
+# FDR vs SCORE
+```{r}
+fdr.df = fread("results/GM12878_FDR/FDR-peaks/FIRE.score.to.FDR.tbl") %>%
+    pivot_longer(
+        contains("peaks")
+    ) %>% data.table()
+myt.df = bind_rows(fdr.df[ which.min(abs(fdr.df$FDR-0.05)), ],
+fdr.df[ which.min(abs(fdr.df$FDR-0.01)), ])
+
+fdr.df %>%
+    ggplot(aes(y=value/1e6, x=threshold, color=name)) +
+    geom_line() +
+    geom_vline(
+        data=myt.df,
+        aes(xintercept=threshold),
+        linetype="dashed",
+        size=.2,
+    ) +
+    scale_x_continuous("FIRE score threshold") + 
+    scale_y_continuous("# of Mbp over FIRE score threshold", trans="log10", label=comma) + 
+    scale_color_manual("",
+        values=c(
+            peaks="darkred",
+            shuffled_peaks="darkgray"
+        ),
+        labels=c("Observed FIRE elements", "Shuffled FIRE elements")
+    )+
+    annotation_logticks(side="l") + 
+    my_grid() +
+    theme(
+        legend.position="top"
+    )
+
+my_ggsave("Figures/FIRE-score-vs-shuffled.pdf", height=2, width=2.5)
+```
+
+```{r}
+fdr_vs_score = bind_rows(
+    list(
+        X130 = fread("results/GM12878_FDR/FDR-peaks/FIRE.score.to.FDR.tbl"),
+        X30 = fread("results/GM12878_FDR_30X/FDR-peaks/FIRE.score.to.FDR.tbl")
+    ),
+    .id="id"
+)
+
+fdr_vs_score %>%
+    mutate(
+        FDR=-log10(FDR),
+    ) %>%
+    arrange(threshold) %>%
+    ggplot(aes(x=threshold, y=FDR, color=id)) +
+    scale_x_continuous("FIRE score threshold") + 
+    scale_y_continuous("-log(FDR)", label=comma) + 
+    geom_line()+
+    scale_color_manual("",
+        values=c("darkred","darkgray"),
+        labels=c("130-fold Fiber-seq", "30-fold Fiber-seq")
+    )+
+    my_grid() +
+    theme(
+        legend.position="top"
+    )
+my_ggsave("Figures/FDR-vs-FIRE-score.pdf", height=2, width=2)
+```

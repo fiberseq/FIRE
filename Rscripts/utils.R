@@ -467,6 +467,10 @@ scientific_10 <- function(x) {
 
 my_read_bed = function(...){
     df=fread(...)
-    colnames(df)[1:3]=c("chrom", "start", "end")
+    names = colnames(df)
+    names[names == "start"] = "start.other"
+    names[names == "end"] = "end.other"
+    names[1:3] = c("chrom", "start", "end")
+    colnames(df) = names
     df
 }

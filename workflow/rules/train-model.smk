@@ -1,7 +1,7 @@
 rule dhs_null:
     input:
         fai=ancient(f"{ref}.fai"),
-        dhs=dhs,
+        dhs=ancient(dhs),
         exclude=excludes,
     output:
         bed="results/{sm}/dhs_with_null.bed.gz",
@@ -46,35 +46,14 @@ rule model_bam:
         """
 
 
-rule genome_bedgraph:
-    input:
-        bam=ancient(lambda wc: data.loc[wc.sm, "bam"]),
-        fai=ancient(f"{ref}.fai"),
-    output:
-        d4="results/{sm}/coverage/{sm}.d4",
-        bg="results/{sm}/coverage/{sm}.bed.gz",
-        median="results/{sm}/coverage/{sm}.median.chromosome.coverage.bed",
-    threads: 16
-    conda:
-        conda
-    shell:
-        """ 
-        d4tools create -t {threads} -Azr {input.fai} {input.bam} {output.d4}
-        d4tools view {output.d4} | bgzip -@ {threads} > {output.bg}
-        zcat {output.bg} \
-            | awk '$4>0' \
-            | datamash -g 1 min 2 max 3 median 4 \
-        > {output.median}
-        #d4tools stat -t {threads} -s median {output.d4} > {output.median}
-        """
-
-
 rule filter_model_input_by_coverage:
     input:
         fai=ancient(f"{ref}.fai"),
         bed=rules.dhs_null.output.bed,
         bam=lambda wc: data.loc[wc.sm, "bam"],
         bg=rules.genome_bedgraph.output.bg,
+        minimum=rules.coverage.output.minimum,
+        maximum=rules.coverage.output.maximum,
     output:
         bed="results/{sm}/dhs_with_null_cov_filtered.bed",
     threads: 8
@@ -82,17 +61,15 @@ rule filter_model_input_by_coverage:
         conda
     params:
         chrom=get_chroms()[0],
-        coverage=get_median_coverage,
     shell:
         """
-        median={params.coverage}
-        min=$(echo "$median" | awk '{{print $1-3*sqrt($1)}}')
-        max=$(echo "$median" | awk '{{print $1+3*sqrt($1)}}')
-        echo $median $min $max 
+        MIN=$(cat {input.minimum})
+        MAX=$(cat {input.maximum})
+        echo $MIN $MAX 
         bedmap --ec --delim '\t' --echo --mean \
             <(zcat {input.bed} | sort -k 1,1 -k2,2n) \
             <(zcat {input.bg} | awk '{{print $1"\t"$2"\t"$3"\t"$4"\t"$4}}' | sort -k 1,1 -k2,2n) \
-            | awk -v min="$min" -v max="$max" '$5 > min && $5 < max' \
+            | awk -v min="$MIN" -v max="$MAX" '$5 > min && $5 < max' \
             | cut -f 1-4 \
             > {output.bed}
         head {output.bed}
@@ -132,7 +109,7 @@ rule make_model:
         "benchmarks/{sm}/make_model.tsv"
     threads: 60
     conda:
-        conda
+        "../envs/fibertools.yaml"
     params:
         n=100_000,
     shell:

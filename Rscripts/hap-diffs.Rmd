@@ -1,3 +1,4 @@
+```{r}
 library(tidyverse)
 library(data.table)
 library(scales)
@@ -85,101 +86,30 @@ scientific_10 <- function(x) {
     rtn = parse(text=text)
     rtn
 }
+```
 
 #
 #
 # SCRIPT
 #
 #
+```{r}
 p_threshold=0.05
-in_file=snakemake@input[[1]]
-out_file_1=snakemake@output[[1]]
-out_file_2=snakemake@output[[2]]
-out_file_3=snakemake@output[[3]]
-out_file_4=snakemake@output[[4]]
+in_file="results/GM12878_FDR/hap1-vs-hap2/FIRE.hap.differences.bed"
+out_file_1="Figures/GM12878_FDR-hap1-vs-hap2.pdf"
+out_file_2="Figures/GM12878_FDR-hap1-vs-hap2-volcano.pdf"
 
-
-df=fread(in_file) %>%
-    mutate_at(
-        c("fire_coverage_H1","fire_coverage_H2","coverage_H1","coverage_H2"),
-        as.numeric
-    ) %>%
-    filter(
-        !is.na(fire_coverage_H1),
-        !is.na(fire_coverage_H2),
-        !is.na(coverage_H1),
-        !is.na(coverage_H2),
-    ) %>%
-    mutate(
-        st=peak_start,
-        en=peak_end,
-        `#ct` = `#chrom`,
-    ) %>%
-    data.table()
-
-print(df[fire_coverage_H1 > coverage_H1])
-print(df[fire_coverage_H2 > coverage_H2])
-
-
-# continue 
-df$hap1_frac_acc = df$fire_coverage_H1/df$coverage_H1
-df$hap2_frac_acc = df$fire_coverage_H2/df$coverage_H2
-df$autosome = "Autosome"
-df[`#chrom` == "chrY"]$autosome = "chrY"
-df[`#chrom` == "chrX"]$autosome = "chrX"
-
-# filter by coverage
-sd = 3
-cov = median(df$coverage)
-my_min_cov = max(cov*0.5 - sd * sqrt(cov*0.5), 10)
-my_max_cov = cov*0.5 + sd * sqrt(cov*0.5)
-
-print(glue("min_cov={my_min_cov} max_cov={my_max_cov} cov={cov}"))
-
-pdf = df %>%
-    filter(coverage_H1 > 0 & coverage_H2 > 0) %>%
-    mutate(
-        min_cov = my_min_cov,
-        max_cov = my_max_cov,
-    ) %>%
-    filter(autosome != "chrY" ) %>%
-    filter(coverage_H1 > min_cov & coverage_H2 > min_cov) %>%
-    filter(coverage_H1 < max_cov & coverage_H2 < max_cov) %>%
-    mutate(
-        hap1_acc = fire_coverage_H1,
-        hap2_acc = fire_coverage_H2,
-        hap1_nacc = coverage_H1 - fire_coverage_H1,
-        hap2_nacc = coverage_H2 - fire_coverage_H2,
-    )
-
-if(nrow(pdf)== 0){
-    system(glue("touch {out_file_1}"))
-    system(glue("touch {out_file_2}"))
-    system(glue("touch {out_file_3}"))
-    system(glue("touch {out_file_4}"))
-    quit()
-}
-
-#print(pdf[2446,])
-pdf = pdf %>%
-    rowwise() %>%
-    mutate(
-        p_value=fisher.test(matrix(c(hap1_acc, hap1_nacc, hap2_acc, hap2_nacc),nrow=2))$p.value
-    ) %>%
-    # group_by(sample) %>%
-    ungroup() %>%
-    mutate(
-        p_adjust = p.adjust(p_value, method="BH"),
-    ) %>%
-    select(!starts_with("V")) %>%
-    mutate(
-        diff = hap1_frac_acc - hap2_frac_acc,
-    ) %>%
-    data.table()
 
 
 # make the plots
-tdf = pdf 
+imprinted=my_read_bed("data/lcl_dmr_coordinates_Akbari.bed")
+df = my_read_bed(in_file) 
+colnames(df)[1:5]=c("chrom","start","end","xstart","xend")
+tdf = df %>%
+    bed_map(imprinted, imprinted=(length(V4) > 0)) %>%
+    replace_na(list(imprinted=FALSE)) %>%
+    data.table
+tdf
 
 tdf %>%
     ggplot(aes(x=hap1_frac_acc, y=hap2_frac_acc)) +
@@ -208,6 +138,13 @@ p = tdf %>%
     geom_hex(bins=100) + scale_fill_distiller("", palette = "Spectral", trans="log10") +
     geom_hline(aes(yintercept=(p_threshold)), linetype="dashed", color="darkblue")+
     geom_hline(aes(yintercept=(cor_p_threshold)), linetype="dashed", color="darkred")+
+    geom_point(
+        data = . %>% filter(imprinted),
+        color="darkred",
+        shape=3,
+        size=.5,
+        alpha=0.65,
+    )+
     facet_wrap(~autosome, ncol=2)+
     scale_x_continuous("Difference between paternal and maternal accessibility", labels=percent) +
     scale_y_continuous(
@@ -249,3 +186,4 @@ tdf %>%
     ) %>%
     select(c("#chrom", "st", "en", "name", "score", "strand", "tst", "ten", "color")) %>%
     fwrite(out_file_4, sep="\t", quote=F, na=".", row.names=F)
+```

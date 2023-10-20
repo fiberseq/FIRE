@@ -1,0 +1,18 @@
+name: fibertools
+channels:
+  - numba
+  - conda-forge
+  - bioconda
+  - defaults
+# Most dependencies are specified by the pypi package fibertools
+# so better to leave this mostly empty
+dependencies:
+  - htslib>=1.17
+  - numpy==1.23.1
+  - rust>=1.71# skip, needed for pyd4, ==1.61.0
+  - pip>=20.1 # pip is needed as dependency
+  - cmake
+  - d4tools
+  - pip:
+      - pyd
+      - git+https://github.com/fiberseq/fibertools.git

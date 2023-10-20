@@ -150,3 +150,10 @@ tmp*
 temp*
 config/**
 .test/**
+.cargo/*
+.conda/*
+*.tbl.gz
+
+*code-workspace*
+.vscode/*
+.DS_Store

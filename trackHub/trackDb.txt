@@ -178,3 +178,62 @@ maxItems 100000
 
 # more tracks 
 
+
+
+# cpg tracks
+track new_FIRE_FDR
+compositeTrack on
+shortLabel new_FIRE_FDR
+longLabel new_FIRE_FDR
+type bigWig 
+maxItems 100000
+maxHeightPixels 100:100:1
+alwaysZero on
+
+    track log_fdr
+    parent new_FIRE_FDR
+    bigDataUrl bw/log_FDR.bw
+    shortLabel log_fdr
+    longLabel log_fdr
+    type bigWig
+    autoScale on
+    visibility full
+    yLineOnOff on
+    yLineMark 20
+    gridDefault on
+
+
+    track fire_score
+    parent new_FIRE_FDR
+    bigDataUrl bw/score.bw
+    shortLabel fire_score
+    longLabel fire_score
+    type bigWig
+    autoScale on
+    viewLimits 0.0:100.0
+    visibility full
+
+
+    track log_fdr_low_cov
+    parent new_FIRE_FDR
+    bigDataUrl bw/log_FDR_low.bw
+    shortLabel log_fdr_low_cov
+    longLabel log_fdr_low_cov
+    type bigWig
+    autoScale on
+    visibility full
+    yLineOnOff on
+    yLineMark 20
+    gridDefault on
+
+
+    track fire_score_low_cov
+    parent new_FIRE_FDR
+    bigDataUrl bw/score_low.bw
+    shortLabel fire_score_low_cov
+    longLabel fire_score_low_cov
+    type bigWig
+    autoScale on
+    viewLimits 0.0:100.0
+    visibility full
+

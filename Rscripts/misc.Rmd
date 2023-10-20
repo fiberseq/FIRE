@@ -1,0 +1,41 @@
+
+```{r}
+source("Rscripts/utils.R")
+z="
+sample hap value
+PS00381 hap1 52.6316
+PS00381 hap2 90.9091
+PS00383 hap1 76.9231
+PS00383 hap2 72.2222
+PS00384 hap1 42.8571
+PS00384 hap2 50
+"
+setwd("~/projects/phased-fdr-and-peaks/")
+getwd()
+```
+
+```{r}
+p = fread(z) %>%
+    ggplot(aes(x=sample, fill=hap, y=value/100)) +
+    geom_bar(stat="identity", position="dodge", width=.6) +
+    scale_y_continuous("", label=percent)+
+    scale_fill_manual("", values=c("darkred", "darkblue"))+
+    theme_minimal_grid() +
+    theme(legend.position="top")
+my_ggsave("~/projects/phased-fdr-and-peaks/Figures/2023-10-13.misc.pdf", plot=p)
+```
+
+
+#ct   en        hap1_acc  hap1_link  hap1_nuc  hap2_fdr          hap2_acc  hap2_link  hap2_nuc  PS00382/results/fire/PS00382/hap1-vs-hap2/hap1-vs-hap2-volcano.tbl.gz
+#chr6  29702809  10        4          5         396.989699700282  20        0          2         PS00381/results/fire/PS00381/hap1-vs-hap2/hap1-vs-hap2-volcano.tbl.gz
+#chr6  29702809  6         4          4         93.1875874665198  6         2          4         PS00384/results/fire/PS00384/hap1-vs-hap2/hap1-vs-hap2-volcano.tbl.gz
+#chr6  29702791  10        1          2         246.989699856217  13        2          3         PS00383/results/fire/PS00383/hap1-vs-hap2/hap1-vs-hap2-volcano.tbl.gz
+
+
+```{r}
+a=6+6
+b=4+4+2+4
+c=10+13
+d=1+2+2+3
+fisher.test(matrix(c(a,b,c,d), nrow=2))
+```
