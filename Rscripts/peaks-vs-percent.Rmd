@@ -161,7 +161,7 @@ percent_plots = percent_encode_long %>%
         label=rep("",20),
     )+
     scale_fill_manual(values=cur_colors) + 
-    facet_col(~name, scales="free_y", strip.position = "right") + 
+    facet_col(~name, scales="free_y", strip.position = "left") + 
     my_grid() +
     coord_cartesian(xlim=c(0,1), clip=FALSE)+
     theme_no_x() +

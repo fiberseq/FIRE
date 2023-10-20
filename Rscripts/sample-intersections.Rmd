@@ -17,22 +17,24 @@ comparisons
 ```
 
 ```{r}
-z=comparisons %>% 
-    #group_by(bin) %>% mutate(row=seq(n())) %>% filter(row<10000) %>%
-    pivot_longer(
-        c("GM12878", "PS00356")
-    ) %>%
-    arrange(name)%>%
-    mutate(name=factor(name, levels=rev(unique(name)))) %>%
-    ggplot(aes(x=PS00388, y=value)) +
-    geom_hex(bins=50) + scale_fill_distiller("", palette = "Spectral", trans="log10") +
-    stat_cor(size=2.5)+
-    geom_smooth(se=F, method="lm", color="black", linetype="dashed", size=.3)+
-    scale_x_continuous("FIRE score of PS00388", limits=c(0,100)) + 
-    scale_y_continuous("FIRE score", limits=c(0,100)) + 
-    facet_row(~name,    strip.position = "left") + 
-    my_grid() 
-my_ggsave("Figures/FIRE-peak-corelation.pdf", height=2, width=4)
+compare_plot = function(z, x_col, y_col){
+    z %>%
+        ggplot(aes(x=.data[[x_col]], y=.data[[y_col]])) +
+        geom_hex(bins=50) + scale_fill_distiller("", palette = "Spectral", trans="log10") +
+        stat_cor(size=2.5)+
+        geom_smooth(se=F, method="lm", color="black", linetype="dashed", size=.3)+
+        scale_x_continuous(glue("FIRE score of {x_col}"), limits=c(0,100)) + 
+        scale_y_continuous(glue("FIRE score of {y_col}"), limits=c(0,100)) + 
+        #facet_row(~name,    strip.position = "left") + 
+        my_grid()
+}
+
+z=compare_plot(comparisons, "GM12878", "PS00356")    
+my_ggsave("Figures/FIRE-peak-corelation-GM12878-PS00356.pdf", height=2, width=2.5)
+z=compare_plot(comparisons, "PS00388", "PS00356")    
+my_ggsave("Figures/FIRE-peak-corelation-PS000388-PS00356.pdf", height=2, width=2.5)
+z=compare_plot(comparisons, "GM12878", "GM12878_30X")    
+my_ggsave("Figures/FIRE-peak-corelation-GM12878-30X.pdf", height=2, width=2.5)
 ```
 
 ```{r}
