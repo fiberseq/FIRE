@@ -54,6 +54,7 @@ encode=my_read_bed("data/ENCODE3_consensus_DHS_ENCFF503GCK.tsv")
 sds=my_read_bed("data/T2T_SDs.bed")
 sds=my_read_bed("config/annotations/SDs.merged.hg38.bed.gz")
 tss=my_read_bed("data/gencode.v42.annotation_TSS.gff3")
+dnase_peaks=my_read_bed("data/ENCFF762CRQ_DNase_peaks.bed.gz")
 ```
 
 ```{r}
@@ -70,7 +71,7 @@ df=fread(in_file)
 df$peak_cov = df$coverage
 df$acc_percent = df$fire_coverage/df$peak_cov
 colnames(df)[1:5]=c("chrom", "start","end","ostart","oend")
-
+df$ID = paste0(df$chrom, "_", df$start, "_", df$end)
 
 df = df %>%
     arrange(-acc_percent) %>%
@@ -81,11 +82,6 @@ df = df %>%
     arrange(-n) %>%
     mutate(
         Mbp=cumsum(end-start)/1e6,
-        group = floor(acc_percent * 20) / 20,
-        group = case_when(
-            group == 1 ~ 0.95,
-            TRUE ~ group,
-        )
     ) %>%
     bed_map(encode,
         encode_count=length(core_end),
@@ -94,15 +90,46 @@ df = df %>%
     bed_map(sds, sd_count=length(end)) %>%
     bed_map(dnase, dnase_max=max(dnase_sig)) %>%
     bed_map(tss, TSS=length(V4)) %>%
+    bed_map(dnase_peaks, 
+        is_dnase_peak = n()>0,
+    ) %>%
     replace_na(list(encode_count = 0, sd_count=0, TSS=0)) %>%
     arrange(-acc_percent, -n) %>%
+    mutate(
+        group = case_when(
+            floor(acc_percent * 20) / 20 == 1 ~ 0.95,
+            TRUE ~ floor(acc_percent * 20) / 20,
+        )
+    ) %>%
     data.table()
+table(df$group)
 head(df)
 tail(df)
 dim(df)
 df %>%
     group_by(encode_anno) %>% summarise(n())
-table(df$group)
+```
+
+# correct DNAse signal with GC content
+```{r}
+df$psize=df$end-df$start
+fit = lm(acc_percent ~ `GC_frac` * log10(dnase_max), data=df[is_dnase_peak==T,])
+summary(fit)
+df$dnase_max_gc_corrected = predict(fit, newdata=df)
+```
+
+# add gc percent
+```{r}
+library(regioneR)
+library(BSgenome.Hsapiens.UCSC.hg38)
+
+#Build a GRanges from your matrix
+ranges <- toGRanges(df[,c("chrom", "start", "end")])
+
+#Get the sequences and compute the GC content
+freqs = alphabetFrequency(getSeq(BSgenome.Hsapiens.UCSC.hg38, ranges))
+df$GC_frac = (freqs[,'C'] + freqs[,'G'])/rowSums(freqs)
+df
 ```
 
 ```{r}
@@ -314,7 +341,12 @@ my_ggsave("Figures/peaks-vs-percent.pdf", height=4, width=5)
 ```
 
 
-#dnase
+
+
+
+
+
+# dnase
 ```{r}
 df %>%
     filter(dnase_max > 0) %>%
@@ -337,6 +369,89 @@ df %>%
     ) + 
     my_grid()
 my_ggsave("Figures/DNase-vs-FIRE.pdf", height=3, width=4)
+```
+
+# dnase by peak size
+```{r}
+#bedtools
+dnase_peaks %>% 
+    bed_map(df, 
+        psize = max(end-start),
+        acc_percent = max(acc_percent),
+        score=max(score),
+        is_dnase_peak=T,
+    ) %>%
+    mutate(
+        dnase_max=V7,
+    ) %>%
+    filter(!is.na(acc_percent)) 
+
+df %>% mutate(
+        psize=end-start,
+        size_group = cut(psize, breaks=c(0,200,250,300,Inf)),
+        size_group2=size_group,
+    ) %>%
+    filter(chrom != "chrX", chrom != "chrY", is_dnase_peak) %>%
+    pivot_longer(starts_with("dnase_max")) %>%
+    #filter(dnase_max>0.3) %>%
+    group_split(name,size_group) %>% 
+    map(
+        ~ggplot(., aes(x=value, y=acc_percent)) +
+            geom_hex(bins=50) + 
+            geom_smooth(se=F, method="lm")+
+            scale_fill_distiller("", 
+                palette = "Spectral",
+                #trans="log10"
+            ) +
+            stat_cor(size=2.5)+
+            scale_x_continuous(
+                "DNase peak signal", 
+                trans="log10"
+            ) + 
+            scale_y_continuous("% actuation in Fiber-seq data", label=percent) + 
+            annotation_logticks(side="b") + 
+            my_grid() +
+            ggtitle(paste(unique(.$size_group2), "   n=",comma(nrow(.)),sep=""))+
+            theme(
+                legend.position="left",
+                plot.title = element_text(size=5, face="bold"),
+                aspect.ratio=1,
+            )
+    ) %>% 
+    plot_grid(plotlist = ., align = 'hv', ncol = 4)
+
+my_ggsave("Figures/FIRE-peaks-percent-fire-vs-DNase.pdf", height=3, width=7)
+```
+
+# dnase with gc in extreams
+```{r}
+df %>% filter(end-start > 300, acc_percent > 0.85) %>%
+    rename(`#chrom`=chrom) %>% 
+    fwrite("tmp.bed", sep="\t")
+dnase_peaks_with_gc = fread(cmd="bedtools nuc -bed tmp.bed -fi ~/assemblies/hg38.analysisSet.fa")
+colnames(dnase_peaks_with_gc)[1:length(colnames(df))] = colnames(df)
+dnase_peaks_with_gc$GC_frac = dnase_peaks_with_gc$`42_pct_gc` 
+```
+
+```{r}
+colnames(dnase_peaks_with_gc)
+z=dnase_peaks_with_gc %>% 
+    ggplot(., aes(x=`42_pct_gc`, y=dnase_max)) +
+        geom_hex(bins=50) + 
+        geom_smooth(se=F)+
+        scale_fill_distiller("", 
+            palette = "Spectral",
+            trans="log10"
+        ) +
+        stat_cor(size=2.5)+
+        scale_y_continuous(
+            "DNase peak signal", 
+            trans="log10"
+        ) + 
+        scale_x_continuous("GC content", label=percent) + 
+        annotation_logticks(side="l") + 
+        my_grid() 
+my_ggsave("Figures/DNase-vs-GC.pdf", height=2, width=2.75)
 ```
 
 
@@ -419,7 +534,7 @@ z = p.df %>%
         #legend.position="top",
         legend.key.size=unit(0.2, "inch")
     )
-my_ggsave("Figures/DNase-over-FIRE-peaks.pdf", height=2, width=2.75)
+my_ggsave("Figures/DNase-over-FIRE-peaks.pdf", height=2, width=3)
 ```
 
 ```{r}
@@ -463,6 +578,95 @@ p.df[p.df$position==width-smooth& p.df$exp=="ENCFF658WKQ_DNase",]
 df_bp %>%
     filter(group == 0.05) 
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# make the dreaded heatmap
+```{r}
+
+f="Tables/per_site_windows_dnase_and_percent_fire.tbl.gz"
+windows_near_fire_peaks = fread(f)
+colnames(windows_near_fire_peaks) = c("window_chrom", "window_start", "window_end", "ID", "data Fiber-seq % accessible", "data DNase signal")
+windows_near_fire_peaks 
+```
+```{r}
+tFDR=0.01
+peaks_to_sample = df %>% filter(FDR < tFDR) %>% group_by(group) %>% sample_n(200) %>% select(group,ID) %>% data.table
+sampled_windows_near_fire_peaks = merge(windows_near_fire_peaks, peaks_to_sample, by="ID") %>%
+    pivot_longer(
+        starts_with("data")
+    ) %>%
+    group_by(name) %>%
+    mutate(value = percent_rank(value)) %>%
+    dplyr::group_by(name, group, ID) %>%
+    mutate(sort_val=mean(value)) %>%
+    dplyr::ungroup() %>%
+    dplyr::group_by(group) %>%
+    arrange(sort_val) %>%
+    mutate(
+        n_id=as.numeric(factor(ID, levels=unique(ID))),
+    ) %>%
+    separate(ID, sep="_", into=c("peak_chrom", "peak_start", "peak_end"),  convert = T) %>%
+    ungroup() %>%
+    mutate(
+        offset = window_start-peak_start,
+        group=factor(group, levels=rev(sort(unique(group)))),
+    ) %>%
+    data.table()
+sampled_windows_near_fire_peaks
+data.table(table(sampled_windows_near_fire_peaks$n_id))
+```
+
+```{r}
+xx=min(sampled_windows_near_fire_peaks$offset)
+z = sampled_windows_near_fire_peaks %>%
+    ggplot(aes(x=offset, y=n_id, fill=100*value + 1)) +
+    geom_raster(interpolate=TRUE)+
+    facet_grid(vars(group),vars(name))+
+    scale_fill_distiller("Percentile rank of data", 
+        #palette = "Spectral",
+        #trans="log10",
+        direction=1,
+    ) + 
+    coord_cartesian(xlim=c(xx,-xx))+
+    my_vgrid() +
+    theme(legend.position="top")
+my_ggsave("Figures/per-site-observations-FDR-{tFDR}.pdf", height=6, width=6)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

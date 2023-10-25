@@ -64,13 +64,9 @@ min(d$DNase)
 max(d$DNase)
 z=d %>%
     filter(chrom != "chrX", chrom != "chrY") %>%
-    mutate(
-        #DNase=anti_logit_e(DNase, a=1.75, b=-2)
-    ) %>%
     ggplot(aes(x=DNase, y=GM12878)) +
     geom_hex(bins=50) + scale_fill_distiller("", palette = "Spectral", trans="log10") +
     stat_cor(size=2.5)+
-    #geom_smooth(se=F, method="lm", color="black", linetype="dashed")+
     scale_x_continuous("DNase peak signal", trans="log10") + 
     scale_y_continuous("% actuation in Fiber-seq data", label=percent) + 
     annotation_logticks(side="b") + 
@@ -78,6 +74,8 @@ z=d %>%
 #zz=z+geom_xsidedensity(aes(y=stat(density))) + geom_ysidedensity(aes(x=stat(density))) 
 my_ggsave("Figures/DNase-peaks-vs-percent-fire.pdf", height=2, width=2.75)
 ```
+
+
 
 # FDR vs SCORE
 ```{r}
