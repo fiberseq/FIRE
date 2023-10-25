@@ -467,8 +467,8 @@ colnames(windows_near_fire_peaks) = c("window_chrom", "window_start", "window_en
 windows_near_fire_peaks 
 ```
 ```{r}
-tFDR=0.01
-peaks_to_sample = fire_df %>% filter(FDR < tFDR) %>% group_by(group) %>% sample_n(200) %>% select(group,ID) %>% data.table
+tFDR=0.05
+peaks_to_sample = fire_df %>% filter(FDR < tFDR) %>% group_by(group) %>% sample_n(100) %>% select(group,ID) %>% data.table
 sampled_windows_near_fire_peaks = merge(windows_near_fire_peaks, peaks_to_sample, by="ID") %>%
     pivot_longer(
         starts_with("data")
