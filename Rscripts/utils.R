@@ -23,6 +23,19 @@ library(weights)
 library(karyoploteR)
 library(zoo)
 library("scales")
+library(tidyverse)
+library(data.table)
+library(scales)
+library(ggforce)
+library(cowplot)
+library(dplyr)
+library(ggrepel)
+library(glue)
+library(patchwork)
+library(ggpubr)
+library(valr)
+library(pals)
+
 
 Red="#c1272d"
 Indigo="#0000a7"
@@ -424,7 +437,8 @@ load_ipd_from_npz = function(file){
         )
 }
 
-FONT_SIZE=8
+
+FONT_SIZE=6
 my_grid = function(...){
     theme_minimal_grid(font_size=FONT_SIZE, ...)
 } 
@@ -474,3 +488,4 @@ my_read_bed = function(...){
     colnames(df) = names
     df
 }
+
