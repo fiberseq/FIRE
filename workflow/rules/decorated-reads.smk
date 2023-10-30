@@ -15,12 +15,19 @@ rule decorate_fibers_chromosome:
     shell:
         """
         INBED={resources.tmpdir}/tmp.{wildcards.sm}.{wildcards.chrom}.bed.gz
+        OUTBED={resources.tmpdir}/tmp.out.{wildcards.sm}.{wildcards.chrom}.bed
         tabix -h {input.bed} {wildcards.chrom} | bgzip -@ {threads} > $INBED
-        python {params.script} -v 1 $INBED {output.bed} \
+        python {params.script} -v 1 $INBED $OUTBED \
             | sort -k1,1 -k2,2n -k3,3n -k4,4 \
             | bgzip -@ {threads} \
         > {output.decorated}
-        rm $INBED
+
+        # sort the other file 
+        sort -k1,1 -k2,2n -k3,3n -k4,4 $OUTBED \
+            | bgzip -@ {threads} \
+        > {output.bed}
+
+        rm $INBED $OUTBED
         """
 
 
