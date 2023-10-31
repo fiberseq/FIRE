@@ -164,6 +164,7 @@ rule helper_fdr_peaks_by_fire_elements:
         conda
     params:
         max_peak_fdr=max_peak_fdr,
+        min_per_acc_peak=min_per_acc_peak,
     shell:
         """
         HEADER=$(zcat {input.bed} | head -n 1 || true)
@@ -183,6 +184,7 @@ rule helper_fdr_peaks_by_fire_elements:
                 | rg -w "#chrom|True" \
                 | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}" \
                 | csvtk filter -tT -C '$' -f "fire_coverage>1" \
+                | bioawk -tc hdr 'NR==1 || ($fire_coverage/$coverage>{params.min_per_acc_peak})' \
                 | bedtools intersect -wa -wb -sorted -a - \
                     -b <(tabix {input.fire} {wildcards.chrom} \
                             | cut -f 1-3 \
@@ -259,6 +261,7 @@ rule wide_fdr_peaks:
     params:
         nuc_size=config.get("nucleosome_size", 147),
         max_peak_fdr=max_peak_fdr,
+        min_per_acc_peak=min_per_acc_peak,
     shell:
         """
         FILE={output.bed}
@@ -267,6 +270,7 @@ rule wide_fdr_peaks:
         ( \
             zcat {input.bed}; \
             bioawk -tc hdr '$FDR<={params.max_peak_fdr}' {input.track} \
+                | bioawk -tc hdr 'NR==1 || ($fire_coverage/$coverage>{params.min_per_acc_peak})' \
         ) \
             | cut -f 1-3 \
             | bedtools sort \

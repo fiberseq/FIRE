@@ -42,7 +42,16 @@ haps = ["all", "hap1", "hap2", "unk"]
 not_all = ["hap1", "hap2", "unk"]
 not_unk = ["all", "hap1", "hap2"]
 min_fire_fdr = config.get("min_fire_fdr", 0.10)
+
+# FDR / peak calling thresholds
 max_peak_fdr = config.get("max_peak_fdr", 0.05)
+min_per_acc_peak = config.get("min_per_acc_peak", None)
+if min_per_acc_peak is None:
+    min_per_acc_peak = 0.0
+else:
+    max_peak_fdr = 1.0
+
+
 print(data.index)
 
 types = ["fdr", "acc", "link", "nuc"]

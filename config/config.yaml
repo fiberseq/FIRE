@@ -24,3 +24,6 @@ manifest: config/config.tbl # table with samples to process
 ##
 # train: True
 # dhs: workflow/annotations/GM12878_DHS.bed.gz # regions of suspected regulatory elements
+
+# Filter peaks on a % accesible threshold instead of FDR. Removes FDR filtering.
+# max_per_acc_peak: 0.10 # enfore 10% of reads in peak are accessible
