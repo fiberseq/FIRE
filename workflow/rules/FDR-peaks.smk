@@ -269,7 +269,7 @@ rule wide_fdr_peaks:
         echo $TMP
         ( \
             zcat {input.bed}; \
-            bioawk -tc hdr '$FDR<={params.max_peak_fdr}' {input.track} \
+            bioawk -tc hdr 'NR==1 || $FDR<={params.max_peak_fdr}' {input.track} \
                 | bioawk -tc hdr 'NR==1 || ($fire_coverage/$coverage>{params.min_per_acc_peak})' \
         ) \
             | cut -f 1-3 \
