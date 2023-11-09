@@ -187,8 +187,10 @@ alwaysZero on
     shortLabel FIRE score
     longLabel FIRE score
     visibility hide
-    autoScale on
+    alwaysZero on
+    viewLimits 0:100
     viewLimits 0.0:100.0
+    windowingFunction maximum
 """
 
 DECORATED = """
