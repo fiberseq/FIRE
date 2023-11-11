@@ -2,31 +2,40 @@ rule dhs_null:
     input:
         fai=ancient(f"{ref}.fai"),
         dhs=ancient(dhs),
-        exclude=excludes,
+        exclude=rules.exclude_from_shuffle.output.bed,
+        unreliable_coverage_regions=rules.unreliable_coverage_regions.output.bed,
     output:
         bed="results/{sm}/dhs_with_null.bed.gz",
         exclude=temp("temp/{sm}/exclues.bed"),
     threads: 2
+    params:
+        keep_chrs="|".join(get_chroms()),
     conda:
         conda
     shell:
         """
-        less {input.exclude} | cut -f 1-3 | bedtools sort -i - | bedtools merge -i - > {output.exclude}
-        (
+        less {input.exclude} {input.unreliable_coverage_regions} \
+            | cut -f 1-3 \
+            | bedtools sort -i - \
+            | bedtools merge -i - \
+        > {output.exclude}
+
+        ( \
             bedtools intersect -v -a {input.dhs} -b {output.exclude} \
-                | cut -f 1-3 | sed 's/$/\tDHS/g'; 
+                | cut -f 1-3 | sed 's/$/\tDHS/g'; \
             bedtools shuffle -noOverlapping \
-                -excl <( less {input.dhs} {output.exclude} | cut -f 1-3 | bedtools sort -i - | bedtools merge -i -) \
+                -excl <( \
+                    less {input.dhs} {output.exclude} \
+                    | cut -f 1-3 \
+                    | bedtools sort -i - \
+                    | bedtools merge -i - \
+                ) \
                 -i <(bedtools intersect -v -a {input.dhs} -b {output.exclude}) \
-                -g {input.fai} |
-                cut -f 1-3 | sed 's/$/\tNULL/g' 
-        ) |
-            sort -k 1,1 -k2,2n --parallel={threads} -S 5G |
-            grep -vw "chrM" |
-            grep -vw "chrY" |
-            grep -vw "chrEBV" |
-            grep -vw "chrX" |
-            grep -v "_" |
+                -g {input.fai} | \
+                cut -f 1-3 | sed 's/$/\tNULL/g' \
+        ) | \
+            sort -k 1,1 -k2,2n --parallel={threads} | \
+            grep -Pw '{params.keep_chrs}' | \
             bgzip -@ {threads} > {output.bed}
         """
 
