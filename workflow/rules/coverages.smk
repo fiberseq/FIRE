@@ -125,3 +125,26 @@ rule exclude_from_shuffle:
             | bgzip -@ {threads} \
         > {output.bed}
         """
+
+
+rule unreliable_coverage_regions:
+    input:
+        bg=rules.genome_bedgraph.output.bg,
+        minimum=rules.coverage.output.minimum,
+        maximum=rules.coverage.output.maximum,
+    output:
+        bed="results/{sm}/coverage/unreliable-coverage-regions.bed.gz",
+        bed_tbi="results/{sm}/coverage/unreliable-coverage-regions.bed.gz.tbi",
+    threads: 4
+    conda:
+        conda
+    shell:
+        """
+        MIN=$(cat {input.minimum})
+        MAX=$(cat {input.maximum})
+        zcat {input.bg} \
+            | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX' \
+            | bgzip -@ {threads} \
+        > {output.bed}
+        tabix -f -p bed {output.bed}
+        """
