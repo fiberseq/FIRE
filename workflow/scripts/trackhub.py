@@ -186,7 +186,7 @@ alwaysZero on
     bigDataUrl {score}
     shortLabel FIRE score
     longLabel FIRE score
-    visibility hide
+    visibility full
     alwaysZero on
     viewLimits 0:100
     viewLimits 0.0:100.0
@@ -198,7 +198,7 @@ track {sample}-{hap}-fibers
 shortLabel {sample}-{hap}-fibers
 longLabel {sample}-{hap}-fibers
 visibility squish
-type bigBed 12+
+type bigBed 12 +
 itemRgb On
 filterText.keywords {hap}
 bigDataUrl bb/fire-fibers.bb 
