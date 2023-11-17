@@ -1,5 +1,36 @@
 # Description of the FIRE peaks
 
+## Estimating the precision of individual FIRE elements
+
+TODO
+
+## FIRE score calculation
+
+The FIRE score ($S$) for a position in the genome ($g$) is calculated using the following formula:
+
+$$ S_g = -\frac{50}{C_g} \sum_{i=1}^{C_g} log_{10}(p_i) $$
+
+Where $C_g$ is the Fiber-seq coverage overlapping position $g$, and $p_i$ is $1$ minus the precision of the FIRE element, i.e., the chance that the FIRE element is a false positive. Note, the highest confidence a FIRE element can have is is $0.99$, i.e., $s_i$ is at least $0.01$.  Therefore, the FIRE score ($S_g$) can take on values between $0$ (none of the overlapping Fiber-seq reads have FIRE elements) and $100$ (all of the overlapping Fiber-seq reads have FIRE elements with a precision of $0.99$).
+
+Regions covered by less than $3$ FIRE elements are not scored and given a value of $-1$.
+
+## FDR calculation
+FDR calculation begins by shuffling the locations of all the fibers across the genome and recalculating the FIRE score for each position in the genome. The FDR is then defined as the number of bases that have shuffled FIRE scores that are higher than FIRE score threshold divided by the number of bases in the un-shuffled data. The shuffle and FDR calculations are performed per sample and the results are recorded in the file `FDR-peaks/FIRE.score.to.FDR.tbl` with the following columns:
+
+| Column | description |
+| ------ | ----------- |
+| threshold | FIRE score threshold |
+| FDR | FDR at threshold |
+| shuffled_peaks | Number of base-pairs at threshold in shuffled data |
+| peaks | Number of base-pairs at threshold in un-shuffled data |
+
+## Peak calling
+
+TODO 
+
+
+### Fields of the FIRE peaks bed file
+
 | Column           | Description                                                       |
 | ---------------- | ----------------------------------------------------------------- |
 | chrom            | Chromosome                                                        |
@@ -30,29 +61,3 @@
 | local_max_count  | Number of local maxima in the peak                                |
 | peak_length      | Length of the peak                                                |
 
-
-## FIRE score calculation
-
-The FIRE score ($S$) for a position in the genome ($g$) is calculated using the following formula:
-
-$$ S_g = -\frac{50}{C_g} \sum_{i=1}^{C_g} log_{10}(p_i) $$
-
-Where $C_g$ is the Fiber-seq coverage overlapping position $g$, and $p_i$ is $1$ minus the precision of the FIRE element, i.e., the chance that the FIRE element is a false positive. Note, the highest confidence a FIRE element can have is is $0.99$, i.e., $s_i$ is at least $0.01$.  Therefore, the FIRE score ($S_g$) can take on values between $0$ (none of the overlapping Fiber-seq reads have FIRE elements) and $100$ (all of the overlapping Fiber-seq reads have FIRE elements with a precision of $0.99$).
-
-Regions covered by less than $3$ FIRE elements are not scored and given a value of $-1$.
-
-## FDR calculation
-FDR calculation begins by shuffling the locations of all the fibers across the genome and recalculating the FIRE score for each position in the genome. The FDR is then defined as the number of bases that have shuffled FIRE scores that are higher than FIRE score threshold divided by the number of bases in the un-shuffled data. The shuffle and FDR calculations are performed per sample and the results are recorded in the file `FDR-peaks/FIRE.score.to.FDR.tbl` with the following columns:
-
-| Column | description |
-| ------ | ----------- |
-| threshold | FIRE score threshold |
-| FDR | FDR at threshold |
-| shuffled_peaks | Number of base-pairs at threshold in shuffled data |
-| peaks | Number of base-pairs at threshold in un-shuffled data |
-
-## Peak calling
-TODO 
-
-## Determination of peak start and end
-TODO
