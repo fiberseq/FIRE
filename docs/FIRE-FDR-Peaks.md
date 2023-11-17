@@ -8,7 +8,7 @@ TODO
 
 The FIRE score ($S$) for a position in the genome ($g$) is calculated using the following formula:
 
-$$ S_g = -\frac{50}{C_g} \sum_{i=1}^{C_g} log_{10}(p_i) $$
+$$ S_g = -\frac{50}{C_g} \sum_{i=1}^{C_g} \log_{10}(p_i) $$
 
 Where $C_g$ is the Fiber-seq coverage overlapping position $g$, and $p_i$ is $1$ minus the precision of the FIRE element, i.e., the chance that the FIRE element is a false positive. Note, the highest confidence a FIRE element can have is is $0.99$, i.e., $s_i$ is at least $0.01$.  Therefore, the FIRE score ($S_g$) can take on values between $0$ (none of the overlapping Fiber-seq reads have FIRE elements) and $100$ (all of the overlapping Fiber-seq reads have FIRE elements with a precision of $0.99$).
 
@@ -26,33 +26,32 @@ FDR calculation begins by shuffling the locations of all the fibers across the g
 
 ## Peak calling
 
-TODO 
+Peaks are called by identifying FIRE score local-maxima that have FDR values below a threshold. By default the pipeline reports results for both 1% and 5% FDR thresholds. Once a local-maxima is identified, the start and end positions of the peak are determined by the median start and end positions of the underlying FIRE elements. We also calculate and report wide peaks by taking the union of the FIRE peaks and all regions below the FDR threshold and then merging resulting regions that are within one nucleosome (147 bp) of one another.
 
-
-### Fields of the FIRE peaks bed file
+The peak results are reported in the file `FDR-peaks/FDR-FIRE-peaks.bed.gz` with the following columns:
 
 | Column           | Description                                                       |
 | ---------------- | ----------------------------------------------------------------- |
 | chrom            | Chromosome                                                        |
 | peak_start       | Start of the peak                                                 |
 | peak_end         | End of the peak                                                   |
-| start            | Start of the peak                                                 |
-| end              | End of the peak                                                   |
+| start            | Start of the local-maxima of the peak                             |
+| end              | End of the local-maxima the peak                                  |
 | fire_coverage    | # of fire elements overlapping the peak                           |
 | coverage         | Coverage of the peak                                              |
 | score            | Max FIRE-score across the peak                                    |
 | FDR              | FDR of the peak                                                   |
-| log_FDR          | -10\*log10(FDR) of the peak                                       |
+| log_FDR          | $-10 \log_{10}(FDR)$ of the peak                                       |
 | fire_coverage_H1 | # of fire elements overlapping the peak in H1                     |
 | coverage_H1      | Coverage of the peak in H1                                        |
 | score_H1         | Max FIRE-score across the peak in H1                              |
 | FDR_H1           | FDR of the peak in H1                                             |
-| log_FDR_H1       | -10\*log10(FDR) of the peak in H1                                 |
+| log_FDR_H1       | $-10 \log_{10}(FDR)$  of the peak in H1                                 |
 | fire_coverage_H2 | # of fire elements overlapping the peak in H2                     |
 | coverage_H2      | Coverage of the peak in H2                                        |
 | score_H2         | Max FIRE-score across the peak in H2                              |
 | FDR_H2           | FDR of the peak in H2                                             |
-| log_FDR_H2       | -10\*log10(FDR) of the peak in H2                                 |
+| log_FDR_H2       | $-10 \log_{10}(FDR)$  of the peak in H2                                 |
 | max_window_score | Max FIRE-score across the peak                                    |
 | FIRE_size_mean   | Mean size of FIRE elements in the peak                            |
 | FIRE_size_ssd    | Standard deviation of the size of FIRE elements in the peak       |
