@@ -42,7 +42,14 @@ Where $C_g$ is the Fiber-seq coverage overlapping position $g$, and $p_i$ is $1$
 Regions covered by less than $3$ FIRE elements are not scored and given a value of $-1$.
 
 ## FDR calculation
-TODO
+FDR is calculated by shuffling the locations of all the fibers across the genome and recalculating the FIRE score for each position. The FDR is then calculated as the fraction of bases that have shuffled FIRE scores that are higher than the FIRE score of the un-shuffled data at various FIRE score thresholds. The shuffle and FDR calculations are performed per sample and the results are recorded in the file `FDR-peaks/FIRE.score.to.FDR.tbl` with the following columns:
+
+| Column | description |
+| ------ | ----------- |
+| threshold | FIRE score threshold |
+| FDR | FDR at threshold |
+| shuffled_peaks | Number of base-pairs at threshold in shuffled data |
+| peaks | Number of base-pairs at threshold in un-shuffled data |
 
 ## Peak calling
 TODO 
