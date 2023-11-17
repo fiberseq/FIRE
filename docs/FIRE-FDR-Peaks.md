@@ -1,9 +1,5 @@
 # Description of the FIRE peaks
 
-TODO in progress
-
-#chrom peak_start peak_end start end fire_coverage coverage score FDR log_FDR fire_coverage_H1 coverage_H1 score_H1 FDR_H1 log_FDR_H1 fire_coverage_H2 coverage_H2 score_H2 FDR_H2 log_FDR_H2 max_window_score FIRE_size_mean FIRE_size_ssd FIRE_start_ssd FIRE_end_ssd local_max_count peak_length
-
 | Column           | Description                                                       |
 | ---------------- | ----------------------------------------------------------------- |
 | chrom            | Chromosome                                                        |
@@ -34,14 +30,21 @@ TODO in progress
 | local_max_count  | Number of local maxima in the peak                                |
 | peak_length      | Length of the peak                                                |
 
+
 ## FIRE score calculation
 
 The FIRE score ($S$) for a position in the genome ($g$) is calculated using the following formula:
 $$ S_g = -\frac{50}{C_g} \sum_{i=1}^{C_g} log_{10}(p_i) $$
 
-Where $C_g$ is the Fiber-seq coverage overlapping position $g$, and $p_i$ is 1 minus the precision of the FIRE element, i.e., the chance that the FIRE element is a false positive. Note, the highest confidence a FIRE element can have is is 0.99, i.e., $s_i$ is at least 0.01.  Therefore, the FIRE score ($S_g$) can take on values between 0 (none of the overlapping Fiber-seq reads have FIRE elements) and 100 (all of the overlapping Fiber-seq reads have FIRE elements with a precision of 0.99).
+Where $C_g$ is the Fiber-seq coverage overlapping position $g$, and $p_i$ is $1$ minus the precision of the FIRE element, i.e., the chance that the FIRE element is a false positive. Note, the highest confidence a FIRE element can have is is $0.99$, i.e., $s_i$ is at least $0.01$.  Therefore, the FIRE score ($S_g$) can take on values between $0$ (none of the overlapping Fiber-seq reads have FIRE elements) and $100$ (all of the overlapping Fiber-seq reads have FIRE elements with a precision of $0.99$).
 
 Regions covered by less than $3$ FIRE elements are not scored and given a value of $-1$.
 
 ## FDR calculation
+TODO
+
+## Peak calling
+TODO 
+
+## Determination of peak start and end
 TODO
