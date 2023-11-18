@@ -70,17 +70,17 @@ The peak results are reported in the file `FDR-peaks/FDR-FIRE-peaks.bed.gz` with
 | coverage         | Coverage of the peak                                              |
 | score            | Max FIRE-score across the peak                                    |
 | FDR              | FDR of the peak                                                   |
-| log_FDR          | $-10 \log_{10}(FDR)$ of the peak                                       |
+| log_FDR          | $-10 \log_{10}(FDR)$ of the peak                                  |
 | fire_coverage_H1 | # of fire elements overlapping the peak in H1                     |
 | coverage_H1      | Coverage of the peak in H1                                        |
 | score_H1         | Max FIRE-score across the peak in H1                              |
 | FDR_H1           | FDR of the peak in H1                                             |
-| log_FDR_H1       | $-10 \log_{10}(FDR)$  of the peak in H1                                 |
+| log_FDR_H1       | $-10 \log_{10}(FDR)$  of the peak in H1                           |
 | fire_coverage_H2 | # of fire elements overlapping the peak in H2                     |
 | coverage_H2      | Coverage of the peak in H2                                        |
 | score_H2         | Max FIRE-score across the peak in H2                              |
 | FDR_H2           | FDR of the peak in H2                                             |
-| log_FDR_H2       | $-10 \log_{10}(FDR)$  of the peak in H2                                 |
+| log_FDR_H2       | $-10 \log_{10}(FDR)$  of the peak in H2                           |
 | max_window_score | Max FIRE-score across the peak                                    |
 | FIRE_size_mean   | Mean size of FIRE elements in the peak                            |
 | FIRE_size_ssd    | Standard deviation of the size of FIRE elements in the peak       |
