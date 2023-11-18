@@ -2,7 +2,7 @@
 
 ## Fiber-seq inferred regulatory elements (FIREs)
 
-FIREs are MTase sensitive patches (MSPs) that are inferred to be regulatory elements on single DNA chromatin fibers. To do this we used semi-supervised machine learning to identify MSPs that are likely to be regulatory elements using the `Mokapot` framework and `XGBoost`. Every individual FIRE element is associated with a precision value, which indicates the probability that the FIRE element is a true regulatory element. The precision of FIREs elements are estimated using `Mokapot` and validation data not used in training.
+FIREs are MTase sensitive patches (MSPs) that are inferred to be regulatory elements on single chromatin fibers. To do this we used semi-supervised machine learning to identify MSPs that are likely to be regulatory elements using the `Mokapot` framework and `XGBoost`. Every individual FIRE element is associated with a precision value, which indicates the probability that the FIRE element is a true regulatory element. The precision of FIREs elements are estimated using `Mokapot` and validation data not used in training.
 
 Semi-superivized machine learning with `Mokapot` requires a mixed-positive training set and a clean negative training set. To create mixed positive training data we selected MSPs that overlapped DNase hypersensitive sites (DHSs) and CTCF ChIP-seq peaks. And to create a clean negative training set we selected MSPs that did not overlap DHSs or CTCF ChIP-seq peaks. 
 
@@ -29,7 +29,7 @@ There are nine 40 bp windows for each MSP (X = 1, 2, ..., 9), with the 5th windo
 
 ## The FIRE score track
 
-The FIRE score track is a genome-wide track that reflects the aggregation of FIRE elements for all the Fiber-seq reads overlapping a genomic position. The FIRE score is comparable to DNase-seq and ATAC-seq accessibility tracks. Details on the FIRE score calculation are provided in the next section.
+The FIRE score track is a genome-wide track that reflects the aggregation of FIRE elements for all the Fiber-seq reads overlapping a genomic position. The FIRE score track for Fiber-seq is comparable to DNase-seq and ATAC-seq accessibility tracks. Details on the FIRE score calculation are provided in the next section.
 
 ### FIRE score calculation
 
