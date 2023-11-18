@@ -2,7 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/561430995.svg)](https://zenodo.org/doi/10.5281/zenodo.10023811)
 
-A Snakemake workflow for calling Fiber-seq Inferred Regulatory Elements (FIREs) on single molecules.
+A Snakemake workflow for calling Fiber-seq Inferred Regulatory Elements (FIREs) on single molecules. For a more detailed description and methods see the [docs](/docs/).
 
 ## Configuring
 
