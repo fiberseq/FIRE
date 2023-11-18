@@ -1,5 +1,7 @@
 # FIRE: descriptions, methods, and outputs 
 
+For details on running the FIRE pipeline see the [README.md](/README.md).
+
 ## Fiber-seq inferred regulatory elements (FIREs)
 
 FIREs are MTase sensitive patches (MSPs) that are inferred to be regulatory elements on single chromatin fibers. To do this we used semi-supervised machine learning to identify MSPs that are likely to be regulatory elements using the `Mokapot` framework and `XGBoost`. Every individual FIRE element is associated with a precision value, which indicates the probability that the FIRE element is a true regulatory element. The precision of FIREs elements are estimated using `Mokapot` and validation data not used in training.
