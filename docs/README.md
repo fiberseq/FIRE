@@ -89,7 +89,7 @@ The peak results are reported in the file `FDR-peaks/FDR-FIRE-peaks.bed.gz` with
 | local_max_count  | Number of local maxima in the peak                                |
 | peak_length      | Length of the peak                                                |
 
-## General outputs
+## General description of the outputs of the FIRE pipeline
 
 | Directory     | File                                            | Description                                                             |
 | ------------- | ----------------------------------------------- | ----------------------------------------------------------------------- |
