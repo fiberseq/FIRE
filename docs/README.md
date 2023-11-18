@@ -4,7 +4,7 @@ For details on running the FIRE pipeline see the [README.md](/README.md).
 
 ## Fiber-seq inferred regulatory elements (FIREs)
 
-FIREs are MTase sensitive patches (MSPs) that are inferred to be regulatory elements on single chromatin fibers. To do this we used semi-supervised machine learning to identify MSPs that are likely to be regulatory elements using the `Mokapot` framework and `XGBoost`. Every individual FIRE element is associated with a precision value, which indicates the probability that the FIRE element is a true regulatory element. The precision of FIREs elements are estimated using `Mokapot` and validation data not used in training.
+FIREs are MTase sensitive patches (MSPs) that are inferred to be regulatory elements on single chromatin fibers. To do this we used semi-supervised machine learning to identify MSPs that are likely to be regulatory elements using the `Mokapot` framework and `XGBoost`. Every individual FIRE element is associated with a precision value, which indicates the probability that the FIRE element is a true regulatory element. The precision of FIREs elements are estimated using `Mokapot` and validation data not used in training. We train our model targeting FIRE elements with at least 90% precision, MSPs with less than 90% precision are considered to have average level of accessibility expected between two nucleosomes, and are referred to as linker regions.
 
 Semi-superivized machine learning with `Mokapot` requires a mixed-positive training set and a clean negative training set. To create mixed positive training data we selected MSPs that overlapped DNase hypersensitive sites (DHSs) and CTCF ChIP-seq peaks. And to create a clean negative training set we selected MSPs that did not overlap DHSs or CTCF ChIP-seq peaks. 
 
@@ -89,3 +89,32 @@ The peak results are reported in the file `FDR-peaks/FDR-FIRE-peaks.bed.gz` with
 | local_max_count  | Number of local maxima in the peak                                |
 | peak_length      | Length of the peak                                                |
 
+## General outputs
+
+| Directory     | File                                            | Description                                                             |
+| ------------- | ----------------------------------------------- | ----------------------------------------------------------------------- |
+| coverage      |                                                 |                                                                         |
+|               | {all,hap1,hap2}\_element_coverages.bed.gz       | Coverage tracks for FIREs, nucleosomes, and linkers                     |
+|               | exclude-from-shuffles.bed.gz                    | Regions to exclude when making null distributions                       |
+|               | {sample}.{bed.gz,d4}                            | bedgraph of coverages                                                   |
+|               | {sample}.{median, maximum,minimum}.coverage.txt | Allowed coverage range for analysis                                     |
+| fiber-calls   |                                                 |                                                                         |
+|               | FIRE.bed.gz                                     | Every FIRE element in every FIRE                                        |
+|               | model.results.bed.gz                            | Every FIRE, linker, and nucleosome in every fiber                       |
+|               | fire-fibers.bed.gz                              | bed12 start and end of every fiber                                      |
+|               | fire-fiber-decorators.bed.gz                    | decorator file that adds annotations of FIRE elements to the bed12 file |
+| FDR-peaks     |                                                 |                                                                         |
+|               | FDR-FIRE-peaks.bed.gz                           | Fiber-seq peak calls                                                    |
+|               | FDR-wide-peaks.bed.gz                           | Fiber-seq wide peak calls                                               |
+|               | FDR.track.bed.gz                                | Track of FDR significance of accessibility                              |
+|               | {sm}.peaks-vs-percent.pdf                       | Number of peaks vs % accessible                                         |
+| all/hap1/hap2 |                                                 |                                                                         |
+|               | percent.accessible.bed.gz                       | % of (haplotype) fibers that are accessible                             |
+| hap1-vs-hap2  |                                                 |                                                                         |
+|               | FIRE.hap.differences.bed                        | Large table of FIREs that are different between hap1 and hap2           |
+|               | hap1-vs-hap2-volcano.pdf                        | Volcano plot of FIREs that are different between hap1 and hap2          |
+|               | hap1-vs-hap2.pdf                                | Scatter plot of FIREs and their percent accessibility for each hap      |
+| trackHub      |                                                 |                                                                         |
+|               | \*                                              | a trackHub directory that can be loaded into the UCSC browser           |
+
+---
