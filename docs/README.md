@@ -117,4 +117,3 @@ The peak results are reported in the file `FDR-peaks/FDR-FIRE-peaks.bed.gz` with
 | trackHub      |                                                 |                                                                         |
 |               | \*                                              | a trackHub directory that can be loaded into the UCSC browser           |
 
----
