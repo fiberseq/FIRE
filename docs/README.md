@@ -37,9 +37,9 @@ The FIRE score track is a genome-wide track that reflects the aggregation of FIR
 
 The FIRE score ($S$) for a position in the genome ($g$) is calculated using the following formula:
 
-$$ S_g = -\frac{50}{C_g} \sum_{i=1}^{C_g} \log_{10}(p_i) $$
+$$ S_g = -\frac{50}{C_g} \sum_{i=1}^{C_g} \log_{10}(q_i) $$
 
-Where $C_g$ is the Fiber-seq coverage overlapping position $g$, and $p_i$ is $1$ minus the precision of the FIRE element, i.e., the chance that the FIRE element is a false positive. Note, the highest confidence a FIRE element can have is is $0.99$, i.e., $s_i$ is at least $0.01$.  Therefore, the FIRE score ($S_g$) can take on values between $0$ (none of the overlapping Fiber-seq reads have FIRE elements) and $100$ (all of the overlapping Fiber-seq reads have FIRE elements with a precision of $0.99$).
+Where $C_g$ is the Fiber-seq coverage overlapping position $g$, and $q_i$ is $1$ minus the precision of the FIRE element, i.e., the chance that the FIRE element is a false positive. Note, the highest confidence a FIRE element can have is is $0.99$, i.e., $q_i$ is at least $0.01$.  Therefore, the FIRE score ($S_g$) can take on values between $0$ (none of the overlapping Fiber-seq reads have FIRE elements) and $100$ (all of the overlapping Fiber-seq reads have FIRE elements with a precision of $0.99$).
 
 Regions covered by less than $3$ FIRE elements are not scored and given a value of $-1$.
 
