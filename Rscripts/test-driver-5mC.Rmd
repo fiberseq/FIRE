@@ -1,0 +1,134 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+# get a fire peak data table called `df`
+source("Rscripts/Fire-peak-df.R")
+```
+
+
+# Figure out 5mC over low peaks
+```{r}
+# this is slow
+low_acc = fire_df[acc_percent < 0.25 & FDR <= 0.01]
+sum(low_acc$imprinted, na.rm=T)
+sites_to_use = low_acc %>%
+    mutate(
+        row_n = sample(n())
+    ) %>%
+    filter(imprinted==TRUE | row_n < 1000 ) %>%
+    select(chrom,start,end,imprinted) 
+sum(sites_to_use$imprinted, na.rm=T)
+sites_to_use %>%
+    fwrite("temp/low_acc_peaks.bed", row.names=F, col.names=F, quote=F, sep="\t")
+system("ft center -s -t $(nproc) -d 500 -r ../k-mer-variant-phasing/results/GM12878/GM12878.haplotagged.bam temp/low_acc_peaks.bed | rg '5mC|type'| bgzip -@ $(nproc) > temp/low_acc_center.tbl.gz")
+```
+
+```{r}
+center=fread("temp/low_acc_center.tbl.gz") %>%
+    select(-subset_sequence) %>%
+    filter(centered_position_type=="5mC") %>%
+    filter(centered_qual >= 256/2) %>% 
+    #filter(centered_qual/256 >= 0.95 ) %>%
+    data.table
+dim(center)
+center = center %>% mutate(
+        start = centering_position,
+    ) %>%
+    merge(sites_to_use) %>%
+    mutate(
+        imprinted = case_when(
+            imprinted ~ "Imprinted Loci",
+            TRUE ~ "",
+        )
+    ) %>%
+    data.table()
+dim(center)
+center
+
+system("tabix -R temp/low_acc_peaks.bed results/GM12878_FDR/fiber-calls/FIRE.bed.gz > temp/low_acc_fires.bed")
+fires = my_read_bed("temp/low_acc_fires.bed")
+
+center$fire = FALSE
+center[query_name %in% fires$V4, "fire"] = TRUE
+sum(center$fire)
+
+```
+
+```{r}
+min_st = 0
+max_en = 250
+p_center = center %>% 
+    filter(centered_start < max_en & centered_start > min_st) %>%
+    filter(centered_query_end > max_en, centered_query_start < min_st) 
+
+zp = p_center %>% 
+    group_by(chrom, centering_position, fire, imprinted) %>%
+    summarise(
+        average_5mC_count = n()/length(unique(query_name))
+    ) %>% 
+    pivot_wider(
+        id_cols=c("chrom", "centering_position", "imprinted"),
+        names_from=fire, values_from=average_5mC_count
+    ) 
+xy_max=max(c(zp$`TRUE`, zp$`FALSE`))
+z = zp %>%
+    ggplot(aes(x=`FALSE`, y=`TRUE`)) +
+    stat_cor()+
+    geom_hex(bins=50) +  scale_fill_distiller("", palette = "Spectral",
+        trans="log10"
+    ) +
+    geom_abline(slope=1, intercept=0, linetype="dashed")+
+    scale_x_continuous("Average number of 5mC events in reads without FIRE MSPs", 
+        #trans="log10"
+    )+
+    scale_y_continuous("Average number of 5mC events in reads with FIRE MSPs",
+        #trans="log10"
+    )+
+    #annotation_logticks(side="lb")+
+    #theme(aspect.ratio=1)+
+    facet_row(~imprinted) + 
+    coord_fixed(xlim = c(0,xy_max), ylim = c(0,xy_max))+
+    theme_minimal_grid()
+
+
+my_ggsave("Figures/5mC_in_FIRE_fibers.pdf", height=6, width=10)
+```
+
+
+```{r}
+zp = p_center %>% 
+    group_by(chrom, centering_position, HP, imprinted) %>%
+    summarise(
+        average_5mC_count = n()/length(unique(query_name))
+    ) %>% 
+    pivot_wider(
+        id_cols=c("chrom", "centering_position", "imprinted"),
+        names_from=HP, values_from=average_5mC_count
+    ) 
+xy_max=max(c(zp$H1, zp$H2))
+
+z = zp %>%
+    ggplot(aes(x=H1, y=H2)) +
+    stat_cor()+
+    geom_hex(bins=50) +  scale_fill_distiller("", palette = "Spectral",
+        trans="log10"
+    ) +
+    geom_abline(slope=1, intercept=0, linetype="dashed")+
+    scale_x_continuous("Average number of 5mC events in H1", 
+        #trans="log10"
+    )+
+    scale_y_continuous("Average number of 5mC events in H2",
+        #trans="log10"
+    )+
+    facet_row(~imprinted) + 
+    coord_fixed(xlim = c(0,xy_max), ylim = c(0,xy_max))+
+    theme_minimal_grid()
+
+
+my_ggsave("Figures/5mC_in_HAPs_fibers.pdf", height=6, width=10)
+```

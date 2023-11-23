@@ -1,0 +1,32 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+# get a fire peak data table called `df`
+source("Rscripts/Fire-peak-df.R")
+library(ggridges)
+```
+
+```{r}
+z=fire_df %>%
+    select(psize,group) %>%
+    filter(psize<1000, psize>50) %>%
+    data.frame %>%
+    ggplot(aes(x=psize, y=factor(group))) + 
+    geom_density_ridges2()+ 
+    scale_y_discrete("Density of FIRE peak size for different % accessibility bins") +     # will generally have to set the `expand` option
+    scale_x_continuous(
+        expand = c(0, 0),
+        trans="log10",
+        label=comma,
+    ) +   # for both axes to remove unneeded padding
+    annotation_logticks(side="b")+
+    coord_cartesian(clip = "off") + # to avoid clipping of the very top of the top ridgeline
+    #theme_ridges() 
+    my_hgrid()
+my_ggsave("Figures/FIRE-peak-size.pdf", width=3, height=3)
+```
