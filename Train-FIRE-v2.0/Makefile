@@ -10,22 +10,35 @@ MIXED_POSITIVES := ./GM12878-mixed-positive-accessible.bed.gz
 ALL_NEGATIVES := ./GM12878-not-accessible.bed.gz
 SHUF_NEGATIVES := ./GM12878-shuf-not-accessible.bed.gz
 HG38 := ~/assemblies/hg38.analysisSet.fa.fai
-N_SITES := 500000
+N_SITES := 10000
 TRAININ_DATA := ./training-data.bed.gz
 FEATS := ./tmp.feats.gz
+EXCLUDE := tmp.exclude.bed.gz
 # Targets and their dependencies
 all: $(FEATS) $(TRAININ_DATA)
 
 
+$(EXCLUDE): ../workflow/annotations/hg38.gap.bed.gz ../workflow/annotations/SDs.merged.hg38.bed.gz 
+	less $^ | cut -f 1-3 | bedtools sort | bedtools merge | bgzip > $@
 
-$(MIXED_POSITIVES): ./mixed-positives/ATAC.bed.gz ./mixed-positives/GM12878_DHS.bed.gz
-	bedtools intersect -a $(word 1,$^) -b $(word 2,$^) | cut -f 1-3 | bedtools sort -g $(HG38) | rg -v _ | bedtools merge -d 147 | bgzip > $@ 
+$(MIXED_POSITIVES): ./mixed-positives/ATAC.bed.gz ./mixed-positives/GM12878_DHS.bed.gz $(EXCLUDE)
+	bedtools intersect -a $(word 1,$^) -b $(word 2,$^) \
+		| cut -f 1-3 \
+		| (shuf | head -n $(N_SITES) || true) \
+		| bedtools sort -g $(HG38) \
+		| rg -v _ \
+		| bedtools merge -d 147 \
+		| bedtools subtract -a - -b $(EXCLUDE) \
+		| bgzip > $@ 
 
 $(ALL_POSITIVES): ./mixed-positives/*.bed*
 	less $^ | cut -f 1-3 | bedtools sort -g $(HG38) | bedtools merge -d 147 | rg -v _ | bgzip > $@
 
-$(ALL_NEGATIVES): $(ALL_POSITIVES)
-	bedtools complement -i $^ -g $(HG38) | rg -v _ | bgzip > $(ALL_NEGATIVES)
+$(ALL_NEGATIVES): $(ALL_POSITIVES) $(EXCLUDE)
+	bedtools complement -i $(ALL_POSITIVES) -g $(HG38) \
+		| rg -v _ \
+		| bedtools subtract -a - -b $(EXCLUDE) \
+		| bgzip > $(ALL_NEGATIVES)
 
 $(SHUF_NEGATIVES): $(ALL_POSITIVES) $(ALL_NEGATIVES) $(MIXED_POSITIVES)
 	bedtools shuffle -excl $(ALL_POSITIVES) -incl $(ALL_NEGATIVES) -i $(MIXED_POSITIVES) -chrom -seed 42 -g $(HG38) | sort -k1,1 -k2,2n > $@
@@ -36,10 +49,11 @@ $(SBAM): $(BAM) $(SHUF_NEGATIVES) $(MIXED_POSITIVES)
 		$(BAM) -o $@
 
 $(FEATS): $(SBAM)
-	ft fire -t 16 -m 1 -f $(SBAM) \
+	ft fire -t `nproc` -m 0 -f $(SBAM) \
 		| awk 'NR == 1 || ($$3>$$2 && $$3-$$2 < 10000)' \
-		| bedtools sort -header \
 		| bgzip -@ 8 > $(FEATS)
+		
+		#| bedtools sort -header \
 
 $(TRAININ_DATA): $(FEATS) $(MIXED_POSITIVES) $(ALL_NEGATIVES) $(SHUF_NEGATIVES) $(ALL_POSITIVES)
 	(zcat $(FEATS) | head -n 1 || true) | sed 's/$$/\tLabel/' > training-data.bed
@@ -56,6 +70,6 @@ FIRE.FDR.pdf: $(TRAININ_DATA)
 
 .PHONY: clean
 clean:
-	rm -f tmp.pos.bed tmp.neg.bed tmp.bed tmp.bam training-data.bed.gz tmp.exclude.bed.gz  $(ALL_POSITIVES) $(MIXED_POSITIVES)
+	rm -f tmp.pos.bed tmp.neg.bed tmp.bed tmp.bam training-data.bed.gz $(EXCLUDE)  $(ALL_POSITIVES) $(MIXED_POSITIVES) 
 
 
