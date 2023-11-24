@@ -18,11 +18,11 @@ all: $(FEATS) $(TRAININ_DATA)
 
 
 
-$(MIXED_POSITIVES): ./mixed-positives/ATAC.bed ./mixed-positives/GM12878_DHS.bed.gz
-	bedtools intersect -a $(word 1,$^) -b $(word 2,$^) | cut -f 1-3 | bedtools sort -g $(HG38) | rg -v _ | bedtools merge | bgzip > $@ 
+$(MIXED_POSITIVES): ./mixed-positives/ATAC.bed.gz ./mixed-positives/GM12878_DHS.bed.gz
+	bedtools intersect -a $(word 1,$^) -b $(word 2,$^) | cut -f 1-3 | bedtools sort -g $(HG38) | rg -v _ | bedtools merge -d 147 | bgzip > $@ 
 
 $(ALL_POSITIVES): ./mixed-positives/*.bed*
-	less $^ | cut -f 1-3 | bedtools sort -g $(HG38) | bedtools merge | rg -v _ | bgzip > $@
+	less $^ | cut -f 1-3 | bedtools sort -g $(HG38) | bedtools merge -d 147 | rg -v _ | bgzip > $@
 
 $(ALL_NEGATIVES): $(ALL_POSITIVES)
 	bedtools complement -i $^ -g $(HG38) | rg -v _ | bgzip > $(ALL_NEGATIVES)
@@ -31,7 +31,7 @@ $(SHUF_NEGATIVES): $(ALL_POSITIVES) $(ALL_NEGATIVES) $(MIXED_POSITIVES)
 	bedtools shuffle -excl $(ALL_POSITIVES) -incl $(ALL_NEGATIVES) -i $(MIXED_POSITIVES) -chrom -seed 42 -g $(HG38) | sort -k1,1 -k2,2n > $@
 
 $(SBAM): $(BAM) $(SHUF_NEGATIVES) $(MIXED_POSITIVES) 
-	samtools view -@ 16 -b -M \
+	samtools view -@ `nproc` -b -M \
 		-L <(less $(SHUF_NEGATIVES) $(MIXED_POSITIVES)  ) \
 		$(BAM) -o $@
 
