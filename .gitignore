@@ -157,3 +157,24 @@ config/**
 *code-workspace*
 .vscode/*
 .DS_Store
+
+
+# stats
+Rdata/
+Rplots.pdf
+Tables/
+Train-FIRE-v2.0/FIRE.FDR.pdf
+Train-FIRE-v2.0/FIRE.conf.json
+Train-FIRE-v2.0/FIRE.feature.importance.pdf
+Train-FIRE-v2.0/FIRE.gbdt.json
+Train-FIRE-v2.0/FIRE.xgb.bin
+Train-FIRE-v2.0/GM12878-all-accessible.bed.gz
+Train-FIRE-v2.0/GM12878-mixed-positive-accessible.bed.gz
+Train-FIRE-v2.0/GM12878-not-accessible.bed.gz
+Train-FIRE-v2.0/GM12878-shuf-not-accessible.bed.gz
+Train-FIRE-v2.0/small.bam
+misc/
+new-agg-test/
+scATAC/
+test/
+
