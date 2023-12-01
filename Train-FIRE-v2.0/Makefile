@@ -101,7 +101,7 @@ $(TRAININ_DATA): $(FEATS) $(MIXED_POSITIVES) $(ALL_NEGATIVES) $(SHUF_NEGATIVES) 
 	bgzip -f -@ 16 training-data.bed
 
 FIRE.FDR.pdf: $(TRAININ_DATA)
-	python train-fire-model.py training-data.bed.gz --threads `nproc` --train-fdr 0.05
+	python train-fire-model.py training-data.bed.gz --threads `nproc` --train-fdr 0.05 --direction msp_len_times_m6a_fc
 
 
 .PHONY: clean

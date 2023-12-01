@@ -119,13 +119,6 @@ def save_mokapot_model_for_fibertools(model, test_conf, max_fdr=0.10):
     plt.savefig(f"FIRE.FDR.pdf")
 
 
-# grid = {
-#    "n_estimators": [50, 100, 150],
-#    "scale_pos_weight": [scale_pos_weight],  # [0.5, 1, 2], #np.logspace(0, 2, 3),
-#    "max_depth": [3, 6, 9],
-#    "min_child_weight": [3, 6, 9, 12],
-#    "gamma": [0.1, 1, 10],
-# }
 def train_classifier(
     train_df,
     test_df,
@@ -161,11 +154,14 @@ def train_classifier(
             n_jobs=threads,
         )
     else:
+        min_child_weights = (len(train_df) * np.array([0.001, 0.005])).astype(int)
+        logging.info(f"min_child_weights: {min_child_weights}")
         grid = {
-            "n_estimators": [100, 200],
+            "n_estimators": [200, 300],
             "scale_pos_weight": [scale_pos_weight],
             "max_depth": [9, 15],
-            "min_child_weight": [75, 150],  # , 300],
+            "min_child_weight": min_child_weights,
+            "colsample_bytree": [0.5, 1],
             "gamma": [1],  # 10
         }
         xgb_model = GridSearchCV(
@@ -274,7 +270,7 @@ def main(
     min_msp_size: int = 1,
     subset_max_train: int = 2_000_000,
     test_fdr: float = 0.05,
-    train_fdr: float = 0.1,
+    train_fdr: float = 0.05,
     n_estimators: int = 50,  # 100
     max_depth: int = 9,  # 6
     min_child_weight: int = 50,  # 6
@@ -282,7 +278,7 @@ def main(
     min_msp_length_for_negative_fire_call: int = 85,
     gamma: float = 1,
     verbose: int = 1,
-    direction: Optional[str] = None,
+    direction: Optional[str] = "msp_len_times_m6a_fc",
     threads: int = 8,
 ):
     """
