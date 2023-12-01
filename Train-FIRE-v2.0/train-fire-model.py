@@ -11,6 +11,7 @@ from xgboost import XGBClassifier  # version 0.82 # required for rust package
 import pandas as pd
 import numpy as np
 import xgboost as xgb
+from sklearn.model_selection import GridSearchCV
 import struct
 from ctypes import cdll
 from ctypes import c_float, c_uint, c_char_p, c_bool
@@ -132,37 +133,62 @@ def train_classifier(
     subset_max_train=200_000,
     test_fdr=0.05,
     train_fdr=0.1,
-    n_estimators=100,  # from previous grid search, may need to use 50
+    n_estimators=50,  # from previous grid search, may need to use 50
     max_depth=6,  # from previous grid search
     min_child_weight=9,  # from previous grid search
-    gamma=10,  # from previous grid search
+    gamma=1,  # from previous grid search 10
     direction=None,
     threads=8,
 ):
     train_df = train_df[train_df.msp_len >= min_msp_size]
-    scale_pos_weight = sum(train_df.Label == -1) / sum(train_df.Label == 1)
+    train_psms = mokapot.read_pin(train_df)
+    train_confs = train_psms.assign_confidence(eval_fdr=train_fdr)
+    confs = train_confs.confidence_estimates["psms"]["mokapot q-value"]
+    n_positives = sum(confs <= train_fdr)
+    scale_pos_weight = sum(train_df.Label == -1) / n_positives
     logging.info(f"scale_pos_weight: {scale_pos_weight}")
 
-    xgb_model = XGBClassifier(
-        use_label_encoder=False,
-        eval_metric="auc",
-        n_estimators=n_estimators,
-        max_depth=max_depth,
-        min_child_weight=min_child_weight,
-        gamma=gamma,
-        scale_pos_weight=scale_pos_weight,
-        seed=RANDOM_SEED,
-        n_jobs=threads,
-    )
+    if False:
+        xgb_model = XGBClassifier(
+            use_label_encoder=False,
+            eval_metric="auc",
+            n_estimators=n_estimators,
+            max_depth=max_depth,
+            min_child_weight=min_child_weight,
+            gamma=gamma,
+            scale_pos_weight=scale_pos_weight,
+            seed=RANDOM_SEED,
+            n_jobs=threads,
+        )
+    else:
+        grid = {
+            "n_estimators": [100, 200],
+            "scale_pos_weight": [scale_pos_weight],
+            "max_depth": [9, 15],
+            "min_child_weight": [75, 150],  # , 300],
+            "gamma": [1],  # 10
+        }
+        xgb_model = GridSearchCV(
+            XGBClassifier(
+                use_label_encoder=False,
+                eval_metric="auc",
+                seed=RANDOM_SEED,
+                n_jobs=threads,
+            ),
+            param_grid=grid,
+            cv=5,
+            scoring="roc_auc",
+            verbose=2,
+        )
 
     # train_psms = mokapot.read_pin("train.pin")
-    train_psms = mokapot.read_pin(train_df)
     # model = mokapot.PercolatorModel()
     model = mokapot.Model(
         xgb_model,
         train_fdr=train_fdr,
         subset_max_train=subset_max_train,
         direction=direction,
+        max_iter=15,
     )
     model.fit(train_psms)
 
@@ -173,8 +199,20 @@ def train_classifier(
     return (model, test_conf)
 
 
+def balance_df(df):
+    # force balanced classes by subsetting the df
+    counts = df.Label.value_counts()
+    min_count = min(counts)
+    logging.info(f"Minimum class count: {min_count}")
+    df = df.groupby("Label").apply(lambda gdf: gdf.sample(min_count))
+    return df
+
+
 def read_input_features(
-    infile, min_msp_length_for_positive_fire_call, test_train_split=0.8
+    infile,
+    min_msp_length_for_positive_fire_call,
+    min_msp_length_for_negative_fire_call,
+    test_train_split=0.80,
 ):
     df = pd.read_csv(infile, sep="\t")
     logging.info(f"Columns: {df.columns}")
@@ -185,22 +223,48 @@ def read_input_features(
     df["scannr"] = df.SpecId
     # check the labels
     assert "Label" in df.columns
+    logging.info(f"Label counts before filters: {df.Label.value_counts()}")
+
+    # df.loc[df.msp_len < min_msp_length_for_positive_fire_call, "Label"] = -1
+    df = df[(df.msp_len >= min_msp_length_for_positive_fire_call) | (df.Label == -1)]
+    df = df[(df.msp_len >= min_msp_length_for_negative_fire_call) | (df.Label == 1)]
     logging.info(
-        f"Label counts before setting a minimum FIRE size: {df.Label.value_counts()}"
-    )
-    df.loc[df.msp_len < min_msp_length_for_positive_fire_call, "Label"] = -1
-    # df = df[df.msp_len >= min_msp_length_for_positive_fire_call]
-    logging.info(
-        f"Label counts after setting a minimum FIRE size: {df.Label.value_counts()}"
+        f"Label counts after filtering for min_msp_length: {df.Label.value_counts()}"
     )
 
+    # we want to use only one msp per fiber to avoid learning fiber wide features for overlapping elements
+    df = df.groupby(["fiber", "Label"]).sample(n=1).reset_index(drop=True)
+    logging.info(
+        f"Label counts after selecting at most one MSP per fiber to help keep things IID: {df.Label.value_counts()}"
+    )
+
+    # removing the AT count columns signifcantly improves performance on outside data (overfitting)
+    for col in df.columns:
+        if "AT" in col or "rle" in col:
+            df[col] = 1
+
+    # make final test and train datasets
+    chrom = df["#chrom"]
     df.drop(columns=["#chrom", "start", "end", "fiber"], inplace=True)
-    # make random test and train in 90 10 split
+
+    # make test and train
     random = np.random.rand(len(df))
+
     train = df[random < test_train_split]
     test = df[random >= test_train_split]
-    logging.info(f"Train size: {train.shape}")
-    logging.info(f"Test size: {test.shape}")
+
+    # we want to focus on learning the hard problem, so don't include trivial negatives in the training dataset
+    train = train[
+        (train.msp_len >= min_msp_length_for_positive_fire_call) | (train.Label == 1)
+    ]
+
+    logging.info(f"Label counts before balancing train: {train.Label.value_counts()}")
+    logging.info(f"Label counts before balancing test: {test.Label.value_counts()}")
+    train = balance_df(train)
+    test = balance_df(test)
+    logging.info(f"Train size: {train.Label.value_counts()}")
+    logging.info(f"Test size: {test.Label.value_counts()}")
+
     return (train, test)
 
 
@@ -211,10 +275,11 @@ def main(
     subset_max_train: int = 2_000_000,
     test_fdr: float = 0.05,
     train_fdr: float = 0.1,
-    n_estimators: int = 100,
-    max_depth: int = 6,
-    min_child_weight: int = 6,
+    n_estimators: int = 50,  # 100
+    max_depth: int = 9,  # 6
+    min_child_weight: int = 50,  # 6
     min_msp_length_for_positive_fire_call: int = 85,
+    min_msp_length_for_negative_fire_call: int = 85,
     gamma: float = 1,
     verbose: int = 1,
     direction: Optional[str] = None,
@@ -235,7 +300,9 @@ def main(
     logger.setLevel(log_level)
 
     train_df, test_df = read_input_features(
-        infile, min_msp_length_for_positive_fire_call
+        infile,
+        min_msp_length_for_positive_fire_call,
+        min_msp_length_for_negative_fire_call,
     )
     model, test_conf = train_classifier(
         train_df,
