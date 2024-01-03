@@ -198,13 +198,14 @@ DECORATED = """
 track {sample}-{hap}-fibers
 shortLabel {sample}-{hap}-fibers
 longLabel {sample}-{hap}-fibers
-visibility squish
+visibility dense
 type bigBed 12 +
 itemRgb On
 filterText.keywords {hap}
 bigDataUrl bb/fire-fibers.bb 
 decorator.default.bigDataUrl bb/fire-fiber-decorators.bb 
 decorator.default.filterValues.keywords 5mC,m6A,NUC,LINKER,FIRE
+decorator.default.filterValuesDefault.keywords LINKER,FIRE
 """
 
 
