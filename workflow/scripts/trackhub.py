@@ -165,6 +165,7 @@ track FIRE_FDR_{sample}
 compositeTrack on
 shortLabel FIRE FDR {sample}
 longLabel {sample} FIRE scores and FDR values
+visibility full
 type bigWig
 maxItems 100000
 maxHeightPixels 100:100:1
