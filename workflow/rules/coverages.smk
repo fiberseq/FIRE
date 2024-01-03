@@ -45,7 +45,7 @@ rule coverage:
 #
 rule fiber_locations_chromosome:
     input:
-        bam=lambda wc: data.loc[wc.sm, "bam"],
+        bam=rules.merged_fire_bam.output.bam,
     output:
         bed=temp("temp/{sm}/coverage/{chrom}.fiber-locations.bed.gz"),
     threads: 8
