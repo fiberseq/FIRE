@@ -161,20 +161,20 @@ maxHeightPixels 100:100:8
 
 
 FIRE_SCORE_AND_FDR = """
-track FIRE_FDR
+track FIRE_FDR_{sample}
 compositeTrack on
-shortLabel FIRE FDR
-longLabel FIRE scores and FDR values
+shortLabel FIRE FDR {sample}
+longLabel {sample} FIRE scores and FDR values
 type bigWig
 maxItems 100000
 maxHeightPixels 100:100:1
 alwaysZero on
 
     track log_fdr
-    parent FIRE_FDR
+    parent FIRE_FDR_{sample}
     bigDataUrl {fdr}
-    shortLabel -10log10 FDR
-    longLabel -10log10 FDR
+    shortLabel -10log10 FDR {sample}
+    longLabel -10log10 FDR {sample}
     autoScale on
     visibility full
     yLineOnOff on
@@ -182,10 +182,10 @@ alwaysZero on
     gridDefault on
     
     track fire_score
-    parent FIRE_FDR
+    parent FIRE_FDR_{sample}
     bigDataUrl {score}
-    shortLabel FIRE score
-    longLabel FIRE score
+    shortLabel FIRE score {sample}
+    longLabel FIRE score {sample}
     visibility full
     alwaysZero on
     viewLimits 0:100
@@ -293,6 +293,7 @@ def generate_trackhub(
     # FDR scores
     trackDb.write(
         FIRE_SCORE_AND_FDR.format(
+            sample=sample,
             fdr=f"bw/log_FDR.bw",
             score=f"bw/score.bw",
             y_line=-10 * np.log10(0.05),
