@@ -3,7 +3,7 @@
 #
 rule genome_bedgraph:
     input:
-        bam=ancient(lambda wc: data.loc[wc.sm, "bam"]),
+        bam=rules.merged_fire_bam.output.bam,
         fai=ancient(f"{ref}.fai"),
     output:
         d4="results/{sm}/coverage/{sm}.d4",

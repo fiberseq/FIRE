@@ -63,9 +63,8 @@ el_types = ["fire", "linker", "nucleosome"]
 
 
 include: "rules/common.smk"
-include: "rules/coverages.smk"
-include: "rules/train-model.smk"
 include: "rules/apply-model.smk"
+include: "rules/coverages.smk"
 include: "rules/FDR-peaks.smk"
 include: "rules/peak-stats.smk"
 include: "rules/decorated-reads.smk"
