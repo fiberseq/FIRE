@@ -23,6 +23,7 @@ rule merged_fire_bam:
         bams=expand(rules.fire.output.bam, chrom=get_chroms(), allow_missing=True),
     output:
         bam="results/{sm}/fire/{sm}.fire.bam",
+        bam="results/{sm}/fire/{sm}.fire.bam.bai",
     threads: 16
     resources:
         mem_mb=8 * 1024,

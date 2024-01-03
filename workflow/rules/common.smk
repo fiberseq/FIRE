@@ -42,9 +42,9 @@ def get_load(wc):
 
 def grep_command_for_el_type(wc):
     if wc.el_type == "nucleosome":
-        return "(rg '230,230,230' || true)"
+        return "awk '$10>1.0'"
     elif wc.el_type == "linker":
-        return f"(rg -v '230,230,230' || true) | awk '$10>{min_fire_fdr}'"
+        return f"awk '$10<=1.0 && $10>{min_fire_fdr}'"
     elif wc.el_type == "fire":
         return f"awk '$10<={min_fire_fdr}'"
     else:
