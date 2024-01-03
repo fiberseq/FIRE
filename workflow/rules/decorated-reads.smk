@@ -6,14 +6,14 @@ rule decorate_fibers_chromosome:
         decorated=temp("temp/{sm}/decorate/{chrom}.dec.bed.gz"),
     threads: 8
     resources:
-        mem_mb=get_large_mem_mb,
+        mem_mb=32*1024,
     conda:
         "../envs/env.yaml"
     shell:
         """
         samtools view -@ {threads} -u {input.bam} {wildcards.chrom} \
             | ft track-decorators {input.bam} -t {threads} --bed12 {output.bed} \
-            | LC_ALL=C sort -k1,1 -k2,2n -k3,3n -k4,4 \
+            | sort -k1,1 -k2,2n -k3,3n -k4,4 \
             | bgzip -@ {threads} \
         > {output.decorated}
         """
