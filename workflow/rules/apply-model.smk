@@ -1,106 +1,66 @@
 #
 # Applying the model
 #
-rule bed_chunks:
-    input:
-        ref=ref,
-        fai=f"{ref}.fai",
-    output:
-        beds=temp(
-            expand(
-                "temp/{sm}/chunks/{chunk}.chunk.bed",
-                chunk=chunks,
-                allow_missing=True,
-            )
-        ),
-    threads: 1
-    conda:
-        "../envs/fibertools.yaml"
-    params:
-        keep_chrs="|".join(get_chroms()),
-    shell:
-        """
-        fibertools split \
-          -g <(grep -Pw '{params.keep_chrs}' {input.fai} | sort -k1,1 -k2,2n -k3,3n -k4,4) \
-          -o {output.beds}
-        """
-
-
-rule extract_and_split:
+rule fire:
     input:
         bam=ancient(lambda wc: data.loc[wc.sm, "bam"]),
-        bed="temp/{sm}/chunks/{chunk}.chunk.bed",
     output:
-        bed=temp("temp/{sm}/{chunk}.extract.all.bed.gz"),
-    threads: 4
+        bam=temp("temp/{sm}/fire/{chrom}.fire.bam"),
+    threads: 8
     resources:
-        mem_mb=get_mem_mb,
+        mem_mb=8 * 1024,
     conda:
-        conda
+        "../envs/env.yaml"
     shell:
         """
-        samtools view \
-          -F 2308 -b -M \
-          -L {input.bed} \
-          -@ {threads} {input.bam} \
-          | ft -t {threads} extract --all - \
-          | bgzip -@ {threads} \
-          > {output.bed}
+        samtools view -u -@ {threads} {input.bam} {wildcards.chrom} \
+            | ft fire -t {threads} --skip-no-m6a - {output.bam}
         """
 
 
-def get_model(wc):
-    if config.get("train") == True:
-        return ancient(rules.train_model.output.model)
-    if config.get("model") is not None:
-        return config.get("model")
-    return ancient(workflow.source_path("../models/model.dat"))
-
-
-rule apply_model:
+rule merged_fire_bam:
     input:
-        bed=rules.extract_and_split.output.bed,
-        model=get_model,
+        bams=expand(rules.fire.output.bam, chrom=get_chroms(), allow_missing=True),
     output:
-        haps=temp("temp/{sm}/all/chunks/{chunk}.bed"),
-    benchmark:
-        "benchmarks/{sm}/chunks/apply_model_{chunk}.tsv"
-    threads: 1
+        bam="results/{sm}/fire/{sm}.fire.bam",
+    threads: 16
     resources:
-        mem_mb=get_mem_mb,
+        mem_mb=8 * 1024,
     conda:
-        "../envs/fibertools.yaml"
-    priority: 0
+        "../envs/env.yaml"
     shell:
         """
-        fibertools -v model -m {input.model} {input.bed} \
-            -o {output.haps} 
+        samtools merge -@ {threads} -o {output.bam} {input.bams}
+        samtools index -@ {threads} {output.bam}
         """
 
 
-rule sort_model:
+rule extract_from_fire:
     input:
-        bed=rules.apply_model.output.haps,
+        bam=rules.fire.output.bam,
     output:
-        bed=temp("temp/{sm}/chunks/{chunk}.sorted.bed"),
+        bed=temp("temp/{sm}/chrom/{chrom}.sorted.bed"),
     threads: 4
     conda:
         conda
     resources:
-        mem_mb=get_mem_mb_small,
+        mem_mb=16 * 1024,
     priority: 10
     shell:
         """
-        LC_ALL=C sort \
-            --parallel={threads} \
-            -k1,1 -k2,2n -k3,3n -k4,4 \
-            {input.bed} -o {output.bed}
+        ft fire -t {threads} --extract {input.bam} \
+            | LC_ALL=C sort \
+                --parallel={threads} \
+                -k1,1 -k2,2n -k3,3n -k4,4 \
+            > {output.bed}
         """
 
 
 rule merge_model_results:
     input:
-        beds=expand(rules.sort_model.output.bed, chunk=chunks, allow_missing=True),
+        beds=expand(
+            rules.extract_from_fire.output.bed, chrom=get_chroms(), allow_missing=True
+        ),
     output:
         bed="results/{sm}/fiber-calls/model.results.bed.gz",
     benchmark:

@@ -90,59 +90,6 @@ rule fdr_peaks_by_fire_elements_to_bb:
         """
 
 
-#
-# make single molecule viz for trackhub
-#
-rule binned_fire_calls:
-    input:
-        bed=rules.merge_model_results.output.bed,
-        tbi=rules.index_model_results.output.tbi,
-    output:
-        beds=temp(
-            expand(
-                "temp/{sm}/{hp}/{chrom}.bin.{bin}.bed", bin=bins, allow_missing=True
-            )
-        ),
-    benchmark:
-        "benchmarks/{sm}/{hp}/{chrom}.fire.d4.tsv"
-    threads: 4
-    resources:
-        mem_mb=get_large_mem_mb,
-    conda:
-        "../envs/fibertools.yaml"
-    shell:
-        """
-        ((zcat {input.bed} | head -n 1) || true; tabix {input.bed} {wildcards.chrom}) \
-            | fibertools -v bin - --outs {output.beds}
-        """
-
-
-rule merge_binned_fire_calls:
-    input:
-        beds=expand(
-            "temp/{sm}/{hp}/{chrom}.bin.{bin}.bed",
-            chrom=get_chroms(),
-            allow_missing=True,
-        ),
-        fai=f"{ref}.fai",
-    output:
-        bed=temp("temp/{sm}/{hp}/chromosomes/{bin}.bed"),
-        bb="results/{sm}/trackHub/bins/{hp}.bin.{bin}.bed.bb",
-    threads: 1
-    resources:
-        mem_mb=get_mem_mb,
-    conda:
-        conda
-    params:
-        chrom=get_chroms()[0],
-    shell:
-        """
-        printf "{params.chrom}\t0\t1\tfake\t100\t+\t0\t1\t230,230,230\n" > {output.bed}
-        cat {input.beds} | awk 'NF == 9' >> {output.bed}
-        bedToBigBed {output.bed} {input.fai} {output.bb}
-        """
-
-
 rule hap_differences_track:
     input:
         bed9=rules.hap_differences.output.bed9,

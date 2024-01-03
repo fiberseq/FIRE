@@ -1,33 +1,21 @@
 rule decorate_fibers_chromosome:
     input:
-        bed=rules.merge_model_results.output.bed,
-        tbi=rules.index_model_results.output.tbi,
+        bam=rules.merged_fire_bam.output.bam,
     output:
-        bed=temp("temp/{sm}/decorate/{chrom}.bed.gz"),
+        bed=temp("temp/{sm}/decorate/{chrom}.bed"),
         decorated=temp("temp/{sm}/decorate/{chrom}.dec.bed.gz"),
     threads: 8
     resources:
         mem_mb=get_large_mem_mb,
     conda:
-        "../envs/python.yaml"
-    params:
-        script=workflow.source_path("../scripts/decorated-bed12.py"),
+        "../envs/env.yaml"
     shell:
         """
-        INBED={resources.tmpdir}/tmp.{wildcards.sm}.{wildcards.chrom}.bed.gz
-        OUTBED={resources.tmpdir}/tmp.out.{wildcards.sm}.{wildcards.chrom}.bed
-        tabix -h {input.bed} {wildcards.chrom} | bgzip -@ {threads} > $INBED
-        python {params.script} -v 1 $INBED $OUTBED \
-            | sort -k1,1 -k2,2n -k3,3n -k4,4 \
+        samtools view -@ {threads} -u {input.bam} {wildcards.chrom} \
+            | ft track-decorators {input.bam} -t {threads} --bed12 {output.bed} \
+            | LC_ALL=C sort -k1,1 -k2,2n -k3,3n -k4,4 \
             | bgzip -@ {threads} \
         > {output.decorated}
-
-        # sort the other file 
-        sort -k1,1 -k2,2n -k3,3n -k4,4 $OUTBED \
-            | bgzip -@ {threads} \
-        > {output.bed}
-
-        rm $INBED $OUTBED
         """
 
 
