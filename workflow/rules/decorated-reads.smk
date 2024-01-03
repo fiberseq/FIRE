@@ -33,7 +33,7 @@ rule decorate_fibers:
         ),
         fai=f"{ref}.fai",
     output:
-        bed="results/{sm}/fiber-calls/fire-fibers.bed.gz",
+        bed="results/{sm}/fiber-calls/fire-fibers.bed",
         bb="results/{sm}/trackHub/bb/fire-fibers.bb",
         decorated="results/{sm}/fiber-calls/fire-fiber-decorators.bed.gz",
         bbd="results/{sm}/trackHub/bb/fire-fiber-decorators.bb",
