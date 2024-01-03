@@ -69,7 +69,7 @@ track hap.diff.{sample}
 type bigBed 9 +
 itemRgb on
 bigDataUrl {file}
-shortLabel hap.diff{sample}
+shortLabel hap.diff.{sample}
 longLabel hap.diff.{sample}
 visibility pack
 maxHeightPixels 25:25:1
