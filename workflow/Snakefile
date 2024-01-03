@@ -87,8 +87,6 @@ wildcard_constraints:
 
 
 localrules:
-    bed_chunks,
-    dhs_null,
     model_input,
     make_model,
     merge_model_results,
