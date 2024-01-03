@@ -87,10 +87,7 @@ wildcard_constraints:
 
 
 localrules:
-    model_input,
-    make_model,
     merge_model_results,
-    model_bam,
     trackhub,
     coverage,
     clustering_vs_null,
