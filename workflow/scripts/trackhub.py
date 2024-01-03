@@ -203,7 +203,7 @@ itemRgb On
 filterText.keywords {hap}
 bigDataUrl bb/fire-fibers.bb 
 decorator.default.bigDataUrl bb/fire-fiber-decorators.bb 
-decorator.default.filterValues.keywords FIRE,Linker
+decorator.default.filterValues.keywords 5mC,m6A,NUC,LINKER,FIRE
 """
 
 
