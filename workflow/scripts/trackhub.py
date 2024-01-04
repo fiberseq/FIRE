@@ -109,6 +109,7 @@ FIRE_SCORE = """
 
 MULTI_WIG = """
 track {sample}-{hap}-coverage
+parent {sample}-coverage
 longLabel {sample}-{hap}-coverage
 shortLabel {sample}-{hap}-coverage
 container multiWig
@@ -186,6 +187,14 @@ type bigBed 12 +
 maxItems 100000
 visibility dense
 priority 30
+
+# grouping for coverage
+track {sample}-coverage
+compositeTrack on
+shortLabel {sample}-coverage
+longLabel {sample}-coverage
+type bigWig 0 1000
+priority 90
 """
 
 DECORATED = """
