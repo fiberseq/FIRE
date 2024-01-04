@@ -203,16 +203,7 @@ DECORATED = """
     decorator.default.filterValuesDefault.keywords LINKER,FIRE
 """
 
-FDR_TEMPLATE = """
-    track {sample}-{name}
-    shortLabel {sample}-{name}
-    longLabel {sample}-{name}
-    type bigBed 
-    bigDataUrl {file}
-    visibility dense
-    maxItems 100000
-    priority 30
-"""
+
 # type bigBed 6 + 4
 FIRE_TEMPLATE = """
     track {sample}-FIRE-peaks
@@ -223,6 +214,18 @@ FIRE_TEMPLATE = """
     longLabel {sample}-FIRE-peaks
     visibility dense
     maxHeightPixels 50:50:1
+"""
+
+WIDE_TEMPLATE = """
+    track {sample}-{name}
+    parent {sample}-peaks
+    shortLabel {sample}-{name}
+    longLabel {sample}-{name}
+    type bigBed 
+    bigDataUrl {file}
+    visibility dense
+    maxItems 100000
+    priority 30
 """
 
 HAP_TEMPLATE = """
@@ -280,7 +283,7 @@ def generate_trackhub(
             trackDb.write(HAP_TEMPLATE.format(file=file, sample=sample))
             file = "bb/FDR-wide-peaks.bb"
             trackDb.write(
-                FDR_TEMPLATE.format(file=file, name="FDR-wide-peaks", sample=sample)
+                WIDE_TEMPLATE.format(file=file, name="FDR-wide-peaks", sample=sample)
             )
 
         # add percent accessible tracks
