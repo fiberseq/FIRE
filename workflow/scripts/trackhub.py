@@ -13,6 +13,11 @@ shortLabel {sample}-fiberseq
 longLabel {sample}-fiberseq
 genomesFile genomes.txt
 email mvollger.edu
+
+track {sample}-fibers
+compositeTrack on
+shortLabel {sample}-fibers
+longLabel {sample}-fibers
 """
 
 GENOMES = """
@@ -226,6 +231,7 @@ priority 10
 
 DECORATED = """
 track {sample}-{hap}-fibers
+parent {sample}-fibers
 shortLabel {sample}-{hap}-fibers
 longLabel {sample}-{hap}-fibers
 visibility dense
