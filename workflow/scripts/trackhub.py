@@ -132,6 +132,35 @@ PER_ACC_TEMPLATE = """
     color {color}
 """
 
+FIRE_SCORE_COMP = """
+track {sample}-FIRE-score
+shortLabel {sample}-FIRE-score
+longLabel  {sample}-FIRE-score
+container multiWig
+aggregate none 
+showSubtrackColorOnUi on
+type bigWig 0 1000
+alwaysZero on
+viewLimits 0:100
+autoScale off
+maxItems 100000
+visibility full
+maxHeightPixels 100:50:8
+priority 100
+"""
+
+FIRE_SCORE = """
+    track {sample}-{hap}-FIRE-score
+    parent {sample}-FIRE-score
+    shortLabel {sample}-{hap}-FIRE-score
+    longLabel  {sample}-{hap}-FIRE-score
+    bigDataUrl {file}
+    type bigWig
+    visibility {viz}
+    color {color}
+"""
+
+
 MULTI_WIG = """
 track {sample}-{hap}-coverage
 longLabel {sample}-{hap}-coverage
@@ -289,6 +318,7 @@ def generate_trackhub(
         if hap == "all":
             color = "0,0,0"
             trackDb.write(PER_ACC_COMP.format(sample=sample))
+            trackDb.write(FIRE_SCORE_COMP.format(sample=sample, file=f"bw/score.bw"))
         elif hap == "hap1":
             color = "0,0,255"
         elif hap == "hap2":
@@ -299,6 +329,12 @@ def generate_trackhub(
             trackDb.write(
                 PER_ACC_TEMPLATE.format(
                     sample=sample, hap=hap, file=file, color=color, viz=viz
+                )
+            )
+            zhap = "" if hap == "all" else f"_{hap}"
+            trackDb.write(
+                FIRE_SCORE.format(
+                    sample=sample, hap=hap, file=f"bw/score{zhap}.bw", viz=viz
                 )
             )
 
