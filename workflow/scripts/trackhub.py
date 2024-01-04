@@ -8,9 +8,9 @@ from typing import Optional
 
 
 HUB = """
-hub fiberseq-{sample}
-shortLabel fiberseq-{sample}
-longLabel fiberseq-{sample}
+hub {sample}-fiberseq
+shortLabel {sample}-fiberseq
+longLabel {sample}-fiberseq
 genomesFile genomes.txt
 email mvollger.edu
 """
@@ -21,9 +21,9 @@ trackDb trackDb.txt
 """
 
 BB_TEMPLATE = """
-track {name}-{sample}
-shortLabel {name}-{sample}
-longLabel {name}-{sample}
+track {sample}-{name}
+shortLabel {sample}-{name}
+longLabel {sample}-{name}
 type bigBed 
 bigDataUrl {file}
 visibility dense
@@ -31,10 +31,10 @@ maxItems 100000
 """
 
 TRACK_COMP = """
-track reads-{sample}-{hap}
+track {sample}-{hap}-reads
 compositeTrack on
-shortLabel {hap} reads
-longLabel {hap} reads
+shortLabel {sample}-{hap}-reads
+longLabel {sample}-{hap}-reads
 type bigBed 9 +
 maxItems 100000
 maxHeightPixels 200:200:1
@@ -55,29 +55,29 @@ SUB_COMP_TRACK = """
 
 # type bigBed 6 + 4
 FIRE_TEMPLATE = """
-track FIRE.peaks.{sample}
+track {sample}-FIRE-peaks
 type bigNarrowPeak
 bigDataUrl {file}
-shortLabel FIRE.peaks.{sample}
-longLabel FIRE.peaks.{sample}
+shortLabel {sample}-FIRE-peaks
+longLabel {sample}-FIRE-peaks
 visibility dense
 maxHeightPixels 50:50:1
 """
 
 HAP_TEMPLATE = """
-track hap.diff.{sample}
+track {sample}-hap-differences
 type bigBed 9 +
 itemRgb on
 bigDataUrl {file}
-shortLabel hap.diff.{sample}
-longLabel hap.diff.{sample}
+shortLabel {sample}-hap-differences
+longLabel {sample}-hap-differences
 visibility pack
 maxHeightPixels 25:25:1
 """
 
 
 BW_COMP = """
-track FDR-{sample}-{hap}
+track {sample}-{hap}-FDR
 compositeTrack on
 shortLabel {hap} FDR tracks 
 longLabel {hap} FDR tracks
@@ -90,7 +90,7 @@ maxHeightPixels 50:50:1
 
 BW_TEMPLATE = """
     track FDR.{sample}.{hap}.{nm}
-    parent FDR-{sample}-{hap}
+    parent {sample}-{hap}-FDR
     bigDataUrl {file}
     shortLabel FDR.{sample}.{hap}.{nm}
     longLabel FDR.{sample}.{hap}.{nm}
@@ -102,9 +102,9 @@ BW_TEMPLATE = """
 
 # transparentOverlay
 PER_ACC_COMP = """
-track percent-accessible-{sample}
-shortLabel {sample} percent-accessible tracks 
-longLabel  {sample} percent-accessible tracks
+track {sample}-percent-accessible
+shortLabel {sample}-percent-accessible
+longLabel  {sample}-percent-accessible
 container multiWig
 aggregate none 
 showSubtrackColorOnUi on
@@ -118,8 +118,8 @@ maxHeightPixels 100:100:8
 """
 
 PER_ACC_TEMPLATE = """
-    track percent-accessible-{sample}-{hap}
-    parent percent-accessible-{sample}
+    track {sample}-{hap}-percent-accessible
+    parent {sample}-percent-accessible
     bigDataUrl {file}
     type bigWig
     visibility {viz}
@@ -127,9 +127,9 @@ PER_ACC_TEMPLATE = """
 """
 
 MULTI_WIG = """
-track coverage-{sample}-{hap}
-longLabel {sample}-{hap} coverage
-shortLabel {sample}-{hap} coverage
+track {sample}-{hap}-coverage
+longLabel {sample}-{hap}-coverage
+shortLabel {sample}-{hap}-coverage
 container multiWig
 aggregate stacked
 showSubtrackColorOnUi on
@@ -140,20 +140,20 @@ viewLimits 0:{upper_coverage}
 visibility full
 maxHeightPixels 100:100:8
     
-    track Accessible-{sample}-{hap}
-    parent coverage-{sample}-{hap}
+    track {sample}-{hap}-accessible
+    parent {sample}-{hap}-coverage
     bigDataUrl {acc}
     type bigWig
     color 139,0,0
     
-    track Linker-{sample}-{hap}
-    parent coverage-{sample}-{hap}
+    track {sample}-{hap}-linker
+    parent {sample}-{hap}-coverage
     bigDataUrl {link}
     type bigWig
     color 147,112,219
     
-    track Nucleosomes-{sample}-{hap}
-    parent coverage-{sample}-{hap}
+    track {sample}-{hap}-nucleosome
+    parent {sample}-{hap}-coverage
     bigDataUrl {nuc}
     type bigWig
     color 169,169,169
@@ -161,21 +161,21 @@ maxHeightPixels 100:100:8
 
 
 FIRE_SCORE_AND_FDR = """
-track FIRE_FDR_{sample}
+track {sample}-FIRE-FDR
 compositeTrack on
-shortLabel FIRE FDR {sample}
-longLabel {sample} FIRE scores and FDR values
+shortLabel {sample}-FIRE-FDR
+longLabel {sample}-FIRE-FDR
 visibility full
 type bigWig
 maxItems 100000
 maxHeightPixels 100:100:1
 alwaysZero on
 
-    track log_fdr
-    parent FIRE_FDR_{sample}
+    track {sample}-log-fdr
+    parent {sample}-FIRE-FDR
     bigDataUrl {fdr}
-    shortLabel -10log10 FDR {sample}
-    longLabel -10log10 FDR {sample}
+    shortLabel {sample} -10log10 FDR
+    longLabel {sample} -10log10 FDR
     autoScale on
     visibility full
     yLineOnOff on
@@ -183,10 +183,10 @@ alwaysZero on
     gridDefault on
     
     track fire_score
-    parent FIRE_FDR_{sample}
+    parent {sample}-FIRE-FDR
     bigDataUrl {score}
-    shortLabel FIRE score {sample}
-    longLabel FIRE score {sample}
+    shortLabel {sample} FIRE score
+    longLabel {sample} FIRE score
     visibility full
     alwaysZero on
     viewLimits 0:100
@@ -194,10 +194,10 @@ alwaysZero on
     windowingFunction maximum
     
     track fire_score_H1
-    parent FIRE_FDR_{sample}
+    parent {sample}-FIRE-FDR
     bigDataUrl bw/score_H1.bw
-    shortLabel H1 FIRE score {sample}
-    longLabel H1 FIRE score {sample}
+    shortLabel {sample}-H1-FIRE-score
+    longLabel {sample}-H1-FIRE-score
     visibility full
     alwaysZero on
     viewLimits 0:100
@@ -205,10 +205,10 @@ alwaysZero on
     windowingFunction maximum
     
     track fire_score_H2
-    parent FIRE_FDR_{sample}
+    parent {sample}-FIRE-FDR
     bigDataUrl bw/score_H2.bw
-    shortLabel H2 FIRE score {sample}
-    longLabel H2 FIRE score {sample}
+    shortLabel {sample}-H2-FIRE-score
+    longLabel {sample}-H2-FIRE-score
     visibility full
     alwaysZero on
     viewLimits 0:100
