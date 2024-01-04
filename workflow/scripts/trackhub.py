@@ -253,7 +253,7 @@ def generate_trackhub(
     open(f"{trackhub_dir}/hub.txt", "w").write(HUB.format(sample=sample))
     open(f"{trackhub_dir}/genomes.txt", "w").write(GENOMES.format(ref=ref))
     trackDb = open(f"{trackhub_dir}/trackDb.txt", "w")
-    trackDb.write(DECORATED_GROUP.format(sample=sample))
+    trackDb.write(TRACK_GROUPS.format(sample=sample))
 
     for hap in ["all", "hap1", "hap2", "unk"]:
         # add coverage tracks
