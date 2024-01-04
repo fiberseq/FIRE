@@ -283,13 +283,13 @@ def generate_trackhub(
         # add percent accessible tracks
         file = f"bw/{hap}.percent.accessible.bw"
         if hap == "all":
-            color = "0,0,0,125"
+            color = "0,0,0"
             trackDb.write(PER_ACC_COMP.format(sample=sample))
             trackDb.write(FIRE_SCORE_COMP.format(sample=sample, file=f"bw/score.bw"))
         elif hap == "hap1":
-            color = "0,0,255,125"
+            color = "0,0,255"
         elif hap == "hap2":
-            color = "255,0,0,125"
+            color = "255,0,0"
 
         if hap != "unk":
             viz = "full" if hap != "all" else "hide"
