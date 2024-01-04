@@ -332,6 +332,8 @@ def generate_trackhub(
                 )
             )
             zhap = "" if hap == "all" else f"_{hap}"
+            zhap.replace("hap", "H")
+
             trackDb.write(
                 FIRE_SCORE.format(
                     sample=sample,
