@@ -146,7 +146,7 @@ autoScale off
 maxItems 100000
 visibility full
 maxHeightPixels 100:50:8
-priority 20
+priority 10
 """
 
 FIRE_SCORE = """
@@ -173,7 +173,7 @@ autoScale off
 alwaysZero on
 viewLimits 0:{upper_coverage}
 visibility full
-maxHeightPixels 100:100:8
+maxHeightPixels 100:50:8
 priority 90
     
     track {sample}-{hap}-accessible
@@ -204,7 +204,7 @@ longLabel {sample}-FIRE-FDR
 visibility full
 type bigWig
 maxItems 100000
-maxHeightPixels 100:100:1
+maxHeightPixels 100:50:1
 alwaysZero on
 priority 10
 
