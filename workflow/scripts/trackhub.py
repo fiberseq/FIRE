@@ -109,6 +109,7 @@ FIRE_SCORE = """
 
 MULTI_WIG = """
 track {sample}-{hap}-coverage
+parent {sample}-coverage
 longLabel {sample}-{hap}-coverage
 shortLabel {sample}-{hap}-coverage
 container multiWig
@@ -148,7 +149,7 @@ compositeTrack on
 shortLabel {sample}-FIRE-FDR
 longLabel {sample}-FIRE-FDR
 visibility full
-type bigWig
+type multiWig
 maxItems 100000
 maxHeightPixels 100:50:1
 alwaysZero on
@@ -187,6 +188,13 @@ maxItems 100000
 visibility dense
 priority 30
 
+# grouping for coverage
+track {sample}-coverage
+compositeTrack containerTrack
+shortLabel {sample}-coverage
+longLabel {sample}-coverage
+type bigWig 0 1000
+priority 90
 """
 
 DECORATED = """
