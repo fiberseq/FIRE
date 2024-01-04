@@ -20,64 +20,6 @@ genome {ref}
 trackDb trackDb.txt
 """
 
-BB_TEMPLATE = """
-track {sample}-{name}
-shortLabel {sample}-{name}
-longLabel {sample}-{name}
-type bigBed 
-bigDataUrl {file}
-visibility dense
-maxItems 100000
-priority 30
-"""
-
-TRACK_COMP = """
-track {sample}-{hap}-reads
-compositeTrack on
-shortLabel {sample}-{hap}-reads
-longLabel {sample}-{hap}-reads
-type bigBed 9 +
-maxItems 100000
-maxHeightPixels 200:200:1
-"""
-
-SUB_COMP_TRACK = """
-    track bin-{i}-{sample}-{hap}
-    parent reads-{sample}-{hap}
-    bigDataUrl bins/{hap}.bin.{i}.bed.bb
-    shortLabel {hap}.bin.{i}
-    longLabel {hap}.bin.{i}
-    priority {i}
-    type bigBed 9 +
-    itemRgb on
-    visibility {viz}
-    maxHeightPixels 1:1:1
-"""
-
-# type bigBed 6 + 4
-FIRE_TEMPLATE = """
-track {sample}-FIRE-peaks
-type bigNarrowPeak
-bigDataUrl {file}
-shortLabel {sample}-FIRE-peaks
-longLabel {sample}-FIRE-peaks
-visibility dense
-maxHeightPixels 50:50:1
-priority 10
-"""
-
-HAP_TEMPLATE = """
-track {sample}-hap-differences
-type bigBed 9 +
-itemRgb on
-bigDataUrl {file}
-shortLabel {sample}-hap-differences
-longLabel {sample}-hap-differences
-visibility dense
-maxHeightPixels 25:25:1
-priority 20
-"""
-
 
 BW_COMP = """
 track {sample}-{hap}-FDR
@@ -224,7 +166,7 @@ priority 10
     gridDefault on
 """
 
-DECORATED_GROUP = """
+TRACK_GROUPS = """
 # grouping for fibers 
 track {sample}-fibers
 compositeTrack on
@@ -232,6 +174,18 @@ shortLabel {sample}-fibers
 longLabel {sample}-fibers
 type bigBed 12 +
 maxItems 100000
+visibility dense
+priority 80
+
+# grouping for peaks
+track {sample}-peaks
+compositeTrack on
+shortLabel {sample}-peaks
+longLabel {sample}-peaks
+type bigBed 12 +
+maxItems 100000
+visibility dense
+priority 30
 """
 
 DECORATED = """
@@ -247,7 +201,40 @@ DECORATED = """
     decorator.default.bigDataUrl bb/fire-fiber-decorators.bb 
     decorator.default.filterValues.keywords 5mC,m6A,NUC,LINKER,FIRE
     decorator.default.filterValuesDefault.keywords LINKER,FIRE
-    priority 80
+"""
+
+FDR_TEMPLATE = """
+    track {sample}-{name}
+    shortLabel {sample}-{name}
+    longLabel {sample}-{name}
+    type bigBed 
+    bigDataUrl {file}
+    visibility dense
+    maxItems 100000
+    priority 30
+"""
+# type bigBed 6 + 4
+FIRE_TEMPLATE = """
+    track {sample}-FIRE-peaks
+    parent {sample}-peaks
+    type bigNarrowPeak
+    bigDataUrl {file}
+    shortLabel {sample}-FIRE-peaks
+    longLabel {sample}-FIRE-peaks
+    visibility dense
+    maxHeightPixels 50:50:1
+"""
+
+HAP_TEMPLATE = """
+    track {sample}-hap-differences
+    parent {sample}-peaks
+    type bigBed 9 +
+    itemRgb on
+    bigDataUrl {file}
+    shortLabel {sample}-hap-differences
+    longLabel {sample}-hap-differences
+    visibility dense
+    maxHeightPixels 25:25:1
 """
 
 
@@ -293,7 +280,7 @@ def generate_trackhub(
             trackDb.write(HAP_TEMPLATE.format(file=file, sample=sample))
             file = "bb/FDR-wide-peaks.bb"
             trackDb.write(
-                BB_TEMPLATE.format(file=file, name="FDR-wide-peaks", sample=sample)
+                FDR_TEMPLATE.format(file=file, name="FDR-wide-peaks", sample=sample)
             )
 
         # add percent accessible tracks
