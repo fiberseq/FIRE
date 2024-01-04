@@ -120,6 +120,8 @@ maxHeightPixels 100:50:8
 PER_ACC_TEMPLATE = """
     track {sample}-{hap}-percent-accessible
     parent {sample}-percent-accessible
+    shortLabel {sample}-{hap}-percent-accessible
+    longLabel  {sample}-{hap}-percent-accessible
     bigDataUrl {file}
     type bigWig
     visibility {viz}
