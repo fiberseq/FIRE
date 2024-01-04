@@ -14,10 +14,13 @@ longLabel {sample}-fiberseq
 genomesFile genomes.txt
 email mvollger.edu
 
+
+# grouping for fibers 
 track {sample}-fibers
 compositeTrack on
 shortLabel {sample}-fibers
 longLabel {sample}-fibers
+type bigBed 12 +
 """
 
 GENOMES = """
