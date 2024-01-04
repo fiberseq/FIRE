@@ -13,16 +13,6 @@ shortLabel {sample}-fiberseq
 longLabel {sample}-fiberseq
 genomesFile genomes.txt
 email mvollger.edu
-
-
-# grouping for fibers 
-track {sample}-fibers
-compositeTrack on
-shortLabel {sample}-fibers
-longLabel {sample}-fibers
-type bigBed 12 +
-maxItems 100000
-maxHeightPixels 200:200:1
 """
 
 GENOMES = """
@@ -234,6 +224,16 @@ priority 10
     gridDefault on
 """
 
+DECORATED_GROUP = """
+# grouping for fibers 
+track {sample}-fibers
+compositeTrack on
+shortLabel {sample}-fibers
+longLabel {sample}-fibers
+type bigBed 12 +
+maxItems 100000
+"""
+
 DECORATED = """
     track {sample}-{hap}-fibers
     parent {sample}-fibers
@@ -266,6 +266,7 @@ def generate_trackhub(
     open(f"{trackhub_dir}/hub.txt", "w").write(HUB.format(sample=sample))
     open(f"{trackhub_dir}/genomes.txt", "w").write(GENOMES.format(ref=ref))
     trackDb = open(f"{trackhub_dir}/trackDb.txt", "w")
+    trackDb.write(DECORATED_GROUP.format(sample=sample))
 
     for hap in ["all", "hap1", "hap2", "unk"]:
         # add coverage tracks
