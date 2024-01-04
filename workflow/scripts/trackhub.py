@@ -218,39 +218,6 @@ priority 10
     yLineOnOff on
     yLineMark {y_line}
     gridDefault on
-    
-    track fire_score
-    parent {sample}-FIRE-FDR
-    bigDataUrl {score}
-    shortLabel {sample}-FIRE-score
-    longLabel {sample}-FIRE-score
-    visibility full
-    alwaysZero on
-    viewLimits 0:100
-    viewLimits 0.0:100.0
-    windowingFunction maximum
-    
-    track fire_score_H1
-    parent {sample}-FIRE-FDR
-    bigDataUrl bw/score_H1.bw
-    shortLabel {sample}-H1-FIRE-score
-    longLabel {sample}-H1-FIRE-score
-    visibility full
-    alwaysZero on
-    viewLimits 0:100
-    viewLimits 0.0:100.0
-    windowingFunction maximum
-    
-    track fire_score_H2
-    parent {sample}-FIRE-FDR
-    bigDataUrl bw/score_H2.bw
-    shortLabel {sample}-H2-FIRE-score
-    longLabel {sample}-H2-FIRE-score
-    visibility full
-    alwaysZero on
-    viewLimits 0:100
-    viewLimits 0.0:100.0
-    windowingFunction maximum
 """
 
 DECORATED = """
