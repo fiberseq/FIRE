@@ -28,6 +28,7 @@ type bigBed
 bigDataUrl {file}
 visibility dense
 maxItems 100000
+priority 30
 """
 
 TRACK_COMP = """
@@ -62,6 +63,7 @@ shortLabel {sample}-FIRE-peaks
 longLabel {sample}-FIRE-peaks
 visibility dense
 maxHeightPixels 50:50:1
+priority 10
 """
 
 HAP_TEMPLATE = """
@@ -73,6 +75,7 @@ shortLabel {sample}-hap-differences
 longLabel {sample}-hap-differences
 visibility dense
 maxHeightPixels 25:25:1
+priority 20
 """
 
 
@@ -115,6 +118,7 @@ autoScale off
 maxItems 100000
 visibility full
 maxHeightPixels 100:50:8
+priority 100
 """
 
 PER_ACC_TEMPLATE = """
@@ -141,6 +145,7 @@ alwaysZero on
 viewLimits 0:{upper_coverage}
 visibility full
 maxHeightPixels 100:100:8
+priority 90
     
     track {sample}-{hap}-accessible
     parent {sample}-{hap}-coverage
@@ -172,6 +177,7 @@ type bigWig
 maxItems 100000
 maxHeightPixels 100:100:1
 alwaysZero on
+priority 10
 
     track {sample}-log-fdr
     parent {sample}-FIRE-FDR
@@ -230,6 +236,7 @@ bigDataUrl bb/fire-fibers.bb
 decorator.default.bigDataUrl bb/fire-fiber-decorators.bb 
 decorator.default.filterValues.keywords 5mC,m6A,NUC,LINKER,FIRE
 decorator.default.filterValuesDefault.keywords LINKER,FIRE
+priority 80
 """
 
 
