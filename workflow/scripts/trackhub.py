@@ -334,7 +334,11 @@ def generate_trackhub(
             zhap = "" if hap == "all" else f"_{hap}"
             trackDb.write(
                 FIRE_SCORE.format(
-                    sample=sample, hap=hap, file=f"bw/score{zhap}.bw", viz=viz
+                    sample=sample,
+                    hap=hap,
+                    file=f"bw/score{zhap}.bw",
+                    viz=viz,
+                    color=color,
                 )
             )
 
