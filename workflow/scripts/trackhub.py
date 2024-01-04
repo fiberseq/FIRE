@@ -149,7 +149,7 @@ compositeTrack on
 shortLabel {sample}-FIRE-FDR
 longLabel {sample}-FIRE-FDR
 visibility full
-type multiWig
+type bigWig 0 1000
 maxItems 100000
 maxHeightPixels 100:50:1
 alwaysZero on
