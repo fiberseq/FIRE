@@ -185,8 +185,8 @@ alwaysZero on
     track fire_score
     parent {sample}-FIRE-FDR
     bigDataUrl {score}
-    shortLabel {sample} FIRE score
-    longLabel {sample} FIRE score
+    shortLabel {sample}-FIRE-score
+    longLabel {sample}-FIRE-score
     visibility full
     alwaysZero on
     viewLimits 0:100
