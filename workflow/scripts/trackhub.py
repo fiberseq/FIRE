@@ -192,6 +192,28 @@ alwaysZero on
     viewLimits 0:100
     viewLimits 0.0:100.0
     windowingFunction maximum
+    
+    track fire_score_H1
+    parent FIRE_FDR_{sample}
+    bigDataUrl bw/score_H1.bw
+    shortLabel H1 FIRE score {sample}
+    longLabel H1 FIRE score {sample}
+    visibility full
+    alwaysZero on
+    viewLimits 0:100
+    viewLimits 0.0:100.0
+    windowingFunction maximum
+    
+    track fire_score_H2
+    parent FIRE_FDR_{sample}
+    bigDataUrl bw/score_H2.bw
+    shortLabel H2 FIRE score {sample}
+    longLabel H2 FIRE score {sample}
+    visibility full
+    alwaysZero on
+    viewLimits 0:100
+    viewLimits 0.0:100.0
+    windowingFunction maximum
 """
 
 DECORATED = """

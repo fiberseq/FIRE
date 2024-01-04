@@ -57,7 +57,7 @@ print(data.index)
 types = ["fdr", "acc", "link", "nuc"]
 types_to_col = {"fdr": 4, "acc": 5, "link": 6, "nuc": 7}
 
-bw_types = ["score", "FDR", "log_FDR"]
+bw_types = ["score", "FDR", "log_FDR", "score_H1", "score_H2"]
 bw_types = bw_types + [f"{t}_H1" for t in bw_types] + [f"{t}_H2" for t in bw_types]
 el_types = ["fire", "linker", "nucleosome"]
 
