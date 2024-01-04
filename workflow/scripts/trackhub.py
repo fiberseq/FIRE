@@ -21,6 +21,8 @@ compositeTrack on
 shortLabel {sample}-fibers
 longLabel {sample}-fibers
 type bigBed 12 +
+maxItems 100000
+maxHeightPixels 200:200:1
 """
 
 GENOMES = """
@@ -233,19 +235,19 @@ priority 10
 """
 
 DECORATED = """
-track {sample}-{hap}-fibers
-parent {sample}-fibers
-shortLabel {sample}-{hap}-fibers
-longLabel {sample}-{hap}-fibers
-visibility dense
-type bigBed 12 +
-itemRgb On
-filterText.keywords {hap}
-bigDataUrl bb/fire-fibers.bb 
-decorator.default.bigDataUrl bb/fire-fiber-decorators.bb 
-decorator.default.filterValues.keywords 5mC,m6A,NUC,LINKER,FIRE
-decorator.default.filterValuesDefault.keywords LINKER,FIRE
-priority 80
+    track {sample}-{hap}-fibers
+    parent {sample}-fibers
+    shortLabel {sample}-{hap}-fibers
+    longLabel {sample}-{hap}-fibers
+    visibility dense
+    type bigBed 12 +
+    itemRgb On
+    filterText.keywords {hap}
+    bigDataUrl bb/fire-fibers.bb 
+    decorator.default.bigDataUrl bb/fire-fiber-decorators.bb 
+    decorator.default.filterValues.keywords 5mC,m6A,NUC,LINKER,FIRE
+    decorator.default.filterValuesDefault.keywords LINKER,FIRE
+    priority 80
 """
 
 
