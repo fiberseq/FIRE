@@ -150,7 +150,7 @@ autoScale off
 maxItems 100000
 visibility full
 maxHeightPixels 100:50:8
-priority 10
+priority 1
 """
 
 FIRE_SCORE = """
