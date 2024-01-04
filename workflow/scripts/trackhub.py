@@ -190,10 +190,9 @@ priority 30
 
 # grouping for coverage
 track {sample}-coverage
-compositeTrack containerTrack
+superTrack on show
 shortLabel {sample}-coverage
 longLabel {sample}-coverage
-type bigWig 0 1000
 priority 90
 """
 
