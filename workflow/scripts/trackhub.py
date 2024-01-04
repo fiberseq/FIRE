@@ -108,6 +108,8 @@ PER_ACC_COMP = """
 track {sample}-percent-accessible
 shortLabel {sample}-percent-accessible
 longLabel  {sample}-percent-accessible
+graphTypeDefault points
+aggregate transparentOverlay
 container multiWig
 aggregate none 
 showSubtrackColorOnUi on
@@ -136,6 +138,8 @@ FIRE_SCORE_COMP = """
 track {sample}-FIRE-score
 shortLabel {sample}-FIRE-score
 longLabel  {sample}-FIRE-score
+graphTypeDefault points
+aggregate transparentOverlay
 container multiWig
 aggregate none 
 showSubtrackColorOnUi on
