@@ -114,7 +114,7 @@ viewLimits 0:100
 autoScale off
 maxItems 100000
 visibility full
-maxHeightPixels 100:100:8
+maxHeightPixels 100:50:8
 """
 
 PER_ACC_TEMPLATE = """
