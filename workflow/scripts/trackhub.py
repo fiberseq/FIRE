@@ -71,7 +71,7 @@ itemRgb on
 bigDataUrl {file}
 shortLabel {sample}-hap-differences
 longLabel {sample}-hap-differences
-visibility pack
+visibility dense
 maxHeightPixels 25:25:1
 """
 
