@@ -1,6 +1,5 @@
 ref: /mmfs1/gscratch/stergachislab/assemblies/hg38.analysisSet.fa
 ref_name: hg38
-n_chunks: 100 # split bam file across x chunks
 max_t: 4 # use X threaeds per chunk
 manifest: config/config.tbl # table with samples to process
 
@@ -18,12 +17,6 @@ manifest: config/config.tbl # table with samples to process
 
 ## you can optionally specify a model that is not the default.
 # model: models/my-custom-model.dat
-
-##
-## only used if training a new model
-##
-# train: True
-# dhs: workflow/annotations/GM12878_DHS.bed.gz # regions of suspected regulatory elements
 
 # Filter peaks on a % accesible threshold instead of FDR. Removes FDR filtering.
 # min_per_acc_peak: 0.10 # enfore 10% of reads in peak are accessible
