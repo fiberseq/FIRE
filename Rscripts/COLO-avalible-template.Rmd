@@ -145,42 +145,50 @@ getmode(fire$coverage_H2)
 
 
 ```{r}
-a=fread("COLO-asm/hg38.stats.bed.gz")
-b=fread("COLO-asm/hg38.PS00357.stats.bed.gz")
-c=fread("COLO-asm/tmp.stats.bed.gz")
-d=fread("COLO-asm/T.tmp.stats.bed.gz")
-hg = bind_rows(list(BL=a, T=b, BL_DSA=c, T_DSA=d), .id="ID")
+# PS00338_DSA.asm.phased.bed.gz
+# PS00338_GRCh38.bed.gz
+# PS00357_DSA.asm.phased.bed.gz
+# PS00357_GRCh38.bed.gz
+a=fread("COLO-asm/stats/PS00338_GRCh38.bed.gz")
+b=fread("COLO-asm/stats/PS00338_DSA.asm.phased.bed.gz")
+c=fread("COLO-asm/stats/PS00357_GRCh38.bed.gz")
+d=fread("COLO-asm/stats/PS00357_DSA.asm.phased.bed.gz")
+hg = bind_rows(list(BL=a, BL_DSA=b, T=c, T_DSA=d), .id="ID") %>%
+    mutate(
+        mismatches_per_1000bp = 1000 * mismatches / (reference_end-reference_start),
+        is_dsa = grepl("DSA", ID),
+        is_T = grepl("T", ID),
+    )
 hg
 ```
 
 ```{r}
 shg = hg %>%  
-    group_by(ID) %>%
+    group_by(ID, is_dsa, is_T) %>%
     summarise(
         mismatches=sum(mismatches),
         matches=sum(matches),
         total_bp = sum(query_length),
+        ref_bp = sum(reference_end - reference_start),
         read_count = n(),
     ) %>%
     mutate(
-        #percent_mismatch = 100 * mismatches / total_bp,
-        mismatches_per_1000bp = 1000 * mismatches / total_bp,
-        is_dsa = grepl("DSA", ID),
-        #mismatch_ratio = mismatches / matches,
+        mismatches_per_1000bp = 1000 * mismatches / ref_bp,
     )
 shg
 z=shg %>%
-    select(-read_count, -matches) %>%
-    pivot_longer(cols=-c("ID","is_dsa")) %>%
+    select(ID, is_dsa, mismatches_per_1000bp, is_T) %>%
+    pivot_longer(cols=-c("ID","is_dsa", "is_T")) %>%
     ggplot(aes(x=ID, y=value, fill=is_dsa)) +
     geom_bar(stat="identity") +
-    geom_text_repel(
+    geom_label_repel(
         aes(label=comma(value)), 
-        position=position_dodge(width=0.9), 
-        vjust=-0.25
+        fill="white",
+        direction="y",
+        #vjust=-0.25
     ) +
     scale_y_continuous(
-        "",
+        "Mismatches per 1,000 bp of read sequence",
         #trans="log10",
     ) +
     scale_fill_manual("",
@@ -188,11 +196,59 @@ z=shg %>%
         values=c("darkred", "skyblue"),
     ) +
     theme_minimal_grid() +
-    facet_col(~name, scales="free")+
+    #facet_col(~name, scales="free")+
+    facet_row(~is_T, scales="free_x") + 
     theme(
         legend.position="top",
     )
 my_ggsave("Figures/COLO-asm-mismatch.pdf")
+```
+
+
+```{r}
+z=hg %>% 
+    filter(!is_T) %>%
+    group_by(ID) %>%
+    sample_n(1e6) %>%
+    mutate(
+        x=1000*mismatches/(reference_end-reference_start),
+        case = case_when(
+            x == 0 ~ 0,
+            x >0 & x <= 10  ~ 10,
+            TRUE ~ Inf,
+        )
+    ) %>%
+    ggplot(
+        aes(
+            x=x+0.01,
+            #color=is_dsa,
+            fill=is_dsa,
+            group=ID,
+        )
+    ) +
+    #geom_density(adjust=0.75) +
+    geom_histogram(bins=30, position="identity", alpha=0.75)+
+    scale_x_continuous(
+        "Mismatches per 1,000 bp",
+        #trans=scales::pseudo_log_trans(base = 10),
+        trans="log10",
+        label=comma,
+    ) +
+    scale_y_continuous(
+        #trans="log10",
+        label=comma,
+    ) +
+    #annotation_logticks(sides="b") +
+    scale_fill_manual("",
+        labels=c("GRCh38", "DSA"),
+        values=c("darkred", "skyblue"),
+    ) +
+    #facet_col(~is_T) + 
+    facet_row(~case, scales="free") + force_panelsizes(cols=c(1,6,6))+
+    #facet_zoom(xlim=c(0,10)) +
+    theme_minimal_grid() +
+    theme(legend.position="top")
+my_ggsave("Figures/COLO-asm-mismatch-density.pdf", height=4, width=6)
 ```
 
 ```{r}
