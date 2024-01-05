@@ -70,7 +70,7 @@ rule merge_model_results:
     conda:
         conda
     params:
-        n_chunks=n_chunks + 10,
+        n_chunks=len(get_chroms())+1,
     priority: 20
     shell:
         """

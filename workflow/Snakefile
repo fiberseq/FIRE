@@ -11,8 +11,6 @@ min_version("7.32.3")
 
 ref = config["ref"]
 ref_name = config["ref_name"]
-n_chunks = config["n_chunks"]
-chunks = [f"{i+1}-of-{n_chunks}" for i in range(n_chunks)]
 
 dhs = config.get("dhs", workflow.source_path("annotations/GM12878_DHS.bed.gz"))
 excludes = config.get("excludes", [])
@@ -77,7 +75,6 @@ chroms = get_chroms()
 wildcard_constraints:
     chrom="|".join(chroms),
     call="|".join(["msp", "m6a"]),
-    chunk="|".join(chunks),
     sm="|".join(data.index),
     types="|".join(types),
     fdr="\d+",

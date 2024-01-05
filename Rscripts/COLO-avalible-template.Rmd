@@ -165,6 +165,7 @@ hg
 ```{r}
 shg = hg %>%  
     group_by(ID, is_dsa, is_T) %>%
+
     summarise(
         mismatches=sum(mismatches),
         matches=sum(matches),
@@ -189,6 +190,7 @@ z=shg %>%
     ) +
     scale_y_continuous(
         "Mismatches per 1,000 bp of read sequence",
+
         #trans="log10",
     ) +
     scale_fill_manual("",
@@ -196,6 +198,7 @@ z=shg %>%
         values=c("darkred", "skyblue"),
     ) +
     theme_minimal_grid() +
+
     #facet_col(~name, scales="free")+
     facet_row(~is_T, scales="free_x") + 
     theme(
@@ -203,7 +206,6 @@ z=shg %>%
     )
 my_ggsave("Figures/COLO-asm-mismatch.pdf")
 ```
-
 
 ```{r}
 z=hg %>% 
@@ -249,13 +251,4 @@ z=hg %>%
     theme_minimal_grid() +
     theme(legend.position="top")
 my_ggsave("Figures/COLO-asm-mismatch-density.pdf", height=4, width=6)
-```
-
-```{r}
-   filter(
-        `#reference_name` != "chrEBV",
-        `#reference_name` != "chrM",
-        `#reference_name` != "chrX",
-        `#reference_name` != "chrY",
-    ) %>%
 ```
