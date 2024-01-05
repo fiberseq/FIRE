@@ -1,8 +1,0 @@
-ref: /mmfs1/gscratch/stergachislab/assemblies/T2Tv2.0_maskedY.fa
-ref_name: T2Tv2.0
-n_chunks: 50
-max_t: 4
-manifest: config/indata_t2t_v2.0.tbl
-excludes:
-  - workflow/annotations/T2Tv2.0.SDs.bed.gz
-  - workflow/annotations/T2Tv2.0.censat.bed.gz

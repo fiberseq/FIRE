@@ -8,9 +8,9 @@ from typing import Optional
 
 
 HUB = """
-hub fiberseq-{sample}
-shortLabel fiberseq-{sample}
-longLabel fiberseq-{sample}
+hub {sample}-fiberseq
+shortLabel {sample}-fiberseq
+longLabel {sample}-fiberseq
 genomesFile genomes.txt
 email mvollger.edu
 """
@@ -20,64 +20,9 @@ genome {ref}
 trackDb trackDb.txt
 """
 
-BB_TEMPLATE = """
-track {name}-{sample}
-shortLabel {name}-{sample}
-longLabel {name}-{sample}
-type bigBed 
-bigDataUrl {file}
-visibility dense
-maxItems 100000
-"""
-
-TRACK_COMP = """
-track reads-{sample}-{hap}
-compositeTrack on
-shortLabel {hap} reads
-longLabel {hap} reads
-type bigBed 9 +
-maxItems 100000
-maxHeightPixels 200:200:1
-"""
-
-SUB_COMP_TRACK = """
-    track bin-{i}-{sample}-{hap}
-    parent reads-{sample}-{hap}
-    bigDataUrl bins/{hap}.bin.{i}.bed.bb
-    shortLabel {hap}.bin.{i}
-    longLabel {hap}.bin.{i}
-    priority {i}
-    type bigBed 9 +
-    itemRgb on
-    visibility {viz}
-    maxHeightPixels 1:1:1
-"""
-
-# type bigBed 6 + 4
-FIRE_TEMPLATE = """
-track FIRE.peaks.{sample}
-type bigNarrowPeak
-bigDataUrl {file}
-shortLabel FIRE.peaks.{sample}
-longLabel FIRE.peaks.{sample}
-visibility dense
-maxHeightPixels 50:50:1
-"""
-
-HAP_TEMPLATE = """
-track hap.diff.{sample}
-type bigBed 9 +
-itemRgb on
-bigDataUrl {file}
-shortLabel hap.diff{sample}
-longLabel hap.diff.{sample}
-visibility pack
-maxHeightPixels 25:25:1
-"""
-
 
 BW_COMP = """
-track FDR-{sample}-{hap}
+track {sample}-{hap}-FDR
 compositeTrack on
 shortLabel {hap} FDR tracks 
 longLabel {hap} FDR tracks
@@ -90,7 +35,7 @@ maxHeightPixels 50:50:1
 
 BW_TEMPLATE = """
     track FDR.{sample}.{hap}.{nm}
-    parent FDR-{sample}-{hap}
+    parent {sample}-{hap}-FDR
     bigDataUrl {file}
     shortLabel FDR.{sample}.{hap}.{nm}
     longLabel FDR.{sample}.{hap}.{nm}
@@ -102,9 +47,11 @@ BW_TEMPLATE = """
 
 # transparentOverlay
 PER_ACC_COMP = """
-track percent-accessible-{sample}
-shortLabel {sample} percent-accessible tracks 
-longLabel  {sample} percent-accessible tracks
+track {sample}-percent-accessible
+shortLabel {sample}-percent-accessible
+longLabel  {sample}-percent-accessible
+graphTypeDefault points
+aggregate transparentOverlay
 container multiWig
 aggregate none 
 showSubtrackColorOnUi on
@@ -114,22 +61,57 @@ viewLimits 0:100
 autoScale off
 maxItems 100000
 visibility full
-maxHeightPixels 100:100:8
+maxHeightPixels 100:50:8
+priority 100
 """
 
 PER_ACC_TEMPLATE = """
-    track percent-accessible-{sample}-{hap}
-    parent percent-accessible-{sample}
+    track {sample}-{hap}-percent-accessible
+    parent {sample}-percent-accessible
+    shortLabel {sample}-{hap}-percent-accessible
+    longLabel  {sample}-{hap}-percent-accessible
     bigDataUrl {file}
     type bigWig
     visibility {viz}
     color {color}
 """
 
+FIRE_SCORE_COMP = """
+track {sample}-FIRE-score
+shortLabel {sample}-FIRE-score
+longLabel  {sample}-FIRE-score
+graphTypeDefault points
+aggregate transparentOverlay
+container multiWig
+aggregate none 
+showSubtrackColorOnUi on
+type bigWig 0 1000
+alwaysZero on
+viewLimits 0:100
+autoScale off
+maxItems 100000
+visibility full
+maxHeightPixels 100:50:8
+priority 1
+"""
+
+FIRE_SCORE = """
+    track {sample}-{hap}-FIRE-score
+    parent {sample}-FIRE-score
+    shortLabel {sample}-{hap}-FIRE-score
+    longLabel  {sample}-{hap}-FIRE-score
+    bigDataUrl {file}
+    type bigWig
+    visibility {viz}
+    color {color}
+"""
+
+
 MULTI_WIG = """
-track coverage-{sample}-{hap}
-longLabel {sample}-{hap} coverage
-shortLabel {sample}-{hap} coverage
+track {sample}-{hap}-coverage
+parent {sample}-coverage
+longLabel {sample}-{hap}-coverage
+shortLabel {sample}-{hap}-coverage
 container multiWig
 aggregate stacked
 showSubtrackColorOnUi on
@@ -138,22 +120,23 @@ autoScale off
 alwaysZero on
 viewLimits 0:{upper_coverage}
 visibility full
-maxHeightPixels 100:100:8
+maxHeightPixels 100:50:8
+priority 90
     
-    track Accessible-{sample}-{hap}
-    parent coverage-{sample}-{hap}
+    track {sample}-{hap}-accessible
+    parent {sample}-{hap}-coverage
     bigDataUrl {acc}
     type bigWig
     color 139,0,0
     
-    track Linker-{sample}-{hap}
-    parent coverage-{sample}-{hap}
+    track {sample}-{hap}-linker
+    parent {sample}-{hap}-coverage
     bigDataUrl {link}
     type bigWig
     color 147,112,219
     
-    track Nucleosomes-{sample}-{hap}
-    parent coverage-{sample}-{hap}
+    track {sample}-{hap}-nucleosome
+    parent {sample}-{hap}-coverage
     bigDataUrl {nuc}
     type bigWig
     color 169,169,169
@@ -161,49 +144,108 @@ maxHeightPixels 100:100:8
 
 
 FIRE_SCORE_AND_FDR = """
-track FIRE_FDR
+track {sample}-FIRE-FDR
 compositeTrack on
-shortLabel FIRE FDR
-longLabel FIRE scores and FDR values
-type bigWig
+shortLabel {sample}-FIRE-FDR
+longLabel {sample}-FIRE-FDR
+visibility full
+type bigWig 0 1000
 maxItems 100000
-maxHeightPixels 100:100:1
+maxHeightPixels 100:50:1
 alwaysZero on
+priority 10
 
-    track log_fdr
-    parent FIRE_FDR
+    track {sample}-log-fdr
+    parent {sample}-FIRE-FDR
     bigDataUrl {fdr}
-    shortLabel -10log10 FDR
-    longLabel -10log10 FDR
+    shortLabel {sample} -10log10 FDR
+    longLabel {sample} -10log10 FDR
     autoScale on
     visibility full
     yLineOnOff on
     yLineMark {y_line}
     gridDefault on
-    
-    track fire_score
-    parent FIRE_FDR
-    bigDataUrl {score}
-    shortLabel FIRE score
-    longLabel FIRE score
-    visibility full
-    alwaysZero on
-    viewLimits 0:100
-    viewLimits 0.0:100.0
-    windowingFunction maximum
+"""
+
+TRACK_GROUPS = """
+# grouping for fibers 
+track {sample}-fibers
+compositeTrack on
+shortLabel {sample}-fibers
+longLabel {sample}-fibers
+type bigBed 12 +
+maxItems 100000
+visibility dense
+priority 80
+
+# grouping for peaks
+track {sample}-peaks
+compositeTrack on
+shortLabel {sample}-peaks
+longLabel {sample}-peaks
+type bigBed 12 +
+maxItems 100000
+visibility dense
+priority 30
+
+# grouping for coverage
+track {sample}-coverage
+superTrack on show
+shortLabel {sample}-coverage
+longLabel {sample}-coverage
+priority 90
 """
 
 DECORATED = """
-track {sample}-{hap}-fibers
-shortLabel {sample}-{hap}-fibers
-longLabel {sample}-{hap}-fibers
-visibility squish
-type bigBed 12 +
-itemRgb On
-filterText.keywords {hap}
-bigDataUrl bb/fire-fibers.bb 
-decorator.default.bigDataUrl bb/fire-fiber-decorators.bb 
-decorator.default.filterValues.keywords FIRE,Linker
+    track {sample}-{hap}-fibers
+    parent {sample}-fibers
+    shortLabel {sample}-{hap}-fibers
+    longLabel {sample}-{hap}-fibers
+    visibility dense
+    type bigBed 12 +
+    itemRgb On
+    filterText.keywords {hap}
+    bigDataUrl bb/fire-fibers.bb 
+    decorator.default.bigDataUrl bb/fire-fiber-decorators.bb 
+    decorator.default.filterValues.keywords 5mC,m6A,NUC,LINKER,FIRE
+    decorator.default.filterValuesDefault.keywords LINKER,FIRE
+"""
+
+
+# type bigBed 6 + 4
+FIRE_TEMPLATE = """
+    track {sample}-FIRE-peaks
+    parent {sample}-peaks
+    type bigNarrowPeak
+    bigDataUrl {file}
+    shortLabel {sample}-FIRE-peaks
+    longLabel {sample}-FIRE-peaks
+    visibility dense
+    maxHeightPixels 50:50:1
+"""
+
+WIDE_TEMPLATE = """
+    track {sample}-{name}
+    parent {sample}-peaks
+    shortLabel {sample}-{name}
+    longLabel {sample}-{name}
+    type bigBed 
+    bigDataUrl {file}
+    visibility dense
+    maxItems 100000
+    priority 30
+"""
+
+HAP_TEMPLATE = """
+    track {sample}-hap-differences
+    parent {sample}-peaks
+    type bigBed 9 +
+    itemRgb on
+    bigDataUrl {file}
+    shortLabel {sample}-hap-differences
+    longLabel {sample}-hap-differences
+    visibility dense
+    maxHeightPixels 25:25:1
 """
 
 
@@ -222,6 +264,7 @@ def generate_trackhub(
     open(f"{trackhub_dir}/hub.txt", "w").write(HUB.format(sample=sample))
     open(f"{trackhub_dir}/genomes.txt", "w").write(GENOMES.format(ref=ref))
     trackDb = open(f"{trackhub_dir}/trackDb.txt", "w")
+    trackDb.write(TRACK_GROUPS.format(sample=sample))
 
     for hap in ["all", "hap1", "hap2", "unk"]:
         # add coverage tracks
@@ -248,7 +291,7 @@ def generate_trackhub(
             trackDb.write(HAP_TEMPLATE.format(file=file, sample=sample))
             file = "bb/FDR-wide-peaks.bb"
             trackDb.write(
-                BB_TEMPLATE.format(file=file, name="FDR-wide-peaks", sample=sample)
+                WIDE_TEMPLATE.format(file=file, name="FDR-wide-peaks", sample=sample)
             )
 
         # add percent accessible tracks
@@ -256,6 +299,7 @@ def generate_trackhub(
         if hap == "all":
             color = "0,0,0"
             trackDb.write(PER_ACC_COMP.format(sample=sample))
+            trackDb.write(FIRE_SCORE_COMP.format(sample=sample, file=f"bw/score.bw"))
         elif hap == "hap1":
             color = "0,0,255"
         elif hap == "hap2":
@@ -266,6 +310,17 @@ def generate_trackhub(
             trackDb.write(
                 PER_ACC_TEMPLATE.format(
                     sample=sample, hap=hap, file=file, color=color, viz=viz
+                )
+            )
+            zhap = "" if hap == "all" else f"_{hap}".replace("hap", "H")
+
+            trackDb.write(
+                FIRE_SCORE.format(
+                    sample=sample,
+                    hap=hap,
+                    file=f"bw/score{zhap}.bw",
+                    viz=viz,
+                    color=color,
                 )
             )
 
@@ -293,6 +348,7 @@ def generate_trackhub(
     # FDR scores
     trackDb.write(
         FIRE_SCORE_AND_FDR.format(
+            sample=sample,
             fdr=f"bw/log_FDR.bw",
             score=f"bw/score.bw",
             y_line=-10 * np.log10(0.05),

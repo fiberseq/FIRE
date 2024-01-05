@@ -3,7 +3,7 @@
 #
 rule genome_bedgraph:
     input:
-        bam=ancient(lambda wc: data.loc[wc.sm, "bam"]),
+        bam=rules.merged_fire_bam.output.bam,
         fai=ancient(f"{ref}.fai"),
     output:
         d4="results/{sm}/coverage/{sm}.d4",
@@ -45,7 +45,7 @@ rule coverage:
 #
 rule fiber_locations_chromosome:
     input:
-        bam=lambda wc: data.loc[wc.sm, "bam"],
+        bam=rules.merged_fire_bam.output.bam,
     output:
         bed=temp("temp/{sm}/coverage/{chrom}.fiber-locations.bed.gz"),
     threads: 8
@@ -124,4 +124,27 @@ rule exclude_from_shuffle:
             | bedtools merge \
             | bgzip -@ {threads} \
         > {output.bed}
+        """
+
+
+rule unreliable_coverage_regions:
+    input:
+        bg=rules.genome_bedgraph.output.bg,
+        minimum=rules.coverage.output.minimum,
+        maximum=rules.coverage.output.maximum,
+    output:
+        bed="results/{sm}/coverage/unreliable-coverage-regions.bed.gz",
+        bed_tbi="results/{sm}/coverage/unreliable-coverage-regions.bed.gz.tbi",
+    threads: 4
+    conda:
+        conda
+    shell:
+        """
+        MIN=$(cat {input.minimum})
+        MAX=$(cat {input.maximum})
+        zcat {input.bg} \
+            | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX' \
+            | bgzip -@ {threads} \
+        > {output.bed}
+        tabix -f -p bed {output.bed}
         """

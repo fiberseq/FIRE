@@ -11,8 +11,6 @@ min_version("7.32.3")
 
 ref = config["ref"]
 ref_name = config["ref_name"]
-n_chunks = config["n_chunks"]
-chunks = [f"{i+1}-of-{n_chunks}" for i in range(n_chunks)]
 
 dhs = config.get("dhs", workflow.source_path("annotations/GM12878_DHS.bed.gz"))
 excludes = config.get("excludes", [])
@@ -63,9 +61,8 @@ el_types = ["fire", "linker", "nucleosome"]
 
 
 include: "rules/common.smk"
-include: "rules/coverages.smk"
-include: "rules/train-model.smk"
 include: "rules/apply-model.smk"
+include: "rules/coverages.smk"
 include: "rules/FDR-peaks.smk"
 include: "rules/peak-stats.smk"
 include: "rules/decorated-reads.smk"
@@ -78,7 +75,6 @@ chroms = get_chroms()
 wildcard_constraints:
     chrom="|".join(chroms),
     call="|".join(["msp", "m6a"]),
-    chunk="|".join(chunks),
     sm="|".join(data.index),
     types="|".join(types),
     fdr="\d+",
@@ -88,12 +84,7 @@ wildcard_constraints:
 
 
 localrules:
-    bed_chunks,
-    dhs_null,
-    model_input,
-    make_model,
     merge_model_results,
-    model_bam,
     trackhub,
     coverage,
     clustering_vs_null,
