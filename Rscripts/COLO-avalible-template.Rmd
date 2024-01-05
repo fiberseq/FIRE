@@ -1,0 +1,205 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+# get a fire peak data table called `df`
+source("Rscripts/utils.R")
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+library(rlang)
+```
+
+```{r}
+sd_range = 2
+# Tumor PS00357
+fire = fread("results/PS00357/FDR-peaks/FDR-FIRE-peaks.bed.gz") %>%
+    # require 95% phasing
+    filter(
+        `#chrom` != "chrX",
+        `#chrom` != "chrY",
+    ) %>%
+    filter(coverage * 0.95 <= coverage_H1 + coverage_H2) 
+nrow(fire)
+cov=getmode(fire$coverage)/2
+cov=getmode(fire$coverage_H1 + fire$coverage_H2)/2
+min_cov = cov - sd_range * sqrt(cov)
+max_cov = cov + sd_range * sqrt(cov)
+min_cov
+cov
+max_cov
+
+dup_cov = 2 * cov
+min_dup_cov = max(dup_cov - sd_range*sqrt(dup_cov) , max_cov)
+
+# make H1 the hap with more coverage always
+fire$swap = fire$coverage_H1 < fire$coverage_H2 
+#tmp[R2 == val, c("R1", "R2") := .(R2, R1)]
+fire[swap==TRUE, c("coverage_H1", "coverage_H2") := .(coverage_H2, coverage_H1)]
+fire[swap==TRUE, c("fire_coverage_H1", "fire_coverage_H2") := .(fire_coverage_H2, fire_coverage_H1)]
+
+norm_vs_dup_df_wide = fire %>% 
+    filter(coverage_H1 >=coverage_H2) %>%
+    # require normal coverage
+    filter(coverage_H2 > min_cov & coverage_H2 < max_cov ) %>%
+    mutate(
+        is_dup=coverage_H1 > min_dup_cov
+    ) %>%
+    mutate(
+        percent_accessible_dup = 100*fire_coverage_H1 / coverage_H1,
+        percent_accessible_norm = 100*fire_coverage_H2 / coverage_H2,
+    ) %>%
+    mutate(
+        norm_minus_dup = percent_accessible_norm - percent_accessible_dup 
+    )
+
+norm_vs_dup_df = norm_vs_dup_df_wide %>%
+    pivot_longer(
+        cols = c("percent_accessible_dup", "percent_accessible_norm"),
+        names_to = "type",
+        values_to = "percent"
+    )
+
+norm_vs_dup_df_coverage = norm_vs_dup_df_wide %>%
+    pivot_longer(
+        cols = c("coverage_H1", "coverage_H2"),
+        names_to = "type",
+        values_to = "coverage_hap"
+    )
+
+table(norm_vs_dup_df_wide$is_dup)
+```
+
+```{r}
+norm_vs_dup_df %>%
+    filter(is_dup) %>%
+    ggplot(aes(fill=type, x=percent)) +
+    #geom_histogram(binwidth=2, position="identity", alpha=0.7) +
+    geom_density(alpha=0.7) +
+    scale_fill_manual("",
+        labels=c("Duplicated haplotype", "Normal haplotype"),
+        values=c("darkred", "skyblue"),
+    ) +
+    scale_x_continuous("Percent accessible", limits=c(0, 100)) +
+    theme_minimal_grid() +
+    theme(legend.position="top")
+my_ggsave("Figures/COLO-available-template.pdf") 
+
+norm_vs_dup_df_wide %>%
+    ggplot(aes(x=norm_minus_dup, fill=is_dup)) + 
+    geom_density(alpha=0.4, aes(y = after_stat(scaled))) +
+    scale_x_continuous("Percent accessible (normal - duplicated)", limits=c(-100,100)) +
+    theme_minimal_grid() +
+    #facet_col(~is_dup)+
+    scale_fill_manual("",
+        labels=c("Regions with normal coverage", "Regions with one duplicated haplotype"),
+        values=c("skyblue", "darkred"),
+    ) +
+    theme(legend.position="top")
+my_ggsave("Figures/COLO-available-template-diff.pdf")
+
+
+# plot the coverage of the duplicated haplotype vs the normal haplotype
+norm_vs_dup_df_coverage %>%
+    filter(is_dup) %>%
+    ggplot(aes(fill=type, x=coverage_hap)) +
+    geom_density(
+        #aes(y = after_stat(scaled)),
+        alpha=0.7, adjust=0.6
+    ) +
+    scale_fill_manual("",
+        labels=c("Duplicated haplotype", "Normal haplotype"),
+        values=c("darkred", "skyblue"),
+    ) +
+    scale_x_continuous("Coverage", limits=c(0,100), breaks=seq(0,100,25)) +
+    theme_minimal_grid() +
+    theme(legend.position="top")
+my_ggsave("Figures/COLO-available-template-total-coverage.pdf") 
+
+```
+
+
+```{r}
+median(norm_vs_dup_df_wide$coverage_H1)
+median(norm_vs_dup_df_wide$coverage_H2)
+median(norm_vs_dup_df_wide[is_dup==TRUE]$coverage_H1)
+```
+
+
+```{r}
+pdf("tmp.pdf")
+hist(
+    fire[coverage<200]$coverage_H2, breaks=100
+    )
+dev.off()
+
+getmode(fire$coverage_H1)
+getmode(fire$coverage_H2)
+```
+
+
+
+```{r}
+a=fread("COLO-asm/hg38.stats.bed.gz")
+b=fread("COLO-asm/hg38.PS00357.stats.bed.gz")
+c=fread("COLO-asm/tmp.stats.bed.gz")
+d=fread("COLO-asm/T.tmp.stats.bed.gz")
+hg = bind_rows(list(BL=a, T=b, BL_DSA=c, T_DSA=d), .id="ID")
+hg
+```
+
+```{r}
+shg = hg %>%  
+    group_by(ID) %>%
+    summarise(
+        mismatches=sum(mismatches),
+        matches=sum(matches),
+        total_bp = sum(query_length),
+        read_count = n(),
+    ) %>%
+    mutate(
+        #percent_mismatch = 100 * mismatches / total_bp,
+        mismatches_per_1000bp = 1000 * mismatches / total_bp,
+        is_dsa = grepl("DSA", ID),
+        #mismatch_ratio = mismatches / matches,
+    )
+shg
+z=shg %>%
+    select(-read_count, -matches) %>%
+    pivot_longer(cols=-c("ID","is_dsa")) %>%
+    ggplot(aes(x=ID, y=value, fill=is_dsa)) +
+    geom_bar(stat="identity") +
+    geom_text_repel(
+        aes(label=comma(value)), 
+        position=position_dodge(width=0.9), 
+        vjust=-0.25
+    ) +
+    scale_y_continuous(
+        "",
+        #trans="log10",
+    ) +
+    scale_fill_manual("",
+        labels=c("GRCh38", "DSA"),
+        values=c("darkred", "skyblue"),
+    ) +
+    theme_minimal_grid() +
+    facet_col(~name, scales="free")+
+    theme(
+        legend.position="top",
+    )
+my_ggsave("Figures/COLO-asm-mismatch.pdf")
+```
+
+```{r}
+   filter(
+        `#reference_name` != "chrEBV",
+        `#reference_name` != "chrM",
+        `#reference_name` != "chrX",
+        `#reference_name` != "chrY",
+    ) %>%
+```
