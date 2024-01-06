@@ -130,51 +130,66 @@ rule fire_sites_index:
         """
 
 
-rule element_coverages_by_type_by_chrom:
+rule split_by_hap_per_chrom:
     input:
         bed=rules.merge_model_results.output.bed,
         tbi=rules.index_model_results.output.tbi,
         fai=f"{ref}.fai",
     output:
         #bed=temp("temp/{sm}/coverage/{hp}/{el_type}_coverage_{hp}_{chrom}.bed.gz"),
-        both=temp("temp/{sm}/coverage/all/{el_type}_coverage_all_{chrom}.bed.gz"),
-        H1=temp("temp/{sm}/coverage/hap1/{el_type}_coverage_hap1_{chrom}.bed.gz"),
-        H2=temp("temp/{sm}/coverage/hap2/{el_type}_coverage_hap2_{chrom}.bed.gz"),
-    benchmark:
-        "benchmarks/{sm}/element_coverages/{el_type}_{chrom}.tsv"
+        both=pipe("temp/{sm}/coverage/all/{chrom}.bed"),
+        H1=pipe("temp/{sm}/coverage/hap1/{chrom}.bed"),
+        H2=pipe("temp/{sm}/coverage/hap2/{chrom}.bed"),
     conda:
         conda
-    params:
-        filter_cmd=grep_command_for_el_type,
-        #filter_hap=hap_grep_term,
     resources:
         time=240,
-        mem_mb=8 * 1024,
-    threads: 4
+        mem_mb=16 * 1024,
+    threads: 8
     shell:
         """
-        tabix {input.bed} {wildcards.chrom} \
-            | {params.filter_cmd} \
+        tabix {input.bed} {wildcards.chrom} | tee \
+            >( (rg -w H1 || true) > {output.H1} ) \
+            >( (rg -w H2 || true) > {otuput.H2} ) \
+            > {output.both}
+        """
+
+
+# el_types = ["fire", "linker", "nucleosome"]
+rule split_hap_by_element_type_per_chrom:
+    input:
+        bed="temp/{sm}/coverage/{hp}/{chrom}.bed",
+        fai=f"{ref}.fai",
+    output:
+        fire=temp("temp/{sm}/coverage/{hp}/fire_{chrom}.bed.gz"),
+        link=temp("temp/{sm}/coverage/{hp}/linker_{chrom}.bed.gz"),
+        nuc=temp("temp/{sm}/coverage/{hp}/nucleosome_{chrom}.bed.gz"),
+    params:
+        min_fire_fdr=min_fire_fdr,
+    shell:
+        """
+        cat {input.bed} \
             | tee \
                 >( \
-                    (rg -w H1 || true) \
+                    awk '$10 <= {params.min_fire_fdr}' \
                         | bedtools genomecov -bg -i - -g {input.fai} \
-                        | bgzip > {output.H1} \
+                        | bgzip > {output.fire} \
                 ) \
                 >( \
-                    (rg -w H2 || true) \
+                    (awk '$10<=1.0 && $10>{params.min_fire_fdr}') \
                         | bedtools genomecov -bg -i - -g {input.fai} \
-                        | bgzip > {output.H2} \
+                        | bgzip > {output.link} \
                 ) \
+            | awk '$10<={params.min_fire_fdr}' \
             | bedtools genomecov -bg -i - -g {input.fai} \
-            | bgzip > {output.both}
+            | bgzip > {output.nuc}
         """
 
 
 rule element_coverages_by_type:
     input:
         beds=expand(
-            "temp/{sm}/coverage/{hp}/{el_type}_coverage_{hp}_{chrom}.bed.gz",
+            "temp/{sm}/coverage/{hp}/{el_type}_{chrom}.bed.gz",
             chrom=get_chroms(),
             allow_missing=True,
         ),
