@@ -11,3 +11,4 @@ reason: True
 use-conda: True
 use-singularity: True
 show-failed-logs: True
+cores: 32
