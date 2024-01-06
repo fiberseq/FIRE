@@ -199,7 +199,7 @@ rule element_coverages_per_chrom:
         names="\t".join(el_types),
     resources:
         time=300,
-    threads: 4
+    threads: 2
     shell:
         """
         HAS_LINES=$(zcat {input.beds} | grep -cv '^#') || true
