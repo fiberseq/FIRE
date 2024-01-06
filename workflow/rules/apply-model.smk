@@ -138,8 +138,8 @@ rule element_coverages_by_type_by_chrom:
     output:
         #bed=temp("temp/{sm}/coverage/{hp}/{el_type}_coverage_{hp}_{chrom}.bed.gz"),
         both=temp("temp/{sm}/coverage/all/{el_type}_coverage_all_{chrom}.bed.gz"),
-        H1=temp("temp/{sm}/coverage/H1/{el_type}_coverage_H1_{chrom}.bed.gz"),
-        H2=temp("temp/{sm}/coverage/H2/{el_type}_coverage_H2_{chrom}.bed.gz"),
+        H1=temp("temp/{sm}/coverage/hap1/{el_type}_coverage_hap1_{chrom}.bed.gz"),
+        H2=temp("temp/{sm}/coverage/hap2/{el_type}_coverage_hap2_{chrom}.bed.gz"),
     benchmark:
         "benchmarks/{sm}/element_coverages/{el_type}_{chrom}.tsv"
     conda:
