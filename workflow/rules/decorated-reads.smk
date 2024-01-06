@@ -45,7 +45,6 @@ rule decorate_fibers_1:
         """
 
 
-
 rule decorate_fibers_2:
     input:
         decorated=expand(
