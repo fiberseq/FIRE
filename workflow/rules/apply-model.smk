@@ -146,7 +146,8 @@ rule element_coverages_by_type_by_chrom:
         filter_hap=hap_grep_term,
     resources:
         time=240,
-    threads: 4
+        mem_mb=8 * 1024,
+    threads: 1
     shell:
         """
         ( \
