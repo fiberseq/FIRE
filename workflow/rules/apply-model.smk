@@ -150,7 +150,7 @@ rule split_by_hap_per_chrom:
         """
         tabix {input.bed} {wildcards.chrom} | tee \
             >( (rg -w H1 || true) > {output.H1} ) \
-            >( (rg -w H2 || true) > {otuput.H2} ) \
+            >( (rg -w H2 || true) > {output.H2} ) \
             > {output.both}
         """
 
