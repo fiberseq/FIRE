@@ -138,7 +138,7 @@ rule element_coverages_by_type_by_chrom:
     output:
         bed=temp("temp/{sm}/coverage/{hp}/{el_type}_coverage_{hp}_{chrom}.bed.gz"),
     benchmark:
-        "benchmarks/{sm}/element_coverages/{el_type}_{hp}.tsv"
+        "benchmarks/{sm}/element_coverages/{el_type}_{hp}_{chrom}.tsv"
     conda:
         conda
     params:
