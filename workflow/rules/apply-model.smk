@@ -189,31 +189,6 @@ rule split_hap_by_element_type_per_chrom:
             | bgzip > {output.nuc}
         """
 
-
-rule element_coverages_by_type:
-    input:
-        beds=expand(
-            "temp/{sm}/coverage/{hp}/{el_type}_{chrom}.bed.gz",
-            chrom=get_chroms(),
-            allow_missing=True,
-        ),
-    output:
-        bed=temp("temp/{sm}/coverage/{hp}/{el_type}_coverage_{hp}.bed.gz"),
-    conda:
-        conda
-    resources:
-        time=240,
-    threads: 1
-    shell:
-        """
-        ( \
-            printf "#chrom\\tstart\\tend\\tcoverage\\n" | bgzip; \
-            cat {input.beds} \
-        ) \
-            > {output.bed}
-        """
-
-
 rule element_coverages_per_chrom:
     input:
         beds=expand(
