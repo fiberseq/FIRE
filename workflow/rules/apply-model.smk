@@ -195,8 +195,6 @@ rule element_coverages_by_type:
         ),
     output:
         bed=temp("temp/{sm}/coverage/{hp}/{el_type}_coverage_{hp}.bed.gz"),
-    benchmark:
-        "benchmarks/{sm}/element_coverages/{el_type}_{hp}.tsv"
     conda:
         conda
     resources:
