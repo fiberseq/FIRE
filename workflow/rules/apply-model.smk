@@ -136,9 +136,12 @@ rule element_coverages_by_type_by_chrom:
         tbi=rules.index_model_results.output.tbi,
         fai=f"{ref}.fai",
     output:
-        bed=temp("temp/{sm}/coverage/{hp}/{el_type}_coverage_{hp}_{chrom}.bed.gz"),
+        #bed=temp("temp/{sm}/coverage/{hp}/{el_type}_coverage_{hp}_{chrom}.bed.gz"),
+        both=temp("temp/{sm}/coverage/all/{el_type}_coverage_all_{chrom}.bed.gz"),
+        H1=temp("temp/{sm}/coverage/H1/{el_type}_coverage_H1_{chrom}.bed.gz"),
+        H2=temp("temp/{sm}/coverage/H2/{el_type}_coverage_H2_{chrom}.bed.gz"),
     benchmark:
-        "benchmarks/{sm}/element_coverages/{el_type}_{hp}_{chrom}.tsv"
+        "benchmarks/{sm}/element_coverages/{el_type}_{chrom}.tsv"
     conda:
         conda
     params:
@@ -147,17 +150,24 @@ rule element_coverages_by_type_by_chrom:
     resources:
         time=240,
         mem_mb=8 * 1024,
-    threads: 1
+    threads: 4
     shell:
         """
-        ( \
-            tabix {input.bed} {wildcards.chrom} \
-                | (rg -w {params.filter_hap} || true) \
-                | {params.filter_cmd} \
-                | bedtools genomecov -bg -i - -g {input.fai} \
-        ) \
-            | bgzip -@ {threads} \
-            > {output.bed}
+        tabix {input.bed} {wildcards.chrom} \
+            | {params.filter_cmd} \
+            | tee \
+                >( \
+                    (rg -w H1 || true) \
+                        | bedtools genomecov -bg -i - -g {input.fai} \
+                        | bgzip > {output.H1} \
+                ) \
+                >( \
+                    (rg -w H2 || true) \
+                        | bedtools genomecov -bg -i - -g {input.fai} \
+                        | bgzip > {output.H2} \
+                ) \
+            | bedtools genomecov -bg -i - -g {input.fai} \
+            | bgzip > {output.both}
         """
 
 
