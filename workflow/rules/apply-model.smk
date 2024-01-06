@@ -174,7 +174,7 @@ rule element_coverages_by_type_by_chrom:
 rule element_coverages_by_type:
     input:
         beds=expand(
-            rules.element_coverages_by_type_by_chrom.output.bed,
+            "temp/{sm}/coverage/{hp}/{el_type}_coverage_{hp}_{chrom}.bed.gz",
             chrom=get_chroms(),
             allow_missing=True,
         ),
