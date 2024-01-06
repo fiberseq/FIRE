@@ -202,7 +202,6 @@ rule element_coverages_per_chrom:
         conda
     params:
         names="\t".join(el_types),
-        chrom=get_chroms()[0],
     resources:
         time=300,
     threads: 4
@@ -210,8 +209,8 @@ rule element_coverages_per_chrom:
         """
         HAS_LINES=$(zcat {input.beds} | grep -cv '^#') || true
         if [ $HAS_LINES -eq 0 ]; then
-            echo "No element coverages found for {wildcards.sm} {wildcards.hp}"
-            printf "#chrom\\tstart\\tend\\t{params.names}\\n{params.chrom}\\t0\\t1\\t0\\t0\\t0\\n" \
+            echo "No element coverages found for {wildcards.sm} {wildcards.hp} {wildcards.chrom}"
+            printf "#chrom\\tstart\\tend\\t{params.names}\\n{wildcards.chrom}\\t0\\t1\\t0\\t0\\t0\\n" \
                 | bgzip -@{threads} \
                 > {output.bed}
         else
