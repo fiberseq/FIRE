@@ -166,6 +166,10 @@ rule split_hap_by_element_type_per_chrom:
         nuc=temp("temp/{sm}/coverage/{hp}/nucleosome_{chrom}.bed.gz"),
     params:
         min_fire_fdr=min_fire_fdr,
+    threads: 4
+    resources:
+        disk_mb=100,
+        mem_mb=4 * 1024,
     shell:
         """
         cat {input.bed} \
