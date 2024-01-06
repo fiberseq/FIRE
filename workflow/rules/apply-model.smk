@@ -145,7 +145,6 @@ rule split_by_hap_per_chrom:
     resources:
         time=240,
         mem_mb=16 * 1024,
-    threads: 1
     shell:
         """
         tabix {input.bed} {wildcards.chrom} | tee \
