@@ -55,7 +55,7 @@ rule decorate_fibers_2:
         fai=f"{ref}.fai",
     output:
         decorated="results/{sm}/fiber-calls/fire-fiber-decorators.bed.gz",
-        bbd="results/{sm}/trackHub/bb/fire-fiber-decorators.bb",
+        bb="results/{sm}/trackHub/bb/fire-fiber-decorators.bb",
     threads: 1
     resources:
         time=240,
@@ -67,5 +67,5 @@ rule decorate_fibers_2:
         """
         cat {input.decorated} > {output.decorated}
         bedToBigBed -allow1bpOverlap -type=bed12+ -as={params.dec_as} \
-            {output.decorated} {input.fai} {output.bbd}
+            {output.decorated} {input.fai} {output.bb}
         """
