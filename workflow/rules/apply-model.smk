@@ -233,8 +233,6 @@ rule element_coverages:
         tbi="results/{sm}/coverage/{hp}_element_coverages.bed.gz.tbi",
     conda:
         conda
-    resources:
-        time=300,
     threads: 1
     shell:
         """
