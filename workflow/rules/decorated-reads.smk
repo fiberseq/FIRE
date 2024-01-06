@@ -19,15 +19,10 @@ rule decorate_fibers_chromosome:
         """
 
 
-rule decorate_fibers:
+rule decorate_fibers_1:
     input:
         bed=expand(
             rules.decorate_fibers_chromosome.output.bed,
-            chrom=get_chroms(),
-            allow_missing=True,
-        ),
-        decorated=expand(
-            rules.decorate_fibers_chromosome.output.decorated,
             chrom=get_chroms(),
             allow_missing=True,
         ),
@@ -35,18 +30,43 @@ rule decorate_fibers:
     output:
         bed="results/{sm}/fiber-calls/fire-fibers.bed",
         bb="results/{sm}/trackHub/bb/fire-fibers.bb",
-        decorated="results/{sm}/fiber-calls/fire-fiber-decorators.bed.gz",
-        bbd="results/{sm}/trackHub/bb/fire-fiber-decorators.bb",
-    threads: 4
+    threads: 1
+    resources:
+        time=240,
     conda:
         conda
     params:
         bed_as=workflow.source_path("../templates/bed12_filter.as"),
-        dec_as=workflow.source_path("../templates/decoration.as"),
     shell:
         """
         cat {input.bed} > {output.bed}
-        bedToBigBed -allow1bpOverlap -type=bed12+ -as={params.bed_as} {output.bed} {input.fai} {output.bb}
+        bedToBigBed -allow1bpOverlap -type=bed12+ -as={params.bed_as} \
+            {output.bed} {input.fai} {output.bb}
+        """
+
+
+
+rule decorate_fibers_2:
+    input:
+        decorated=expand(
+            rules.decorate_fibers_chromosome.output.decorated,
+            chrom=get_chroms(),
+            allow_missing=True,
+        ),
+        fai=f"{ref}.fai",
+    output:
+        decorated="results/{sm}/fiber-calls/fire-fiber-decorators.bed.gz",
+        bbd="results/{sm}/trackHub/bb/fire-fiber-decorators.bb",
+    threads: 1
+    resources:
+        time=240,
+    conda:
+        conda
+    params:
+        dec_as=workflow.source_path("../templates/decoration.as"),
+    shell:
+        """
         cat {input.decorated} > {output.decorated}
-        bedToBigBed -allow1bpOverlap -type=bed12+ -as={params.dec_as} {output.decorated} {input.fai} {output.bbd}
+        bedToBigBed -allow1bpOverlap -type=bed12+ -as={params.dec_as} \
+            {output.decorated} {input.fai} {output.bbd}
         """

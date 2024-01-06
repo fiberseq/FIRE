@@ -130,4 +130,5 @@ rule all:
             el_type=el_types,
         ),
         expand(rules.trackhub.output, sm=data.index),
-        expand(rules.decorate_fibers.output, sm=data.index),
+        expand(rules.decorate_fibers_1.output, sm=data.index),
+        expand(rules.decorate_fibers_2.output, sm=data.index),
