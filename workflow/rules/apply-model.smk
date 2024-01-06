@@ -184,6 +184,7 @@ rule split_hap_by_element_type_per_chrom:
             | bgzip > {output.nuc}
         """
 
+
 rule element_coverages_per_chrom:
     input:
         beds=expand(
@@ -215,6 +216,7 @@ rule element_coverages_per_chrom:
             > {output.bed}
         fi
         """
+
 
 rule element_coverages:
     input:
