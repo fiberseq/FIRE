@@ -136,7 +136,6 @@ rule split_by_hap_per_chrom:
         tbi=rules.index_model_results.output.tbi,
         fai=f"{ref}.fai",
     output:
-        #bed=temp("temp/{sm}/coverage/{hp}/{el_type}_coverage_{hp}_{chrom}.bed.gz"),
         both=pipe("temp/{sm}/coverage/all/{chrom}.bed"),
         H1=pipe("temp/{sm}/coverage/hap1/{chrom}.bed"),
         H2=pipe("temp/{sm}/coverage/hap2/{chrom}.bed"),
@@ -155,7 +154,6 @@ rule split_by_hap_per_chrom:
         """
 
 
-# el_types = ["fire", "linker", "nucleosome"]
 rule split_hap_by_element_type_per_chrom:
     input:
         bed="temp/{sm}/coverage/{hp}/{chrom}.bed",
@@ -172,18 +170,15 @@ rule split_hap_by_element_type_per_chrom:
         mem_mb=8 * 1024,
     shell:
         """
-        cat {input.bed} \
-            | tee \
-                >( \
-                    awk '$10<={params.min_fire_fdr}' \
-                        | bedtools genomecov -bg -i - -g {input.fai} \
-                        | bgzip > {output.fire} \
-                ) \
-                >( \
-                    (awk '$10<=1.0 && $10>{params.min_fire_fdr}') \
-                        | bedtools genomecov -bg -i - -g {input.fai} \
-                        | bgzip > {output.link} \
-                ) \
+        cat {input.bed} | tee \
+            >( awk '$10<={params.min_fire_fdr}' \
+                | bedtools genomecov -bg -i - -g {input.fai} \
+                | bgzip > {output.fire} \
+            ) \
+            >( (awk '$10<=1.0 && $10>{params.min_fire_fdr}') \
+                | bedtools genomecov -bg -i - -g {input.fai} \
+                | bgzip > {output.link} \
+            ) \
             | awk '$10>1.0' \
             | bedtools genomecov -bg -i - -g {input.fai} \
             | bgzip > {output.nuc}
