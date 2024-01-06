@@ -70,7 +70,7 @@ rule merge_model_results:
     conda:
         conda
     params:
-        n_chunks=len(get_chroms())+1,
+        n_chunks=len(get_chroms()) + 1,
     priority: 20
     shell:
         """
@@ -130,12 +130,13 @@ rule fire_sites_index:
         """
 
 
-rule element_coverages_by_type:
+rule element_coverages_by_type_by_chrom:
     input:
         bed=rules.merge_model_results.output.bed,
+        tbi=rules.index_model_results.output.tbi,
         fai=f"{ref}.fai",
     output:
-        bed=temp("temp/{sm}/coverage/{hp}/{el_type}_coverage_{hp}.bed.gz"),
+        bed=temp("temp/{sm}/coverage/{hp}/{el_type}_coverage_{hp}_{chrom}.bed.gz"),
     benchmark:
         "benchmarks/{sm}/element_coverages/{el_type}_{hp}.tsv"
     conda:
@@ -149,13 +150,38 @@ rule element_coverages_by_type:
     shell:
         """
         ( \
-            printf "#chrom\\tstart\\tend\\tcoverage\\n"; \
-            bgzip -cd -@{threads} {input.bed} \
+            tabix {input.bed} {wildcards.chrom} \
                 | (rg -w {params.filter_hap} || true) \
                 | {params.filter_cmd} \
                 | bedtools genomecov -bg -i - -g {input.fai} \
         ) \
-            | bgzip -@{threads} \
+            | bgzip -@ {threads} \
+            > {output.bed}
+        """
+
+
+rule element_coverages_by_type:
+    input:
+        beds=expand(
+            rules.element_coverages_by_type_by_chrom.output.bed,
+            chrom=get_chroms(),
+            allow_missing=True,
+        ),
+    output:
+        bed=temp("temp/{sm}/coverage/{hp}/{el_type}_coverage_{hp}.bed.gz"),
+    benchmark:
+        "benchmarks/{sm}/element_coverages/{el_type}_{hp}.tsv"
+    conda:
+        conda
+    resources:
+        time=240,
+    threads: 1
+    shell:
+        """
+        ( \
+            printf "#chrom\\tstart\\tend\\tcoverage\\n" | bgzip; \
+            cat {input.beds} \
+        ) \
             > {output.bed}
         """
 
