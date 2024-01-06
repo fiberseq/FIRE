@@ -143,6 +143,7 @@ rule split_by_hap_per_chrom:
     conda:
         conda
     resources:
+        disk_mb=100,
         time=240,
         mem_mb=4 * 1024,
     shell:
