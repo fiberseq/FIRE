@@ -144,8 +144,7 @@ rule split_by_hap_per_chrom:
         conda
     resources:
         time=240,
-        mem_mb=16 * 1024,
-    threads: len(get_chroms())
+        mem_mb=4 * 1024,
     shell:
         """
         tabix {input.bed} {wildcards.chrom} | tee \
