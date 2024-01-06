@@ -214,16 +214,15 @@ rule element_coverages_by_type:
         """
 
 
-rule element_coverages:
+rule element_coverages_per_chrom:
     input:
         beds=expand(
-            rules.element_coverages_by_type.output.bed,
+            "temp/{sm}/coverage/{hp}/{el_type}_{chrom}.bed.gz",
             el_type=el_types,
             allow_missing=True,
         ),
     output:
-        bed="results/{sm}/coverage/{hp}_element_coverages.bed.gz",
-        tbi="results/{sm}/coverage/{hp}_element_coverages.bed.gz.tbi",
+        bed=temp("temp/{sm}/coverage/{hp}_{chrom}_element_coverages.bed.gz"),
     conda:
         conda
     params:
@@ -237,12 +236,34 @@ rule element_coverages:
         HAS_LINES=$(zcat {input.beds} | grep -cv '^#') || true
         if [ $HAS_LINES -eq 0 ]; then
             echo "No element coverages found for {wildcards.sm} {wildcards.hp}"
-            printf "#chrom\\tstart\\tend\\t{params.names}\\n{params.chrom}\\t0\\t1\\t0\\t0\\t0\\n" | bgzip -@{threads} > {output.bed}
+            printf "#chrom\\tstart\\tend\\t{params.names}\\n{params.chrom}\\t0\\t1\\t0\\t0\\t0\\n" \
+                | bgzip -@{threads} \
+                > {output.bed}
         else
             bedtools unionbedg -header -i {input.beds} -names {params.names} \
                 | sed 's/^chrom/#chrom/' \
                 | bgzip -@ {threads} \
             > {output.bed}
         fi
+        """
+
+rule element_coverages:
+    input:
+        beds=expand(
+            rules.element_coverages_per_chrom.output.bed,
+            chrom=get_chroms(),
+            allow_missing=True,
+        ),
+    output:
+        bed="results/{sm}/coverage/{hp}_element_coverages.bed.gz",
+        tbi="results/{sm}/coverage/{hp}_element_coverages.bed.gz.tbi",
+    conda:
+        conda
+    resources:
+        time=300,
+    threads: 1
+    shell:
+        """
+        cat {input.beds} > {output.bed}
         tabix -p bed {output.bed}
         """
