@@ -171,7 +171,7 @@ rule split_hap_by_element_type_per_chrom:
         cat {input.bed} \
             | tee \
                 >( \
-                    awk '$10 <= {params.min_fire_fdr}' \
+                    awk '$10<={params.min_fire_fdr}' \
                         | bedtools genomecov -bg -i - -g {input.fai} \
                         | bgzip > {output.fire} \
                 ) \
@@ -180,7 +180,7 @@ rule split_hap_by_element_type_per_chrom:
                         | bedtools genomecov -bg -i - -g {input.fai} \
                         | bgzip > {output.link} \
                 ) \
-            | awk '$10<={params.min_fire_fdr}' \
+            | awk '$10>1.0' \
             | bedtools genomecov -bg -i - -g {input.fai} \
             | bgzip > {output.nuc}
         """
