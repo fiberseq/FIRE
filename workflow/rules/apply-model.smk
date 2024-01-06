@@ -146,7 +146,7 @@ rule element_coverages_by_type_by_chrom:
         conda
     params:
         filter_cmd=grep_command_for_el_type,
-        filter_hap=hap_grep_term,
+        #filter_hap=hap_grep_term,
     resources:
         time=240,
         mem_mb=8 * 1024,
