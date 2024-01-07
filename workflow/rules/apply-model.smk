@@ -64,9 +64,7 @@ rule merge_model_results:
             rules.extract_from_fire.output.bed, chrom=get_chroms(), allow_missing=True
         ),
     output:
-        bed="results/{sm}/fiber-calls/model.results.bed.gz",
-    benchmark:
-        "benchmarks/{sm}/merge_model_results.tsv"
+        bed=temp("temp/{sm}/fiber-calls/model.results.bed.gz"),
     threads: 8
     conda:
         conda
