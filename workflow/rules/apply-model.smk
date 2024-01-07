@@ -40,7 +40,7 @@ rule extract_from_fire:
     input:
         bam=rules.fire.output.bam,
     output:
-        bed=temp("temp/{sm}/chrom/{chrom}.sorted.bed"),
+        bed=temp("temp/{sm}/chrom/{chrom}.sorted.bed.gz"),
     threads: 4
     conda:
         conda
@@ -53,6 +53,7 @@ rule extract_from_fire:
             | LC_ALL=C sort \
                 --parallel={threads} \
                 -k1,1 -k2,2n -k3,3n -k4,4 \
+            | bgzip -@ {threads} \
             > {output.bed}
         """
 
@@ -74,13 +75,7 @@ rule merge_model_results:
     priority: 20
     shell:
         """
-        LC_ALL=C sort \
-            --parallel={threads} \
-            --batch-size={params.n_chunks} \
-            -k1,1 -k2,2n -k3,3n -k4,4 -m -u \
-            {input.beds} \
-          | bgzip -@ {threads} \
-          > {output.bed}
+        cat {input.beds} > {output.bed}
         """
 
 
