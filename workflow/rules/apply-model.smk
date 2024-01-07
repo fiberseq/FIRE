@@ -113,7 +113,7 @@ rule fire_sites_index:
     input:
         bed=rules.fire_sites.output.bed,
     output:
-        tbi="results/{sm}/fiber-calls/FIRE.bed.gz.tbi",
+        tbi=rules.fire_sites.output.bed + ".tbi",
     threads: 1
     conda:
         conda
