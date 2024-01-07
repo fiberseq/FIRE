@@ -54,7 +54,7 @@ rule decorate_fibers_2:
         ),
         fai=f"{ref}.fai",
     output:
-        decorated="results/{sm}/fiber-calls/fire-fiber-decorators.bed.gz",
+        decorated=temp("temp/{sm}/fiber-calls/fire-fiber-decorators.bed.gz"),
         bb="results/{sm}/trackHub/bb/fire-fiber-decorators.bb",
     threads: 1
     resources:
