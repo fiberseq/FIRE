@@ -58,7 +58,7 @@ rule decorate_fibers_2:
         bb="results/{sm}/trackHub/bb/fire-fiber-decorators.bb",
     threads: 1
     resources:
-        time=60*8,
+        time=60*16,
     conda:
         conda
     params:
