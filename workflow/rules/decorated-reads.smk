@@ -2,7 +2,7 @@ rule decorate_fibers_chromosome:
     input:
         bam=rules.merged_fire_bam.output.bam,
     output:
-        bed=temp("temp/{sm}/decorate/{chrom}.bed"),
+        bed=temp("temp/{sm}/decorate/{chrom}.bed.gz"),
         decorated=temp("temp/{sm}/decorate/{chrom}.dec.bed.gz"),
     threads: 8
     resources:
@@ -28,7 +28,7 @@ rule decorate_fibers_1:
         ),
         fai=f"{ref}.fai",
     output:
-        bed="results/{sm}/fiber-calls/fire-fibers.bed",
+        bed="results/{sm}/fiber-calls/fire-fibers.bed.gz",
         bb="results/{sm}/trackHub/bb/fire-fibers.bb",
     threads: 1
     resources:
