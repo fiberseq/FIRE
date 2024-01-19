@@ -158,7 +158,7 @@ rule split_hap_by_element_type_per_chrom:
     params:
         min_fire_fdr=min_fire_fdr,
     threads: 2
-    conda: 
+    conda:
         conda
     resources:
         disk_mb=100,
