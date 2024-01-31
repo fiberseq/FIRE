@@ -1,0 +1,4 @@
+executor: slurm
+jobs: 500
+latency-wait: 60
+max-jobs-per-second: 50
