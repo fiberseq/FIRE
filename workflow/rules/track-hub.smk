@@ -9,7 +9,7 @@ rule percent_accessible:
         tbi="results/{sm}/{hp}/percent.accessible.bed.gz.tbi",
     threads: 4
     conda:
-        conda
+        default_env
     resources:
         mem_mb=get_mem_mb,
     params:
@@ -42,7 +42,7 @@ rule element_coverages_bw:
         tmp=temp("temp/{sm}/trackHub/bw/{hp}.{el_type}.coverage.bed"),
         bw="results/{sm}/trackHub/bw/{hp}.{el_type}.coverage.bw",
     conda:
-        conda
+        default_env
     shell:
         """
         zcat {input.bed} | hck -f 1-3 -F {wildcards.el_type} > {output.tmp}
@@ -59,7 +59,7 @@ rule fdr_track_to_bw:
         tmp=temp("temp/{sm}/trackHub/bw/{col}.tmp.bed"),
     threads: 4
     conda:
-        conda
+        default_env
     shell:
         """
         hck -z -f 1-3 -F {wildcards.col} {input.bed} > {output.tmp} 
@@ -76,7 +76,7 @@ rule fdr_peaks_by_fire_elements_to_bb:
         tmp=temp("temp/{sm}/trackHub/bb/FDR-FIRE-peaks.bb.tmp"),
     threads: 4
     conda:
-        conda
+        default_env
     params:
         bedfmt=workflow.source_path("../templates/fire_peak.as"),
     shell:
@@ -101,7 +101,7 @@ rule hap_differences_track:
     resources:
         mem_mb=get_mem_mb,
     conda:
-        conda
+        default_env
     params:
         chrom=get_chroms()[0],
     shell:

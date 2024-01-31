@@ -11,7 +11,7 @@ rule clustering_vs_null:
         bed="results/{sm}/clustering-vs-null.bed.gz",
     threads: 8
     conda:
-        conda
+        default_env
     shell:
         """
         bgzip -cd -@{threads} {input.bed} | cut -f 1-3 > {output.tmp}
@@ -33,7 +33,7 @@ rule percent_in_clusters:
         txt="results/{sm}/percent-in-clusters.txt",
     threads: 8
     conda:
-        conda
+        default_env
     params:
         script=workflow.source_path("../scripts/percent-in-clusters.sh"),
     shell:

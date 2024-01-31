@@ -33,7 +33,7 @@ coverage_within_n_sd = config.get("coverage_within_n_sd", 5)
 
 # sample, haplotype, and chromosome wildcard building
 fai = pd.read_csv(f"{ref}.fai", sep="\t", names=["chr", "length", "x", "y", "z"])
-conda = config.get("env", "../envs/env.yaml")
+default_env = config.get("env", "../envs/env.yaml")
 bins = list(range(1, max_bins + 1))
 data = pd.read_csv(config["manifest"], sep="\s+", comment="#").set_index("sample")
 haps = ["all", "hap1", "hap2", "unk"]

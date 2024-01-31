@@ -8,7 +8,7 @@ rule decorate_fibers_chromosome:
     resources:
         mem_mb=get_large_mem_mb,
     conda:
-        "../envs/env.yaml"
+        default_env
     shell:
         """
         samtools view -@ {threads} -u {input.bam} {wildcards.chrom} \
@@ -34,7 +34,7 @@ rule decorate_fibers_1:
     resources:
         time=240,
     conda:
-        conda
+        default_env
     params:
         bed_as=workflow.source_path("../templates/bed12_filter.as"),
     shell:
@@ -60,7 +60,7 @@ rule decorate_fibers_2:
     resources:
         time=60 * 16,
     conda:
-        conda
+        default_env
     params:
         dec_as=workflow.source_path("../templates/decoration.as"),
     shell:

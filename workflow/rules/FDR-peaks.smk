@@ -7,7 +7,7 @@ rule filtered_and_shuffled_fiber_locations_chromosome:
         shuffled=temp("temp/{sm}/coverage/{chrom}.fiber-locations-shuffled.bed.gz"),
     threads: 4
     conda:
-        conda
+        default_env
     shell:
         """
         tabix -h {input.filtered} {wildcards.chrom} \
@@ -32,7 +32,7 @@ rule filtered_and_shuffled_fiber_locations:
         shuffled="results/{sm}/coverage/filtered-for-coverage/fiber-locations-shuffled.bed.gz",
     threads: 1
     conda:
-        conda
+        default_env
     shell:
         """
         cat {input.shuffled} > {output.shuffled}
@@ -112,7 +112,7 @@ rule fdr_track:
         tbi="results/{sm}/FDR-peaks/FDR.track.bed.gz.tbi",
     threads: 8
     conda:
-        conda
+        default_env
     shell:
         """
         ( \
@@ -135,7 +135,7 @@ rule fdr_track_filtered:
         tbi="results/{sm}/FDR-peaks/FDR.track.coverage.filtered.bed.gz.tbi",
     threads: 8
     conda:
-        conda
+        default_env
     shell:
         """
         MIN=$(cat {input.minimum})
@@ -161,7 +161,7 @@ rule helper_fdr_peaks_by_fire_elements:
         bed=temp("temp/{sm}/FDR-peaks/{chrom}-FDR-FIRE-peaks.bed.gz"),
     threads: 8
     conda:
-        conda
+        default_env
     params:
         max_peak_fdr=max_peak_fdr,
         min_per_acc_peak=min_per_acc_peak,
@@ -233,7 +233,7 @@ rule fdr_peaks_by_fire_elements:
         tbi="results/{sm}/FDR-peaks/FDR-FIRE-peaks.bed.gz.tbi",
     threads: 8
     conda:
-        conda
+        default_env
     shell:
         """
         ( \
@@ -256,7 +256,7 @@ rule wide_fdr_peaks:
         tbi="results/{sm}/FDR-peaks/FDR-wide-peaks.bed.gz.tbi",
         bb="results/{sm}/trackHub/bb/FDR-wide-peaks.bb",
     conda:
-        conda
+        default_env
     threads: 4
     params:
         nuc_size=config.get("nucleosome_size", 147),
@@ -293,7 +293,7 @@ rule one_percent_fdr_peaks:
         wide_tbi="results/{sm}/FDR-peaks/FDR-01-FIRE-wide-peaks.bed.gz.tbi",
     threads: 4
     conda:
-        conda
+        default_env
     params:
         nuc_size=config.get("nucleosome_size", 147),
     shell:
