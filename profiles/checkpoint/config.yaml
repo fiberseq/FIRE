@@ -1,18 +1,17 @@
-cluster:
-  mkdir -p cluster_logs/{rule} &&
+cluster: mkdir -p cluster_logs/{rule} &&
   sbatch
-    --account=stergachislab
-    --partition=ckpt
-    --nodes=1 
-    --ntasks-per-node={threads} 
-    --mem={resources.mem_mb} 
-    --tmp={resources.disk_mb}
-    --time={resources.time}
-    --gpus={resources.gpus}
-    --job-name=smk-{rule}-{wildcards}
-    --output=cluster_logs/{rule}/{rule}-{wildcards}-%j.out
-    --export=all
-    --parsable # Required to pass job IDs to scancel
+  --account=stergachislab
+  --partition=ckpt
+  --nodes=1
+  --ntasks-per-node={threads}
+  --mem={resources.mem_mb}
+  --tmp={resources.disk_mb}
+  --time={resources.runtime}
+  --gpus={resources.gpus}
+  --job-name=smk-{rule}-{wildcards}
+  --output=cluster_logs/{rule}/{rule}-{wildcards}-%j.out
+  --export=all
+  --parsable # Required to pass job IDs to scancel
 jobs: 1000
 cluster-cancel: scancel
 cluster-cancel-nargs: 500 # cancel 500 jobs at a time, all will still be canceled

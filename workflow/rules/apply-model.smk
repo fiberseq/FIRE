@@ -136,7 +136,7 @@ rule split_by_hap_per_chrom:
         default_env
     resources:
         disk_mb=100,
-        time=240,
+        runtime=240,
         mem_mb=4 * 1024,
     shell:
         """
@@ -194,7 +194,7 @@ rule element_coverages_per_chrom:
     params:
         names="\t".join(el_types),
     resources:
-        time=300,
+        runtime=300,
     threads: 2
     shell:
         """

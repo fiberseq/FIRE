@@ -32,7 +32,7 @@ rule decorate_fibers_1:
         bb="results/{sm}/trackHub/bb/fire-fibers.bb",
     threads: 1
     resources:
-        time=240,
+        runtime=240,
     conda:
         default_env
     params:
@@ -58,7 +58,7 @@ rule decorate_fibers_2:
         bb="results/{sm}/trackHub/bb/fire-fiber-decorators.bb",
     threads: 1
     resources:
-        time=60 * 16,
+        runtime=60 * 16,
     conda:
         default_env
     params:
