@@ -11,7 +11,7 @@ rule genome_bedgraph:
         median="results/{sm}/coverage/{sm}.median.chromosome.coverage.bed",
     threads: 16
     conda:
-        conda
+        default_env
     shell:
         """ 
         d4tools create -t {threads} -Azr {input.fai} {input.bam} {output.d4}
@@ -50,7 +50,7 @@ rule fiber_locations_chromosome:
         bed=temp("temp/{sm}/coverage/{chrom}.fiber-locations.bed.gz"),
     threads: 8
     conda:
-        conda
+        default_env
     shell:
         """
         # get fiber locations
@@ -80,7 +80,7 @@ rule fiber_locations:
         filtered_tbi="results/{sm}/coverage/filtered-for-coverage/fiber-locations.bed.gz.tbi",
     threads: 4
     conda:
-        conda
+        default_env
     shell:
         """
         cat {input.fibers} > {output.bed}
@@ -109,7 +109,7 @@ rule exclude_from_shuffle:
         bed="results/{sm}/coverage/exclude-from-shuffles.bed.gz",
     threads: 4
     conda:
-        conda
+        default_env
     params:
         exclude=excludes,
     shell:
@@ -137,7 +137,7 @@ rule unreliable_coverage_regions:
         bed_tbi="results/{sm}/coverage/unreliable-coverage-regions.bed.gz.tbi",
     threads: 4
     conda:
-        conda
+        default_env
     shell:
         """
         MIN=$(cat {input.minimum})
