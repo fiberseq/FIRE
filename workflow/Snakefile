@@ -35,7 +35,7 @@ coverage_within_n_sd = config.get("coverage_within_n_sd", 5)
 fai = pd.read_csv(f"{ref}.fai", sep="\t", names=["chr", "length", "x", "y", "z"])
 default_env = config.get("env", "../envs/env.yaml")
 bins = list(range(1, max_bins + 1))
-data = pd.read_csv(config["manifest"], sep="\s+", comment="#").set_index("sample")
+data = pd.read_csv(config["manifest"], sep=r"\s+", comment="#").set_index("sample")
 haps = ["all", "hap1", "hap2", "unk"]
 not_all = ["hap1", "hap2", "unk"]
 not_unk = ["all", "hap1", "hap2"]
@@ -77,7 +77,7 @@ wildcard_constraints:
     call="|".join(["msp", "m6a"]),
     sm="|".join(data.index),
     types="|".join(types),
-    fdr="\d+",
+    fdr=r"\d+",
     hp="|".join(haps),
     col="|".join(bw_types),
     el_type="|".join(el_types),
