@@ -1,13 +1,8 @@
-default-resources:
-  - disk_mb=4096
-  - mem_mb=16096
-  - runtime=120
-  - gpus=0
 rerun-incomplete: True
 rerun-triggers: mtime
-restart-times: 2
+restart-times: 1
+software-deployment-method: apptainer,conda
 printshellcmds: True
-use-conda: True
-use-singularity: True
 show-failed-logs: True
 cores: 32
+local-cores: 4

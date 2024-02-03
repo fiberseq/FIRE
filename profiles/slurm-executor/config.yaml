@@ -2,9 +2,11 @@ executor: slurm
 jobs: 500
 latency-wait: 60
 max-jobs-per-second: 50
-## you can change the default account or partition by adding CLI options e.g.:
-## --default-resources slurm_account=stergachislab slurm_partition=ckpt
-## or you can add them to this config file e.g.:
-# default-resources:
-#   - slurm_partition=ckpt
-## without these options it will default to stergachislab and compute when using hyak
+default-resources:
+  - disk_mb=4096
+  - mem_mb=16096
+  - runtime=120
+  # you can change the default account or partition by them to the default-resources.
+  # Without these options it will default to stergachislab and compute when using hyak.
+# - slurm_partition=ckpt
+# - slurm_account=stergachislab
