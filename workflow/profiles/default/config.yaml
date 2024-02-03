@@ -1,4 +1,5 @@
 rerun-incomplete: True
+show-failed-logs: True
 rerun-triggers: mtime
 restart-times: 1
 software-deployment-method:
