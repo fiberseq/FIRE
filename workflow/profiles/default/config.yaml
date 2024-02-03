@@ -1,7 +1,9 @@
 rerun-incomplete: True
 rerun-triggers: mtime
 restart-times: 1
-software-deployment-method: apptainer conda
+software-deployment-method:
+  - apptainer
+  - conda
 printshellcmds: True
 show-failed-logs: True
 cores: 32
