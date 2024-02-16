@@ -99,6 +99,7 @@ rule all:
         expand(rules.genome_bedgraph.output, sm=data.index),
         expand(rules.coverage.output, sm=data.index),
         expand(rules.exclude_from_shuffle.output, sm=data.index),
+        expand(rules.unreliable_coverage_regions.output, sm=data.index),
         # model results
         expand(rules.fire_sites.output, sm=data.index),
         # fiber locations
