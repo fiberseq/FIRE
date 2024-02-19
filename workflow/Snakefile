@@ -23,7 +23,6 @@ if ref_name == "hg38" or ref_name == "GRCh38":
     excludes += [workflow.source_path(file) for file in files]
 
 max_t = config.get("max_t", 4)
-max_bins = config.get("max_bins", 75)
 keep_chrs = config.get("keep_chromosomes", ".*")
 
 # coverage requirements
@@ -33,7 +32,6 @@ coverage_within_n_sd = config.get("coverage_within_n_sd", 5)
 # sample, haplotype, and chromosome wildcard building
 fai = pd.read_csv(f"{ref}.fai", sep="\t", names=["chr", "length", "x", "y", "z"])
 default_env = config.get("env", "../envs/env.yaml")
-bins = list(range(1, max_bins + 1))
 data = pd.read_csv(config["manifest"], sep=r"\s+", comment="#").set_index("sample")
 haps = ["all", "hap1", "hap2", "unk"]
 not_all = ["hap1", "hap2", "unk"]

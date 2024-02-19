@@ -133,13 +133,11 @@ rule trackhub:
     params:
         ref=ref_name,
         script=workflow.source_path("../scripts/trackhub.py"),
-        max_bins=max_bins,
     shell:
         """
         python {params.script} -v 2 \
           --trackhub-dir results/{wildcards.sm}/trackHub \
           --reference {params.ref} \
           --sample {wildcards.sm} \
-          --max-bins {max_bins} \
           --average-coverage $(cat {input.cov}) 
         """

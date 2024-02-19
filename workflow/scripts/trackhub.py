@@ -253,7 +253,6 @@ def generate_trackhub(
     trackhub_dir,
     ref,
     sample,
-    max_bins,
     ave_coverage,
 ):
     if ref == "T2Tv2.0":
@@ -324,22 +323,7 @@ def generate_trackhub(
                 )
             )
 
-        # bin files
-        if False:
-            max_coverage = ave_coverage * 3 * np.sqrt(ave_coverage)
-            if hap != "all":
-                trackDb.write(TRACK_COMP.format(sample=sample, hap=hap))
-                viz = "dense"
-                for i in range(max_bins):
-                    if hap == "all":
-                        continue
-                    if i >= max_coverage / 2 and hap != "all" and hap != "unk":
-                        continue
-                    elif i >= max_coverage:
-                        continue
-                    trackDb.write(
-                        SUB_COMP_TRACK.format(i=i + 1, viz=viz, sample=sample, hap=hap)
-                    )
+        
         # new bin files
         if hap == "all":
             for z in ["H1", "H2", "UNK"]:
@@ -364,7 +348,6 @@ def main(
     trackhub_dir: Optional[Path] = None,
     reference: Optional[str] = None,
     sample: Optional[str] = None,
-    max_bins: Optional[int] = None,
     average_coverage: Optional[int] = 60,
     verbose: int = 0,
 ):
@@ -376,7 +359,7 @@ def main(
     log_level = 10 * (3 - verbose)
     logging.basicConfig(format=log_format)
     logger.setLevel(log_level)
-    generate_trackhub(trackhub_dir, reference, sample, max_bins, average_coverage)
+    generate_trackhub(trackhub_dir, reference, sample, average_coverage)
     return 0
 
 
