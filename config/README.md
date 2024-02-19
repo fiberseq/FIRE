@@ -1,4 +1,4 @@
-# Description of configuration yaml file
+# Inputs and options for the configuration yaml file
 
 
 ## Required input options
@@ -10,7 +10,7 @@ Reference `fasta` file:
 ```
 ref: /path/to/hg38.fa
 ```
-Table of input sample(s), must have two columns: sample name (`sample`) and input bam file path (`bam`) e.g.:
+Manifest of input sample(s), must have two white-space separated columns: sample name (`sample`) and input bam file path (`bam`) e.g.:
 ```
 manifest: samples.tbl
 ```
