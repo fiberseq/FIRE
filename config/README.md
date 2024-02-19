@@ -2,7 +2,7 @@
 see `config.yaml` for an example.
 
 ## Required input options
-Reference name:
+Reference name, this is the name that will be used as the genome name in the UCSC track hub, so be sure to use a valid UCSC genome name when possible. 
 ```
 ref_name: hg38
 ```
