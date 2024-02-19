@@ -25,7 +25,6 @@ if ref_name == "hg38" or ref_name == "GRCh38":
 max_t = config.get("max_t", 4)
 max_bins = config.get("max_bins", 75)
 keep_chrs = config.get("keep_chromosomes", ".*")
-force_coverage = config.get("force_coverage", None)
 
 # coverage requirements
 min_coverage = config.get("min_coverage", 4)
@@ -49,8 +48,6 @@ if min_per_acc_peak is None:
 else:
     max_peak_fdr = 1.0
 
-
-print(data.index)
 
 types = ["fdr", "acc", "link", "nuc"]
 types_to_col = {"fdr": 4, "acc": 5, "link": 6, "nuc": 7}
