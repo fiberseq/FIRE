@@ -19,7 +19,7 @@ manifest: config/config.tbl
 ## Optional input options
 Max number of threads to use in very distributed steps:
 ```
-max_t: 8
+max_t: 4
 ```
 
 ### Coverage options
