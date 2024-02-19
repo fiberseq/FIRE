@@ -10,9 +10,9 @@ Reference `fasta` file:
 ```
 ref: /path/to/hg38.fa
 ```
-Manifest of input sample(s), must have two white-space separated columns: sample name (`sample`) and input bam file path (`bam`) e.g.:
+Manifest of input sample(s), must have two white-space separated columns: sample name (`sample`) and input bam file path (`bam`). See config.tbl for an example.
 ```
-manifest: samples.tbl
+manifest: config/config.tbl
 ```
 
 
@@ -23,10 +23,6 @@ max_t: 8
 ```
 
 ### Coverage options
-Min coverage for calling a FIRE peak:
-```
-min_coverage: 4
-```
 Filter peaks that are more than `x` standard deviations from the mean coverage:
 ```
 coverage_within_n_sd: 5
@@ -42,6 +38,10 @@ excludes:
 ```
 
 # Developer options, not for general use
+Min coverage of FIRE elements for calling a FIRE peak:
+```
+min_coverage: 4
+```
 Forgo the use of FDR peak calling and instead call peaks for regions with at least this fraction of reads actuated.
 ```
 min_per_acc_peak = 0.25

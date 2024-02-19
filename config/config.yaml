@@ -1,22 +1,14 @@
 ref: /mmfs1/gscratch/stergachislab/assemblies/hg38.analysisSet.fa
 ref_name: hg38
-max_t: 4 # use X threaeds per chunk
 manifest: config/config.tbl # table with samples to process
 
 # keep_chromosomes: chr20 # only keep chrs matching this regex.
-
-## Force a read coverage instead of calulating it genome wide from the bam file.
-## This can be useful if only a subset of the genome has reads.
-# force_coverage: 30
 
 ## regions to not use when identifying null regions that should not have RE, below are the defaults auto used for hg38.
 #excludes:
 #- workflow/annotations/hg38.blacklist.ENCFF356LFX.bed.gz
 #- workflow/annotations/hg38.gap.bed.gz
 #- workflow/annotations/SDs.merged.hg38.bed.gz
-
-## you can optionally specify a model that is not the default.
-# model: models/my-custom-model.dat
 
 # Filter peaks on a % accesible threshold instead of FDR. Removes FDR filtering.
 # min_per_acc_peak: 0.10 # enfore 10% of reads in peak are accessible
