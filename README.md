@@ -4,7 +4,6 @@
 
 A Snakemake workflow for calling Fiber-seq Inferred Regulatory Elements (FIREs) on single molecules. For a more detailed description and methods see the [docs](/docs/README.md), or [watch](https://youtu.be/RiZrMltAiWM?si=sSo64goaNQxgyfcc) my lab meeting on FIRE.
 
-
 ## Install
 
 You will need **snakemake** and all the **UCSC Kent utilities** and the **latest version** of them (v455).
