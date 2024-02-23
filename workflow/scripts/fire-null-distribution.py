@@ -278,7 +278,6 @@ def fire_tracks(fire, outfile, min_coverage=4):
 
 def make_fdr_table(fire, fibers, outfile, min_coverage=4):
     logging.info("Starting analysis")
-    fire = fire.join(fibers, on=["chrom", "fiber", "hap"])
     logging.debug(f"Joined fibers\n{fire}")
     fire_tracks(fire, outfile, min_coverage=min_coverage)
     return 0
@@ -428,7 +427,7 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
 
 
 def write_scores(fire, fibers, fdr_table, outfile, min_coverage=4):
-    fire = fire.join(fibers, on=["chrom", "fiber", "hap"])
+    fire = fire.join(fibers, on=["chrom", "fiber", "hap"], how="outer")
     first = True
     for chrom, g in fire.groupby("chrom", maintain_order=True):
         logging.info(f"Processing {chrom}")
@@ -521,17 +520,24 @@ def main(
             columns=[0, 1, 2, 3],
             new_columns=["chrom", "null_fiber_start", "null_fiber_end", "fiber"],
         )
-        fibers = fiber_locations.join(shuffled_locations, on=["chrom", "fiber"])
-        make_fdr_table(fire, fibers, outfile, min_coverage=min_coverage)
+        fiber_locations = fiber_locations.join(
+            shuffled_locations, on=["chrom", "fiber"]
+        )
+
+    logging.info("Joining FIRE elements and fibers and then sorting")
+    fire = fire.join(fiber_locations, on=["chrom", "fiber", "hap"], how="outer").sort(
+        ["chrom", "start", "end"]
+    )
+
+    if shuffled_locations_file is not None:
+        make_fdr_table(fire, outfile, min_coverage=min_coverage)
     else:
         fdr_table = (
             pl.read_csv(fdr_table_file, separator="\t")
             .to_pandas()
             .sort_values("threshold")
         )
-        write_scores(
-            fire, fiber_locations, fdr_table, outfile, min_coverage=min_coverage
-        )
+        write_scores(fire, fdr_table, outfile, min_coverage=min_coverage)
     return 0
 
 

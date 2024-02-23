@@ -323,7 +323,6 @@ def generate_trackhub(
                 )
             )
 
-        
         # new bin files
         if hap == "all":
             for z in ["H1", "H2", "UNK"]:
