@@ -173,7 +173,7 @@ def fire_tracks(fire, outfile, min_coverage=4):
     for chrom, g in fire.groupby("chrom", maintain_order=True):
         logging.info(f"Processing {chrom}")
         # fibers for this chromosome
-        fibers = g[FIBER_COLUMNS].unique().to_pandas()
+        fibers = g[FIBER_COLUMNS].filter(~pl.col("fiber_start").is_null()).unique().to_pandas()
         # convert to pandas for easier manipulation
         g = g.filter(~pl.col("start").is_null()).to_pandas()
         logging.info(f"Grouped fire data\n{g}")
