@@ -276,7 +276,7 @@ def fire_tracks(fire, outfile, min_coverage=4):
     results.to_csv(outfile, sep="\t", index=False)
 
 
-def make_fdr_table(fire, fibers, outfile, min_coverage=4):
+def make_fdr_table(fire, outfile, min_coverage=4):
     logging.info("Starting analysis")
     logging.debug(f"Joined fibers\n{fire}")
     fire_tracks(fire, outfile, min_coverage=min_coverage)
@@ -426,8 +426,7 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
     return return_data
 
 
-def write_scores(fire, fibers, fdr_table, outfile, min_coverage=4):
-    fire = fire.join(fibers, on=["chrom", "fiber", "hap"], how="outer")
+def write_scores(fire, fdr_table, outfile, min_coverage=4):
     first = True
     for chrom, g in fire.groupby("chrom", maintain_order=True):
         logging.info(f"Processing {chrom}")
