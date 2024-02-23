@@ -175,7 +175,7 @@ def fire_tracks(fire, outfile, min_coverage=4):
         # fibers for this chromosome
         fibers = g[FIBER_COLUMNS].unique().to_pandas()
         # convert to pandas for easier manipulation
-        g = g.to_pandas()
+        g = g.select(~pl.col("start").is_null()).to_pandas()
 
         # get coverage for this chromosome and the shuffled fibers
         chrom_length = g.length[0]
