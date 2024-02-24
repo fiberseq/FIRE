@@ -87,7 +87,7 @@ def fire_scores_per_chrom(
     min_allowed_q=0.01,
     min_coverage=4,
 ):
-    fire_scores = np.zeros(np.float64(chrom_length), dtype=np.float64)
+    fire_scores = np.zeros(chrom_length, dtype=np.float64)
 
     multi = -50.0  # a multi of -50 and a min_allowed_q of 0.01 gives a max score of 100
     max_add = multi * np.log10(min_allowed_q)
@@ -181,7 +181,7 @@ def fire_tracks(fire, outfile, min_coverage=4):
         )
         # convert to pandas for easier manipulation
         g = g.filter(~pl.col("start").is_null()).to_pandas()
-        logging.info(f"Grouped fire data\n{g}")
+        logging.info(f"Grouped fire data\n{g}\n{g.dtypes}")
 
         # get coverage for this chromosome and the shuffled fibers
         chrom_length = g.length[0].astype(int)
