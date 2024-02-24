@@ -174,7 +174,8 @@ def fire_tracks(fire, outfile, min_coverage=4):
     null_count = fire.filter(
         pl.col("start").is_null() & pl.col("fiber_start").is_null()
     ).shape[0]
-    logging.info(f"Null count: {null_count}")
+    if null_count > 0:
+        logging.warn(f"Null count: {null_count}")
     
     for chrom, g in fire.groupby("chrom", maintain_order=True):
         logging.info(f"Processing {chrom}")
