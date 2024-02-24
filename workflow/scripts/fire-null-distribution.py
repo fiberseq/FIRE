@@ -179,6 +179,7 @@ def fire_tracks(fire, outfile, min_coverage=4):
             .unique()
             .to_pandas()
         )
+        logging.info(f"Fiber dtypes\n{fibers.dtypes}")
         # convert to pandas for easier manipulation
         g = g.filter(~pl.col("start").is_null()).to_pandas()
         logging.info(f"Grouped fire data\n{g}\n{fibers}")
