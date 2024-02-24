@@ -132,19 +132,26 @@ rule unreliable_coverage_regions:
         bg=rules.genome_bedgraph.output.bg,
         minimum=rules.coverage.output.minimum,
         maximum=rules.coverage.output.maximum,
+        fai=ancient(f"{ref}.fai"),
     output:
         bed="results/{sm}/coverage/unreliable-coverage-regions.bed.gz",
         bed_tbi="results/{sm}/coverage/unreliable-coverage-regions.bed.gz.tbi",
+        bb="results/{sm}/trackHub/bb/unreliable-coverage-regions.bb",
     threads: 4
     conda:
         default_env
     shell:
         """
+        FILE={output.bed}
+        TMP="${{FILE%.*}}"
+
         MIN=$(cat {input.minimum})
         MAX=$(cat {input.maximum})
         zcat {input.bg} \
             | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX' \
-            | bgzip -@ {threads} \
-        > {output.bed}
+        > $TMP
+        bedToBigBed $TMP {input.fai} {output.bb}
+        # compress 
+        bgzip -f -@ {threads} $TMP
         tabix -f -p bed {output.bed}
         """

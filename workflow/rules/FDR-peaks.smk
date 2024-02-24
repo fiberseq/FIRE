@@ -271,6 +271,7 @@ rule wide_fdr_peaks:
         FILE={output.bed}
         TMP="${{FILE%.*}}"
         echo $TMP
+
         ( \
             zcat {input.bed}; \
             bioawk -tc hdr 'NR==1 || $FDR<={params.max_peak_fdr}' {input.track} \
@@ -291,10 +292,10 @@ rule one_percent_fdr_peaks:
         bed=rules.fdr_peaks_by_fire_elements.output.bed,
         track=rules.fdr_track.output.bed,
     output:
-        bed="results/{sm}/FDR-peaks/FDR-01-FIRE-peaks.bed.gz",
-        tbi="results/{sm}/FDR-peaks/FDR-01-FIRE-peaks.bed.gz.tbi",
-        wide="results/{sm}/FDR-peaks/FDR-01-FIRE-wide-peaks.bed.gz",
-        wide_tbi="results/{sm}/FDR-peaks/FDR-01-FIRE-wide-peaks.bed.gz.tbi",
+        bed="results/{sm}/FDR-peaks/one-percent-FDR/FDR-01-FIRE-peaks.bed.gz",
+        tbi="results/{sm}/FDR-peaks/one-percent-FDR/FDR-01-FIRE-peaks.bed.gz.tbi",
+        wide="results/{sm}/FDR-peaks/one-percent-FDR/FDR-01-FIRE-wide-peaks.bed.gz",
+        wide_tbi="results/{sm}/FDR-peaks/one-percent-FDR/FDR-01-FIRE-wide-peaks.bed.gz.tbi",
     threads: 4
     conda:
         default_env
