@@ -180,7 +180,11 @@ def fire_tracks(fire, outfile, min_coverage=4):
             .to_pandas()
         )
         # convert to pandas for easier manipulation
-        g = g.filter(~pl.col("start").is_null()).to_pandas()
+        g = (
+            g.filter(~pl.col("start").is_null())
+            .filter(~pl.col("fiber_start").is_null())
+            .to_pandas()
+        )
         logging.info(f"Grouped fire data\n{g}\n{g.dtypes}")
 
         # get coverage for this chromosome and the shuffled fibers
@@ -536,7 +540,7 @@ def main(
         ["chrom", "start", "end"]
     )
     logging.info(f"fire dtypes\n{fire.dtypes}\n{fire}")
-    
+
     if shuffled_locations_file is not None:
         make_fdr_table(fire, outfile, min_coverage=min_coverage)
     else:
