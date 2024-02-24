@@ -114,6 +114,8 @@ def main(
     min_frac_overlap: float = 0.5,
     min_reciprocal_overlap: float = 0.90,
     max_grouping_iterations: int = 10,
+    min_cov = 0,
+    max_cov = 100_000_000_000,
     verbose: int = 0,
 ):
     """
@@ -170,6 +172,11 @@ def main(
         min_reciprocal_overlap=min_reciprocal_overlap,
         max_grouping_iterations=2,
     )
+    # add a column indicating if the peak passes coverage filters
+    df = df.with_columns(
+        pass_coverage=(pl.col("coverage") >= min_cov) & (pl.col("coverage") <= max_cov),
+    )
+    
     # write to stdout
     (
         df.sort(["#chrom", "peak_start", "peak_end"])

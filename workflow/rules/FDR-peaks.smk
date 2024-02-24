@@ -153,8 +153,8 @@ rule fdr_track_filtered:
 
 rule helper_fdr_peaks_by_fire_elements:
     input:
-        bed=rules.fdr_track_filtered.output.bed,
-        tbi=rules.fdr_track_filtered.output.tbi,
+        bed=rules.fdr_track.output.bed,
+        tbi=rules.fdr_track.output.tbi,
         fire=rules.fire_sites.output.bed,
         fire_tbi=rules.fire_sites_index.output.tbi,
     output:
@@ -205,6 +205,8 @@ rule helper_fdr_peaks_by_fire_elements:
 rule fdr_peaks_by_fire_elements_chromosome:
     input:
         bed=rules.helper_fdr_peaks_by_fire_elements.output.bed,
+        minimum=rules.coverage.output.minimum,
+        maximum=rules.coverage.output.maximum,
     output:
         bed=temp("temp/{sm}/FDR-peaks/grouped-{chrom}-FDR-FIRE-peaks.bed.gz"),
     threads: 8
@@ -216,6 +218,8 @@ rule fdr_peaks_by_fire_elements_chromosome:
         """
         zcat {input.bed} \
             | python {params.script} -v 1 \
+                --max-cov $(cat {input.maximum}) \
+                --min-cov $(cat {input.minimum}) \
             | bgzip -@ {threads} \
         > {output.bed}
         """
@@ -249,7 +253,7 @@ rule fdr_peaks_by_fire_elements:
 rule wide_fdr_peaks:
     input:
         bed=rules.fdr_peaks_by_fire_elements.output.bed,
-        track=rules.fdr_track_filtered.output.bed,
+        track=rules.fdr_track.output.bed,
         fai=ancient(f"{ref}.fai"),
     output:
         bed="results/{sm}/FDR-peaks/FDR-wide-peaks.bed.gz",
@@ -285,7 +289,7 @@ rule wide_fdr_peaks:
 rule one_percent_fdr_peaks:
     input:
         bed=rules.fdr_peaks_by_fire_elements.output.bed,
-        track=rules.fdr_track_filtered.output.bed,
+        track=rules.fdr_track.output.bed,
     output:
         bed="results/{sm}/FDR-peaks/FDR-01-FIRE-peaks.bed.gz",
         tbi="results/{sm}/FDR-peaks/FDR-01-FIRE-peaks.bed.gz.tbi",
