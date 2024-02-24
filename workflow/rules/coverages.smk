@@ -149,6 +149,7 @@ rule unreliable_coverage_regions:
         MAX=$(cat {input.maximum})
         zcat {input.bg} \
             | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX' \
+            | bedtools merge -i - \
         > $TMP
         bedToBigBed $TMP {input.fai} {output.bb}
         # compress 
