@@ -188,14 +188,15 @@ maxItems 100000
 visibility dense
 priority 30
 
-# track of unreliable regions just above the peak tracks
-track {sample}-unreliable-coverage-regions
-shortLabel {sample}-unreliable-coverage-regions
-longLabel {sample}-unreliable-coverage-regions
-type bigBed
-bigDataUrl bb/unreliable-coverage-regions.bb
-visibility dense
-priority 29
+    # track of unreliable regions just above the peak tracks
+    track {sample}-unreliable-coverage-regions
+    parent {sample}-peaks
+    shortLabel {sample}-unreliable-coverage-regions
+    longLabel {sample}-unreliable-coverage-regions
+    type bigBed
+    bigDataUrl bb/unreliable-coverage-regions.bb
+    visibility dense
+    priority 29
 
 # grouping for coverage
 track {sample}-coverage
