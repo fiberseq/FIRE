@@ -512,7 +512,7 @@ def main(
         has_header=False,
         columns=[0, 1, 2, 3, 5],
         new_columns=["chrom", "fiber_start", "fiber_end", "fiber", "hap"],
-        dtypes={"fiber_start": pl.Int32, "fiber_end": pl.Int32},
+        dtypes={"fiber_start": pl.Int64, "fiber_end": pl.Int64},
     ).join(fai, on="chrom")
 
     if shuffled_locations_file is not None:
@@ -525,7 +525,7 @@ def main(
             has_header=False,
             columns=[0, 1, 2, 3],
             new_columns=["chrom", "null_fiber_start", "null_fiber_end", "fiber"],
-            dtypes={"null_fiber_start": pl.Int32, "null_fiber_end": pl.Int32},
+            dtypes={"null_fiber_start": pl.Int64, "null_fiber_end": pl.Int64},
         )
         fiber_locations = fiber_locations.join(
             shuffled_locations, on=["chrom", "fiber"]
