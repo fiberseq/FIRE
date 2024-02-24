@@ -192,7 +192,7 @@ def fire_tracks(fire, outfile, min_coverage=4):
             .filter(~pl.col("fiber_start").is_null())
             .to_pandas()
         )
-        logging.info(f"Grouped fire data\n{g}\n{g.dtypes}")
+        logging.debug(f"Grouped fire data\n{g}\n{g.dtypes}")
 
         # get coverage for this chromosome and the shuffled fibers
         chrom_length = g.length[0].astype(int)
@@ -316,7 +316,7 @@ def write_bed(chrom, output_dict, out, first=True):
     else:
         header = False
         mode = "a"
-    logging.info(f"Making data frame")
+    logging.info("Making data frame")
     df = pl.DataFrame(output_dict)
     del output_dict
     gc.collect()
@@ -330,11 +330,11 @@ def write_bed(chrom, output_dict, out, first=True):
     )
     original_columns = df.columns
     # find and clear the duplicates
-    logging.info(f"Finding duplicates")
+    logging.info("Finding duplicates")
     # float array that says if a row is different from the previous row
     diff = (((df != df.shift(periods=1)).sum(axis=1)) > 0) * 1.0
     # turn the diff array into a group number
-    logging.info(f"Merging duplicates")
+    logging.info("Merging duplicates")
     df = (
         df.with_columns(
             diff.cumsum().alias("group"),
@@ -379,7 +379,7 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
     for hap in [""] + HAPS:
         # select data we are working with
         if hap == "":
-            logging.info(f"Processing all haplotypes")
+            logging.info("Processing all haplotypes")
             tag = ""
             cur_fire = fire
             cur_fibers = fibers
@@ -523,7 +523,6 @@ def main(
         has_header=False,
         columns=[0, 1, 2, 3, 5],
         new_columns=["chrom", "fiber_start", "fiber_end", "fiber", "hap"],
-        dtypes={"fiber_start": pl.Int64, "fiber_end": pl.Int64},
     ).join(fai, on="chrom")
 
     if shuffled_locations_file is not None:
@@ -536,7 +535,6 @@ def main(
             has_header=False,
             columns=[0, 1, 2, 3],
             new_columns=["chrom", "null_fiber_start", "null_fiber_end", "fiber"],
-            dtypes={"null_fiber_start": pl.Int64, "null_fiber_end": pl.Int64},
         )
         fiber_locations = fiber_locations.join(
             shuffled_locations, on=["chrom", "fiber"]
@@ -546,7 +544,6 @@ def main(
     fire = fire.join(fiber_locations, on=["chrom", "fiber", "hap"], how="outer").sort(
         ["chrom", "start", "end"]
     )
-    logging.info(f"fire dtypes\n{fire.dtypes}\n{fire}")
 
     if shuffled_locations_file is not None:
         make_fdr_table(fire, outfile, min_coverage=min_coverage)
