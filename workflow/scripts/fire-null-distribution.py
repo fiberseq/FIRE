@@ -173,7 +173,12 @@ def fire_tracks(fire, outfile, min_coverage=4):
     for chrom, g in fire.groupby("chrom", maintain_order=True):
         logging.info(f"Processing {chrom}")
         # fibers for this chromosome
-        fibers = g[FIBER_COLUMNS].filter(~pl.col("fiber_start").is_null()).unique().to_pandas()
+        fibers = (
+            g[FIBER_COLUMNS]
+            .filter(~pl.col("fiber_start").is_null())
+            .unique()
+            .to_pandas()
+        )
         # convert to pandas for easier manipulation
         g = g.filter(~pl.col("start").is_null()).to_pandas()
         logging.info(f"Grouped fire data\n{g}\n{fibers}")
@@ -507,6 +512,7 @@ def main(
         has_header=False,
         columns=[0, 1, 2, 3, 5],
         new_columns=["chrom", "fiber_start", "fiber_end", "fiber", "hap"],
+        dtypes={"fiber_start": pl.Int32, "fiber_end": pl.Int32},
     ).join(fai, on="chrom")
 
     if shuffled_locations_file is not None:
@@ -519,6 +525,7 @@ def main(
             has_header=False,
             columns=[0, 1, 2, 3],
             new_columns=["chrom", "null_fiber_start", "null_fiber_end", "fiber"],
+            dtypes={"null_fiber_start": pl.Int32, "null_fiber_end": pl.Int32},
         )
         fiber_locations = fiber_locations.join(
             shuffled_locations, on=["chrom", "fiber"]
