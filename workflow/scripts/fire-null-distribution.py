@@ -177,7 +177,7 @@ def fire_tracks(fire, outfile, min_coverage=4):
     if null_count > 0:
         logging.warn(f"Null count: {null_count}")
     
-    for chrom, g in fire.groupby("chrom", maintain_order=True):
+    for chrom, g in fire.group_by("chrom", maintain_order=True):
         logging.info(f"Processing {chrom}")
         # fibers for this chromosome
         fibers = (
@@ -445,7 +445,7 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
 
 def write_scores(fire, fdr_table, outfile, min_coverage=4):
     first = True
-    for chrom, g in fire.groupby("chrom", maintain_order=True):
+    for chrom, g in fire.group_by("chrom", maintain_order=True):
         logging.info(f"Processing {chrom}")
         # fibers for this chromosome
         fibers = (
