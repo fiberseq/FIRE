@@ -62,7 +62,7 @@ autoScale off
 maxItems 100000
 visibility full
 maxHeightPixels 100:50:8
-priority 100
+priority 1
 """
 
 PER_ACC_TEMPLATE = """
@@ -92,7 +92,7 @@ autoScale off
 maxItems 100000
 visibility full
 maxHeightPixels 100:50:8
-priority 1
+priority 100
 """
 
 FIRE_SCORE = """
@@ -308,7 +308,7 @@ def generate_trackhub(
         if hap == "all":
             color = "0,0,0"
             trackDb.write(PER_ACC_COMP.format(sample=sample))
-            trackDb.write(FIRE_SCORE_COMP.format(sample=sample, file=f"bw/score.bw"))
+            #trackDb.write(FIRE_SCORE_COMP.format(sample=sample, file=f"bw/score.bw"))
         elif hap == "hap1":
             color = "0,0,255"
         elif hap == "hap2":
@@ -321,17 +321,16 @@ def generate_trackhub(
                     sample=sample, hap=hap, file=file, color=color, viz=viz
                 )
             )
-            zhap = "" if hap == "all" else f"_{hap}".replace("hap", "H")
-
-            trackDb.write(
-                FIRE_SCORE.format(
-                    sample=sample,
-                    hap=hap,
-                    file=f"bw/score{zhap}.bw",
-                    viz=viz,
-                    color=color,
-                )
-            )
+            #zhap = "" if hap == "all" else f"_{hap}".replace("hap", "H")
+            #trackDb.write(
+            #    FIRE_SCORE.format(
+            #        sample=sample,
+            #        hap=hap,
+            #        file=f"bw/score{zhap}.bw",
+            #        viz=viz,
+            #        color=color,
+            #    )
+            #)
 
         # new bin files
         if hap == "all":
