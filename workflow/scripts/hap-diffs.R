@@ -104,6 +104,7 @@ df=fread(in_file) %>%
         c("fire_coverage_H1","fire_coverage_H2","coverage_H1","coverage_H2"),
         as.numeric
     ) %>%
+    filter(pass_coverage) %>%
     filter(
         !is.na(fire_coverage_H1),
         !is.na(fire_coverage_H2),
