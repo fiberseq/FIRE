@@ -535,7 +535,7 @@ def main(
     fire = fire.join(fiber_locations, on=["chrom", "fiber", "hap"], how="outer").sort(
         ["chrom", "start", "end"]
     )
-    logging.info(f"fire dtypes\n{fire.dtypes}")
+    logging.info(f"fire dtypes\n{fire.dtypes}\n{fire}")
     
     if shuffled_locations_file is not None:
         make_fdr_table(fire, outfile, min_coverage=min_coverage)
