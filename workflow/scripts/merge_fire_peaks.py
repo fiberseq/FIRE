@@ -71,7 +71,7 @@ def group_peaks(df, min_frac_overlap=0.5, min_reciprocal_overlap=0.75):
         )
         .filter(pl.col("score") == pl.col("score_max"))
         # filter multiple maxes
-        .groupby("group")
+        .group_by("group")
         .agg(pl.all().head(1))
         .explode(pl.all().exclude("group"))
         # add the peak length
