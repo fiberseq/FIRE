@@ -114,8 +114,8 @@ def main(
     min_frac_overlap: float = 0.5,
     min_reciprocal_overlap: float = 0.90,
     max_grouping_iterations: int = 10,
-    min_cov = 0,
-    max_cov = 100_000_000_000,
+    min_cov: int = 0,
+    max_cov: int = 100_000_000_000,
     verbose: int = 0,
 ):
     """
