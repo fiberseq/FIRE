@@ -92,11 +92,11 @@ rule index_model_results:
         """
 
 
-rule fire_sites:
+rule fire_sites_chrom:
     input:
-        bed=rules.merge_model_results.output.bed,
+        bed=rules.extract_from_fire.output.bed,
     output:
-        bed="results/{sm}/fiber-calls/FIRE.bed.gz",
+        bed=temp("temp/{sm}/fiber-calls/{chrom}/FIRE.bed.gz"),
     threads: 8
     conda:
         default_env
@@ -106,8 +106,25 @@ rule fire_sites:
         """
         bgzip -cd -@{threads} {input.bed} \
             | bioawk -tc hdr '$10<={params.min_fdr}' \
+            | grep -v '^#' \
             | bgzip -@{threads} \
             > {output.bed}
+        """
+
+
+rule fire_sites:
+    input:
+        beds=expand(rules.fire_sites_chrom.output.bam, chrom=get_chroms(), allow_missing=True),
+    output:
+        bed="results/{sm}/fiber-calls/FIRE.bed.gz",
+    threads: 8
+    conda:
+        default_env
+    params:
+        min_fdr=min_fire_fdr,
+    shell:
+        """
+        cat {input.beds} > {output.bed}
         """
 
 
