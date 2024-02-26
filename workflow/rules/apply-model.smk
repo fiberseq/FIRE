@@ -94,17 +94,18 @@ rule index_model_results:
 
 rule fire_sites_chrom:
     input:
-        bed=rules.extract_from_fire.output.bed,
+        bed=rules.merge_model_results.output.bed,
+        tbi=rules.index_model_results.output.tbi,
     output:
         bed=temp("temp/{sm}/fiber-calls/{chrom}/FIRE.bed.gz"),
-    threads: 8
+    threads: 4
     conda:
         default_env
     params:
         min_fdr=min_fire_fdr,
     shell:
         """
-        bgzip -cd -@{threads} {input.bed} \
+        tabix {input.bed} {wildcards.chrom} \
             | bioawk -tc hdr '$10<={params.min_fdr}' \
             | grep -v '^#' \
             | bgzip -@{threads} \
