@@ -195,7 +195,7 @@ def fire_tracks(fire, outfile, min_coverage=4):
         logging.debug(f"Grouped fire data\n{g}\n{g.dtypes}")
 
         if g.shape[0] == 0:
-            logging.warn(f"No data for {chrom}")
+            logging.warning(f"No data for {chrom}")
             continue
         
         # get coverage for this chromosome and the shuffled fibers
