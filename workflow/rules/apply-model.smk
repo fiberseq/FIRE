@@ -114,7 +114,7 @@ rule fire_sites_chrom:
 
 rule fire_sites:
     input:
-        beds=expand(rules.fire_sites_chrom.output.bam, chrom=get_chroms(), allow_missing=True),
+        beds=expand(rules.fire_sites_chrom.output.bed, chrom=get_chroms(), allow_missing=True),
     output:
         bed="results/{sm}/fiber-calls/FIRE.bed.gz",
     threads: 8
