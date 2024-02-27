@@ -19,7 +19,7 @@ rule fire:
         samtools view -u -@ {threads} {input.bam} {wildcards.chrom} \
             | ft fire -t {threads} \
                 --min-msp {params.min_msp} \
-                --min-ave-msp-size {min_ave_msp_size} \
+                --min-ave-msp-size {params.min_ave_msp_size} \
                 --skip-no-m6a \
                 - {output.bam}
         """
