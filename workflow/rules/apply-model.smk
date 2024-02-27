@@ -11,12 +11,17 @@ rule fire:
         mem_mb=8 * 1024,
     params:
         min_msp=config.get("min_msp", 10),
+        min_ave_msp_size=config.get("min_ave_msp_size", 10),
     conda:
         default_env
     shell:
         """
         samtools view -u -@ {threads} {input.bam} {wildcards.chrom} \
-            | ft fire -t {threads} --min-msp {params.min_msp} --skip-no-m6a - {output.bam}
+            | ft fire -t {threads} \
+                --min-msp {params.min_msp} \
+                --min-ave-msp-size {min_ave_msp_size} \
+                --skip-no-m6a \
+                - {output.bam}
         """
 
 
