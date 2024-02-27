@@ -159,7 +159,7 @@ rule helper_fdr_peaks_by_fire_elements:
         fire_tbi=rules.fire_sites_index.output.tbi,
     output:
         bed=temp("temp/{sm}/FDR-peaks/{chrom}-FDR-FIRE-peaks.bed.gz"),
-    threads: 8
+    threads: 2
     conda:
         default_env
     params:
