@@ -46,6 +46,10 @@ Forgo the use of FDR peak calling and instead call peaks for regions with at lea
 ```
 min_per_acc_peak = 0.25
 ```
+Apply a percent actuation filter on top of the FDR peak calling. Default is `0.0` for no filter.
+```
+min_frac_accessible: 0.0
+```
 Process only chromosomes matching this regular expression:
 ```
 keep_chromosomes: "chr[0-9XY]+$"
