@@ -113,8 +113,8 @@ rule fire_sites_chrom:
         """
         tabix {input.bed} {wildcards.chrom} \
             | bioawk -tc hdr '$10<={params.min_fdr}' \
-            | grep -v '^#' \
             | grep '\\S' \
+            | grep -v '^#' \
             | bgzip -@{threads} \
             > {output.bed}
         """
