@@ -57,7 +57,7 @@ rule extract_from_fire:
     shell:
         """
         ft fire -t {threads} --extract {input.bam} \
-            | grep '\\S' \
+            | (grep '\\S' || true) \
             | LC_ALL=C sort \
                 --parallel={threads} \
                 -k1,1 -k2,2n -k3,3n -k4,4 \
