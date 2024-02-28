@@ -214,12 +214,14 @@ rule fdr_peaks_by_fire_elements_chromosome:
         "../envs/python.yaml"
     params:
         script=workflow.source_path("../scripts/merge_fire_peaks.py"),
+        min_frac_accessible=config.get("min_frac_accessible", 0)
     shell:
         """
         zcat {input.bed} \
             | python {params.script} -v 1 \
                 --max-cov $(cat {input.maximum}) \
                 --min-cov $(cat {input.minimum}) \
+                --min-frac-accessible {params.min_frac_accessible} \
             | bgzip -@ {threads} \
         > {output.bed}
         """
