@@ -62,3 +62,11 @@ The allowed false discovery rate for calling FIRE elements.
 ```
 min_fire_fdr: 0.10
 ```
+The minimum number of MSPs in a Fiber-seq read for it to be included in the analysis. Default is `10`.
+```
+min_msp: 10
+```
+The minimum average size of MSPs in a Fiber-seq read for it to be included in the analysis. Default is `10`.
+```
+min_ave_msp_size: 10
+```
