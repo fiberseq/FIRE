@@ -57,7 +57,7 @@ rule extract_from_fire:
     shell:
         """
         ft fire -t {threads} --extract {input.bam} \
-            | grep "\S" \
+            | grep '\S' \
             | LC_ALL=C sort \
                 --parallel={threads} \
                 -k1,1 -k2,2n -k3,3n -k4,4 \
@@ -114,7 +114,7 @@ rule fire_sites_chrom:
         tabix {input.bed} {wildcards.chrom} \
             | bioawk -tc hdr '$10<={params.min_fdr}' \
             | grep -v '^#' \
-            | grep "\S" \
+            | grep '\S' \
             | bgzip -@{threads} \
             > {output.bed}
         """
