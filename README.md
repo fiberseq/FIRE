@@ -62,4 +62,4 @@ snakemake \
 
 ## Test data
 
-You can find input data to test against at [this url](https://s3-us-west-2.amazonaws.com/stergachis-public1/index.html?prefix=Projects/Phased-GM12878/fire-test/).
+You can find input data to test against at [this url](https://s3-us-west-2.amazonaws.com/stergachis-public1/index.html?prefix=FIRE/test-data/).
