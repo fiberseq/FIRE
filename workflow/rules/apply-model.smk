@@ -88,7 +88,7 @@ rule index_model_results:
     input:
         bed=rules.merge_model_results.output.bed,
     output:
-        tbi=rules.merge_model_results.output.bed + ".tbi",
+        tbi=temp(rules.merge_model_results.output.bed + ".tbi"),
     conda:
         default_env
     shell:
