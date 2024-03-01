@@ -184,7 +184,7 @@ rule helper_fdr_peaks_by_fire_elements:
                 | rg -w "#chrom|True" \
                 | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}" \
                 | csvtk filter -tT -C '$' -f "fire_coverage>1" \
-                | bioawk -tc hdr 'NR==1 || ($fire_coverage/$coverage>{params.min_per_acc_peak})' \
+                | bioawk -tc hdr 'NR==1 || ($fire_coverage/$coverage>={params.min_per_acc_peak})' \
                 | bedtools intersect -wa -wb -sorted -a - \
                     -b <(tabix {input.fire} {wildcards.chrom} \
                             | cut -f 1-3 \
@@ -277,7 +277,7 @@ rule wide_fdr_peaks:
         ( \
             zcat {input.bed}; \
             bioawk -tc hdr 'NR==1 || $FDR<={params.max_peak_fdr}' {input.track} \
-                | bioawk -tc hdr 'NR==1 || ($fire_coverage/$coverage>{params.min_frac_acc})' \
+                | bioawk -tc hdr 'NR==1 || ($fire_coverage/$coverage>={params.min_frac_acc})' \
         ) \
             | cut -f 1-3 \
             | bedtools sort \
