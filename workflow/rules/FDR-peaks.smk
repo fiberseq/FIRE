@@ -214,7 +214,7 @@ rule fdr_peaks_by_fire_elements_chromosome:
         "../envs/python.yaml"
     params:
         script=workflow.source_path("../scripts/merge_fire_peaks.py"),
-        min_frac_accessible=config.get("min_frac_accessible", 0)
+        min_frac_accessible=config.get("min_frac_accessible", 0),
     shell:
         """
         zcat {input.bed} \
@@ -267,7 +267,7 @@ rule wide_fdr_peaks:
     params:
         nuc_size=config.get("nucleosome_size", 147),
         max_peak_fdr=max_peak_fdr,
-        min_per_acc_peak=min_per_acc_peak,
+        min_frac_acc=max(config.get("min_frac_accessible", 0), min_per_acc_peak),
     shell:
         """
         FILE={output.bed}
@@ -277,7 +277,7 @@ rule wide_fdr_peaks:
         ( \
             zcat {input.bed}; \
             bioawk -tc hdr 'NR==1 || $FDR<={params.max_peak_fdr}' {input.track} \
-                | bioawk -tc hdr 'NR==1 || ($fire_coverage/$coverage>{params.min_per_acc_peak})' \
+                | bioawk -tc hdr 'NR==1 || ($fire_coverage/$coverage>{params.min_frac_acc})' \
         ) \
             | cut -f 1-3 \
             | bedtools sort \
