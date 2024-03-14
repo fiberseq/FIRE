@@ -170,15 +170,36 @@ def fire_tracks(fire, outfile, min_coverage=4):
     null_s = []
     fire_s = []
     logging.info(f"Fire data\n{fire}")
-    for chrom, g in fire.groupby("chrom", maintain_order=True):
+    # number of elements where start and fiber_start are null
+    null_count = fire.filter(
+        pl.col("start").is_null() & pl.col("fiber_start").is_null()
+    ).shape[0]
+    if null_count > 0:
+        logging.warn(f"Null count: {null_count}")
+    
+    for chrom, g in fire.group_by("chrom", maintain_order=True):
         logging.info(f"Processing {chrom}")
         # fibers for this chromosome
-        fibers = g[FIBER_COLUMNS].unique().to_pandas()
+        fibers = (
+            g[FIBER_COLUMNS]
+            .filter(~pl.col("fiber_start").is_null())
+            .unique()
+            .to_pandas()
+        )
         # convert to pandas for easier manipulation
-        g = g.to_pandas()
+        g = (
+            g.filter(~pl.col("start").is_null())
+            .filter(~pl.col("fiber_start").is_null())
+            .to_pandas()
+        )
+        logging.debug(f"Grouped fire data\n{g}\n{g.dtypes}")
 
+        if g.shape[0] == 0:
+            logging.warning(f"No data for {chrom}")
+            continue
+        
         # get coverage for this chromosome and the shuffled fibers
-        chrom_length = g.length[0]
+        chrom_length = g.length[0].astype(int)
         coverage_array = make_coverage_array(
             fibers.fiber_start.values, fibers.fiber_end.values, chrom_length
         )
@@ -276,9 +297,8 @@ def fire_tracks(fire, outfile, min_coverage=4):
     results.to_csv(outfile, sep="\t", index=False)
 
 
-def make_fdr_table(fire, fibers, outfile, min_coverage=4):
+def make_fdr_table(fire, outfile, min_coverage=4):
     logging.info("Starting analysis")
-    fire = fire.join(fibers, on=["chrom", "fiber", "hap"])
     logging.debug(f"Joined fibers\n{fire}")
     fire_tracks(fire, outfile, min_coverage=min_coverage)
     return 0
@@ -300,7 +320,7 @@ def write_bed(chrom, output_dict, out, first=True):
     else:
         header = False
         mode = "a"
-    logging.info(f"Making data frame")
+    logging.info("Making data frame")
     df = pl.DataFrame(output_dict)
     del output_dict
     gc.collect()
@@ -314,11 +334,11 @@ def write_bed(chrom, output_dict, out, first=True):
     )
     original_columns = df.columns
     # find and clear the duplicates
-    logging.info(f"Finding duplicates")
+    logging.info("Finding duplicates")
     # float array that says if a row is different from the previous row
     diff = (((df != df.shift(periods=1)).sum(axis=1)) > 0) * 1.0
     # turn the diff array into a group number
-    logging.info(f"Merging duplicates")
+    logging.info("Merging duplicates")
     df = (
         df.with_columns(
             diff.cumsum().alias("group"),
@@ -363,7 +383,7 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
     for hap in [""] + HAPS:
         # select data we are working with
         if hap == "":
-            logging.info(f"Processing all haplotypes")
+            logging.info("Processing all haplotypes")
             tag = ""
             cur_fire = fire
             cur_fibers = fibers
@@ -427,10 +447,9 @@ def extra_output_columns(fire, fibers, fdr_table, min_coverage=4):
     return return_data
 
 
-def write_scores(fire, fibers, fdr_table, outfile, min_coverage=4):
-    fire = fire.join(fibers, on=["chrom", "fiber", "hap"])
+def write_scores(fire, fdr_table, outfile, min_coverage=4):
     first = True
-    for chrom, g in fire.groupby("chrom", maintain_order=True):
+    for chrom, g in fire.group_by("chrom", maintain_order=True):
         logging.info(f"Processing {chrom}")
         # fibers for this chromosome
         fibers = (
@@ -521,17 +540,24 @@ def main(
             columns=[0, 1, 2, 3],
             new_columns=["chrom", "null_fiber_start", "null_fiber_end", "fiber"],
         )
-        fibers = fiber_locations.join(shuffled_locations, on=["chrom", "fiber"])
-        make_fdr_table(fire, fibers, outfile, min_coverage=min_coverage)
+        fiber_locations = fiber_locations.join(
+            shuffled_locations, on=["chrom", "fiber"]
+        )
+
+    logging.info("Joining FIRE elements and fibers and then sorting")
+    fire = fire.join(fiber_locations, on=["chrom", "fiber", "hap"], how="outer").sort(
+        ["chrom", "start", "end"]
+    )
+
+    if shuffled_locations_file is not None:
+        make_fdr_table(fire, outfile, min_coverage=min_coverage)
     else:
         fdr_table = (
             pl.read_csv(fdr_table_file, separator="\t")
             .to_pandas()
             .sort_values("threshold")
         )
-        write_scores(
-            fire, fiber_locations, fdr_table, outfile, min_coverage=min_coverage
-        )
+        write_scores(fire, fdr_table, outfile, min_coverage=min_coverage)
     return 0
 
 

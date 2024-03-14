@@ -153,13 +153,13 @@ rule fdr_track_filtered:
 
 rule helper_fdr_peaks_by_fire_elements:
     input:
-        bed=rules.fdr_track_filtered.output.bed,
-        tbi=rules.fdr_track_filtered.output.tbi,
+        bed=rules.fdr_track.output.bed,
+        tbi=rules.fdr_track.output.tbi,
         fire=rules.fire_sites.output.bed,
         fire_tbi=rules.fire_sites_index.output.tbi,
     output:
         bed=temp("temp/{sm}/FDR-peaks/{chrom}-FDR-FIRE-peaks.bed.gz"),
-    threads: 8
+    threads: 2
     conda:
         default_env
     params:
@@ -184,7 +184,7 @@ rule helper_fdr_peaks_by_fire_elements:
                 | rg -w "#chrom|True" \
                 | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}" \
                 | csvtk filter -tT -C '$' -f "fire_coverage>1" \
-                | bioawk -tc hdr 'NR==1 || ($fire_coverage/$coverage>{params.min_per_acc_peak})' \
+                | bioawk -tc hdr 'NR==1 || ($fire_coverage/$coverage>={params.min_per_acc_peak})' \
                 | bedtools intersect -wa -wb -sorted -a - \
                     -b <(tabix {input.fire} {wildcards.chrom} \
                             | cut -f 1-3 \
@@ -205,6 +205,8 @@ rule helper_fdr_peaks_by_fire_elements:
 rule fdr_peaks_by_fire_elements_chromosome:
     input:
         bed=rules.helper_fdr_peaks_by_fire_elements.output.bed,
+        minimum=rules.coverage.output.minimum,
+        maximum=rules.coverage.output.maximum,
     output:
         bed=temp("temp/{sm}/FDR-peaks/grouped-{chrom}-FDR-FIRE-peaks.bed.gz"),
     threads: 8
@@ -212,10 +214,14 @@ rule fdr_peaks_by_fire_elements_chromosome:
         "../envs/python.yaml"
     params:
         script=workflow.source_path("../scripts/merge_fire_peaks.py"),
+        min_frac_accessible=config.get("min_frac_accessible", 0),
     shell:
         """
         zcat {input.bed} \
             | python {params.script} -v 1 \
+                --max-cov $(cat {input.maximum}) \
+                --min-cov $(cat {input.minimum}) \
+                --min-frac-accessible {params.min_frac_accessible} \
             | bgzip -@ {threads} \
         > {output.bed}
         """
@@ -249,7 +255,7 @@ rule fdr_peaks_by_fire_elements:
 rule wide_fdr_peaks:
     input:
         bed=rules.fdr_peaks_by_fire_elements.output.bed,
-        track=rules.fdr_track_filtered.output.bed,
+        track=rules.fdr_track.output.bed,
         fai=ancient(f"{ref}.fai"),
     output:
         bed="results/{sm}/FDR-peaks/FDR-wide-peaks.bed.gz",
@@ -261,16 +267,17 @@ rule wide_fdr_peaks:
     params:
         nuc_size=config.get("nucleosome_size", 147),
         max_peak_fdr=max_peak_fdr,
-        min_per_acc_peak=min_per_acc_peak,
+        min_frac_acc=max(config.get("min_frac_accessible", 0), min_per_acc_peak),
     shell:
         """
         FILE={output.bed}
         TMP="${{FILE%.*}}"
         echo $TMP
+
         ( \
             zcat {input.bed}; \
             bioawk -tc hdr 'NR==1 || $FDR<={params.max_peak_fdr}' {input.track} \
-                | bioawk -tc hdr 'NR==1 || ($fire_coverage/$coverage>{params.min_per_acc_peak})' \
+                | bioawk -tc hdr 'NR==1 || ($fire_coverage/$coverage>={params.min_frac_acc})' \
         ) \
             | cut -f 1-3 \
             | bedtools sort \
@@ -285,12 +292,12 @@ rule wide_fdr_peaks:
 rule one_percent_fdr_peaks:
     input:
         bed=rules.fdr_peaks_by_fire_elements.output.bed,
-        track=rules.fdr_track_filtered.output.bed,
+        track=rules.fdr_track.output.bed,
     output:
-        bed="results/{sm}/FDR-peaks/FDR-01-FIRE-peaks.bed.gz",
-        tbi="results/{sm}/FDR-peaks/FDR-01-FIRE-peaks.bed.gz.tbi",
-        wide="results/{sm}/FDR-peaks/FDR-01-FIRE-wide-peaks.bed.gz",
-        wide_tbi="results/{sm}/FDR-peaks/FDR-01-FIRE-wide-peaks.bed.gz.tbi",
+        bed="results/{sm}/FDR-peaks/one-percent-FDR/FDR-01-FIRE-peaks.bed.gz",
+        tbi="results/{sm}/FDR-peaks/one-percent-FDR/FDR-01-FIRE-peaks.bed.gz.tbi",
+        wide="results/{sm}/FDR-peaks/one-percent-FDR/FDR-01-FIRE-wide-peaks.bed.gz",
+        wide_tbi="results/{sm}/FDR-peaks/one-percent-FDR/FDR-01-FIRE-wide-peaks.bed.gz.tbi",
     threads: 4
     conda:
         default_env

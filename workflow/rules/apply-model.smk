@@ -9,12 +9,19 @@ rule fire:
     threads: 8
     resources:
         mem_mb=8 * 1024,
+    params:
+        min_msp=config.get("min_msp", 10),
+        min_ave_msp_size=config.get("min_ave_msp_size", 10),
     conda:
         default_env
     shell:
         """
         samtools view -u -@ {threads} {input.bam} {wildcards.chrom} \
-            | ft fire -t {threads} --skip-no-m6a - {output.bam}
+            | ft fire -t {threads} \
+                --min-msp {params.min_msp} \
+                --min-ave-msp-size {params.min_ave_msp_size} \
+                --skip-no-m6a \
+                - {output.bam}
         """
 
 
@@ -81,7 +88,7 @@ rule index_model_results:
     input:
         bed=rules.merge_model_results.output.bed,
     output:
-        tbi=rules.merge_model_results.output.bed + ".tbi",
+        tbi=temp(rules.merge_model_results.output.bed + ".tbi"),
     conda:
         default_env
     shell:
@@ -90,9 +97,33 @@ rule index_model_results:
         """
 
 
-rule fire_sites:
+rule fire_sites_chrom:
     input:
         bed=rules.merge_model_results.output.bed,
+        tbi=rules.index_model_results.output.tbi,
+    output:
+        bed=temp("temp/{sm}/fiber-calls/{chrom}/FIRE.bed.gz"),
+    threads: 4
+    conda:
+        default_env
+    params:
+        min_fdr=min_fire_fdr,
+    shell:
+        """
+        tabix {input.bed} {wildcards.chrom} \
+            | bioawk -tc hdr '$10<={params.min_fdr}' \
+            | (grep '\\S' || true) \
+            | (grep -v '^#' || true) \
+            | bgzip -@{threads} \
+            > {output.bed}
+        """
+
+
+rule fire_sites:
+    input:
+        beds=expand(
+            rules.fire_sites_chrom.output.bed, chrom=get_chroms(), allow_missing=True
+        ),
     output:
         bed="results/{sm}/fiber-calls/FIRE.bed.gz",
     threads: 8
@@ -102,10 +133,7 @@ rule fire_sites:
         min_fdr=min_fire_fdr,
     shell:
         """
-        bgzip -cd -@{threads} {input.bed} \
-            | bioawk -tc hdr '$10<={params.min_fdr}' \
-            | bgzip -@{threads} \
-            > {output.bed}
+        cat {input.beds} > {output.bed}
         """
 
 

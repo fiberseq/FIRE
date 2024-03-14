@@ -38,23 +38,35 @@ excludes:
 ```
 
 # Developer options, not for general use
-Min coverage of FIRE elements for calling a FIRE peak:
+Min coverage of FIRE elements for calling a FIRE peak. Default is `4`.
 ```
 min_coverage: 4
 ```
-Forgo the use of FDR peak calling and instead call peaks for regions with at least this fraction of reads actuated.
+Forgo the use of FDR peak calling and instead call peaks for regions with at least this fraction of reads actuated. Default is `0.0` for no filter.
 ```
 min_per_acc_peak = 0.25
+```
+Apply a percent actuation filter on top of the FDR peak calling. Default is `0.0` for no filter.
+```
+min_frac_accessible: 0.0
 ```
 Process only chromosomes matching this regular expression:
 ```
 keep_chromosomes: "chr[0-9XY]+$"
 ```
-The false discovery rate (FDR) for calling FIRE peaks:
+The false discovery rate (FDR) for calling FIRE peaks. Default is `0.05`.
 ```
 max_peak_fdr: 0.05
 ```
-The allowed false discovery rate for calling FIRE elements. 
+The allowed false discovery rate for calling individual FIRE elements. Default is `0.10`.
 ```
 min_fire_fdr: 0.10
+```
+The minimum number of MSPs in a Fiber-seq read for it to be included in the analysis. Default is `10`.
+```
+min_msp: 10
+```
+The minimum average size of MSPs in a Fiber-seq read for it to be included in the analysis. Default is `10`.
+```
+min_ave_msp_size: 10
 ```

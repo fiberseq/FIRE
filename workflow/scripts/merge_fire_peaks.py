@@ -71,7 +71,7 @@ def group_peaks(df, min_frac_overlap=0.5, min_reciprocal_overlap=0.75):
         )
         .filter(pl.col("score") == pl.col("score_max"))
         # filter multiple maxes
-        .groupby("group")
+        .group_by("group")
         .agg(pl.all().head(1))
         .explode(pl.all().exclude("group"))
         # add the peak length
@@ -113,7 +113,10 @@ def main(
     max_score_every: int = None,
     min_frac_overlap: float = 0.5,
     min_reciprocal_overlap: float = 0.90,
+    min_frac_accessible: float = 0.0,
     max_grouping_iterations: int = 10,
+    min_cov: int = 0,
+    max_cov: int = 100_000_000_000,
     verbose: int = 0,
 ):
     """
@@ -170,6 +173,13 @@ def main(
         min_reciprocal_overlap=min_reciprocal_overlap,
         max_grouping_iterations=2,
     )
+    # add a column indicating if the peak passes coverage filters
+    df = df.with_columns(
+        pass_coverage=(pl.col("coverage") >= min_cov) & (pl.col("coverage") <= max_cov),
+    ).filter(
+        pl.col("fire_coverage")/pl.col("coverage") >= min_frac_accessible 
+    )
+    
     # write to stdout
     (
         df.sort(["#chrom", "peak_start", "peak_end"])

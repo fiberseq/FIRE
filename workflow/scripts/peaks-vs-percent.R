@@ -43,6 +43,7 @@ df=fread(in_file)
 df$peak_cov = df$coverage
 df$acc_percent = df$fire_coverage/df$peak_cov
 df = df %>%
+    filter(pass_coverage) %>%
     arrange(-acc_percent) %>%
     mutate(
         count=row_number(),
