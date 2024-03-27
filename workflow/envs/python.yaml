@@ -10,8 +10,8 @@ dependencies:
   - numpy==1.24 # use this version to avoid cxx errors
   - numba::numba>=0.56
   - pandas==1.4 # pandas versions later than this have cxx errors
-  - pysam>=0.19
-  - htslib>=1.17
+  - pysam==0.21
+  - htslib==1.189
   - pip
   - pip:
-      - polars[pyarrow]>=0.19
+      - polars[pyarrow]==0.19
