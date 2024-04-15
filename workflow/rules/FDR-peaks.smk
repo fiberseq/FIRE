@@ -243,8 +243,8 @@ rule fdr_peaks_by_fire_elements:
     shell:
         """
         ( \
-            zcat {input.beds} | rg "^#" | head -n 1; \
-            zcat {input.beds} | rg -v "^#" \
+            cat {input.beds} | bgzip -cd | rg "^#" | head -n 1; \
+            cat {input.beds} | bgzip -cd -@ {threads} | rg -v "^#" \
         ) \
             | bgzip -@ {threads} \
             > {output.bed}
