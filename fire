@@ -2,7 +2,7 @@
 
 # check for conda location
 if [[ -z "${SNAKEMAKE_CONDA_PREFIX}" ]]; then
-    printf "Warning:\n\tSNAKEMAKE_CONDA_PREFIX is not set. Please set this env variable to the location of your group's shared snakemke conda enviroments.\n\tSee --conda-prefix at https://snakemake.readthedocs.io/en/stable/executing/cli.html#conda for more information.\n\n"
+    printf "Warning:\n\tSNAKEMAKE_CONDA_PREFIX is not set. Please set this env variable to the location of your group's shared snakemke conda enviroments.\n\tSee --conda-prefix at https://snakemake.readthedocs.io/en/stable/executing/cli.html#conda for more information.\n\n" 1>&2
 fi
 
 set -euo pipefail
