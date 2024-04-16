@@ -6,39 +6,53 @@ rule genome_bedgraph:
         bam=rules.merged_fire_bam.output.bam,
         fai=ancient(f"{ref}.fai"),
     output:
-        d4="results/{sm}/coverage/{sm}.d4",
         bg="results/{sm}/coverage/{sm}.bed.gz",
-        median="results/{sm}/coverage/{sm}.median.chromosome.coverage.bed",
+        csi="results/{sm}/coverage/{sm}.bed.gz.csi",
     threads: 16
+    shadow:
+        "shallow"
     conda:
         default_env
     shell:
         """ 
-        d4tools create -t {threads} -Azr {input.fai} {input.bam} {output.d4}
-        d4tools view {output.d4} | bedtools sort | bgzip -@ {threads} > {output.bg}
-        zcat {output.bg} \
-            | awk '$4>0' \
-            | datamash -g 1 min 2 max 3 median 4 \
-        > {output.median}
+        mosdepth -t {threads} tmp {input.bam}
+        mv tmp.per-base.bed.gz {output.bg}
+        mv tmp.per-base.bed.gz.csi {output.csi}
         """
 
 
 rule coverage:
     input:
-        median=rules.genome_bedgraph.output.median,
+        bam=rules.merged_fire_bam.output.bam,
     output:
         cov="results/{sm}/coverage/{sm}.median.coverage.txt",
         minimum="results/{sm}/coverage/{sm}.minimum.coverage.txt",
         maximum="results/{sm}/coverage/{sm}.maximum.coverage.txt",
     conda:
-        "../envs/python.yaml"
+        default_env
+    threads: 16
     params:
-        chrom=get_chroms(),
-        coverage_within_n_sd=coverage_within_n_sd,
-        min_coverage=min_coverage,
-    script:
-        "../scripts/cov.py"
+        n_sd=coverage_within_n_sd,
+        mincov=min_coverage,
+    shell:
+        """
+        samtools depth -@ {threads} {input.bam} | datamash median 3 > {output.cov}
+        MEDIAN=$(cat {output.cov})
 
+        # calculate minimum and maximum coverage        
+        echo $MEDIAN \
+            | awk '{{print int($0 + {params.n_sd} * sqrt($0) + 0.5) }}' \
+            > {output.maximum}
+
+        echo $MEDIAN \
+            | awk '{{print int($0 - {params.n_sd} * sqrt($0) + 0.5) }}' \
+            | awk '{{if $0 < {params.mincov} {{print {params.mincov}}}; else {{print $0}}}}' \
+            > {output.minimum}
+
+        echo "Median coverage: $MEDIAN"
+        echo "Minimum coverage: $(cat {output.minimum})"
+        echo "Maximum coverage: $(cat {output.maximum})"
+        """
 
 #
 # fiber locations and coverages
