@@ -46,7 +46,7 @@ rule coverage:
 
         echo $MEDIAN \
             | awk '{{print int($0 - {params.n_sd} * sqrt($0) + 0.5) }}' \
-            | awk '{{if $0 < {params.mincov} {{print {params.mincov}}} else {{print $0}}}}' \
+            | awk '{{if ($0 < {params.mincov}) print {params.mincov}; else print $0}}' \
             > {output.minimum}
 
         echo "Median coverage: $MEDIAN"
