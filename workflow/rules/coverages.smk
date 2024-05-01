@@ -31,6 +31,8 @@ rule coverage:
     conda:
         default_env
     threads: 16
+    resources:
+      mem_mb=80 * 1024,
     params:
         n_sd=coverage_within_n_sd,
         mincov=min_coverage,
