@@ -16,8 +16,11 @@ rule genome_bedgraph:
     shell:
         """ 
         mosdepth -t {threads} tmp {input.bam}
-        mv tmp.per-base.bed.gz {output.bg}
-        mv tmp.per-base.bed.gz.csi {output.csi}
+        zcat tmp.regions.bed.gz \
+            | bedtools sort \
+            | bgzip -@ {threads} \
+        > {output.bg}
+        tabix -f -p bed {output.bg}
         """
 
 
