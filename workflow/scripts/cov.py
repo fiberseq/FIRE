@@ -22,7 +22,7 @@ def get_max_coverage(median):
 def weighted_median(df, val, weight):
     df.sort_values(val, inplace=True)
     # group by value and sum the weights
-    gdf = df.groupby(val)[weight].sum().reset_index()
+    gdf = df.groupby(val)[weight].sum().reset_index().sort_values(val)
     print(gdf, file=sys.stderr)
     
     df["cumsum"] = df[weight].cumsum()
