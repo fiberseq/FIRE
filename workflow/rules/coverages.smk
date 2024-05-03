@@ -35,7 +35,7 @@ rule coverage:
         "../envs/python.yaml"
     threads: 16
     params:
-        n_sd=coverage_within_n_sd,
+        coverage_within_n_sd=coverage_within_n_sd,
         mincov=min_coverage,
     script: "../scripts/cov.py"
 
