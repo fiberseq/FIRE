@@ -9,7 +9,7 @@ def get_chroms():
     min_contig_length = config.get("min_contig_length", 0)
     skipped_contigs = fai["chr"][fai["length"] < min_contig_length]
     if len(skipped_contigs) > 0 and FIRST_REPORT:
-        logging.warn(f"Skipping contigs with length < {min_contig_length}: {skipped_contigs}")
+        logging.warn(f"Skipping contigs with length < {min_contig_length:,}: {skipped_contigs}")
         FIRST_REPORT = False
 
     chroms = fai["chr"][fai["length"] >= min_contig_length]
