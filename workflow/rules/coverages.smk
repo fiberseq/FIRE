@@ -15,11 +15,10 @@ rule genome_bedgraph:
         default_env
     shell:
         """ 
-        export LC_ALL=C
         mosdepth -t {threads} tmp {input.bam}
         ls * 
         zcat tmp.per-base.bed.gz \
-            | bedtools sort \
+            | LC_ALL=C sort -k1,1 -k2,2n -k3,3n -k4,4  \
             | bgzip -@ {threads} \
         > {output.bg}
         tabix -f -p bed {output.bg}
