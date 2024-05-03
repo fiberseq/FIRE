@@ -20,9 +20,9 @@ def get_max_coverage(median):
 
 def weighted_median(df, val, weight):
     df.sort_values(val, inplace=True)
-    cumsum = df[weight].cumsum()
-    cutoff = df[weight].sum() / 2.0
-    comparison = df[cumsum >= cutoff][val]
+    df["cumsum"] = df[weight].cumsum()
+    df["cutoff"] = df[weight].sum() / 2.0
+    comparison = df[df["cumsum"] >= df["cutoff"]][val]
     print(comparison, file=sys.stderr)
     return comparison.iloc[0]
 
