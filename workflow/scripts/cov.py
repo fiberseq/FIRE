@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import sys
 import os
 import math
@@ -22,7 +23,7 @@ def weighted_median(df, val, weight):
     df.sort_values(val, inplace=True)
     df["cumsum"] = df[weight].cumsum()
     df["cutoff"] = df[weight].sum() / 2.0
-    print(df, file=sys.stderr)
+    print(df[np.abs(df["cumsum"]-df["cutoff"]) <= 5] , file=sys.stderr)
     comparison = df[df["cumsum"] >= df["cutoff"]][val]
     print(comparison, file=sys.stderr)
     return comparison.iloc[0]
