@@ -32,7 +32,7 @@ df = pd.read_csv(
     names=["chr", "start", "end", "coverage"],
 )
 df = df[df.coverage > 0]
-df = df[df["chr"].isin(snakemake.params.chrom)]
+df = df[df["chr"].isin(snakemake.params.chroms)]
 df = df[~df["chr"].isin(["chrX", "chrY", "chrM", "chrEBV"])]
 df["weight"] = df["end"] - df["start"]
 print(df, file=sys.stderr)
