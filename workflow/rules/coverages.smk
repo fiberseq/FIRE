@@ -7,7 +7,7 @@ rule genome_bedgraph:
         fai=ancient(f"{ref}.fai"),
     output:
         bg="results/{sm}/coverage/{sm}.bed.gz",
-        csi="results/{sm}/coverage/{sm}.bed.gz.csi",
+        tbi="results/{sm}/coverage/{sm}.bed.gz.tbi",
     threads: 16
     shadow:
         "shallow"
