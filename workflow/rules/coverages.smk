@@ -43,25 +43,6 @@ rule coverage:
         chroms=get_chroms(),
     script: "../scripts/cov.py"
 
-"""
-samtools depth -@ {threads} {input.bam} | cut -f 3 | datamash median 1 > {output.cov}
-MEDIAN=$(cat {output.cov})
-
-# calculate minimum and maximum coverage        
-echo $MEDIAN \
-    | awk '{{print int($0 + {params.n_sd} * sqrt($0) + 0.5) }}' \
-    > {output.maximum}
-
-echo $MEDIAN \
-    | awk '{{print int($0 - {params.n_sd} * sqrt($0) + 0.5) }}' \
-    | awk '{{if ($0 < {params.mincov}) print {params.mincov}; else print $0}}' \
-    > {output.minimum}
-
-echo "Median coverage: $MEDIAN"
-echo "Minimum coverage: $(cat {output.minimum})"
-echo "Maximum coverage: $(cat {output.maximum})"
-"""
-
 #
 # fiber locations and coverages
 #
