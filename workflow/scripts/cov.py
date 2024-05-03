@@ -22,7 +22,9 @@ def weighted_median(df, val, weight):
     df.sort_values(val, inplace=True)
     cumsum = df[weight].cumsum()
     cutoff = df[weight].sum() / 2.0
-    return df[cumsum >= cutoff][val].iloc[0]
+    comparison = df[cumsum >= cutoff][val]
+    print(comparison, file=sys.stderr)
+    return comparison.iloc[0]
 
 
 df = pd.read_csv(
