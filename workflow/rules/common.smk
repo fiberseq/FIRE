@@ -11,7 +11,7 @@ def get_chroms():
     skipped_contigs = fai["chr"][fai["length"] < min_contig_length]
     if len(skipped_contigs) > 0 and FIRST_REPORT:
         print(
-            f"Skipping contigs with length < {min_contig_length:,}: {skipped_contigs}",
+            f"WARNING: Skipping contigs with length < {min_contig_length:,}: {skipped_contigs}",
             file=sys.stderr,
         )
         FIRST_REPORT = False
