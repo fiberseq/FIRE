@@ -14,8 +14,7 @@ def get_chroms():
             f"WARNING: Skipping contigs with length < {min_contig_length:,}: {skipped_contigs}",
             file=sys.stderr,
         )
-        FIRST_REPORT = False
-
+        
     chroms = fai["chr"][fai["length"] >= min_contig_length]
     chroms = sorted([chrom for chrom in fai["chr"] if "chrUn_" not in chrom])
     chroms = [chrom for chrom in chroms if "_random" not in chrom]
