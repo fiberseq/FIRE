@@ -2,11 +2,13 @@ import re
 import logging
 import sys
 
+FIRST_REPORT=True
 
 def get_chroms():
     min_contig_length = config.get("min_contig_length", 0)
     skipped_contigs = fai["chr"][fai["length"] < min_contig_length]
-    logging.warn(f"Skipping contigs with length < {min_contig_length}: {skipped_contigs}")
+    if len(skipped_contigs) > 0 and FIRST_REPORT:
+        logging.warn(f"Skipping contigs with length < {min_contig_length}: {skipped_contigs}")
     chroms = fai["chr"][fai["length"] >= min_contig_length]
     chroms = sorted([chrom for chrom in fai["chr"] if "chrUn_" not in chrom])
     chroms = [chrom for chrom in chroms if "_random" not in chrom]
