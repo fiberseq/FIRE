@@ -39,7 +39,7 @@ rule coverage:
         mincov=min_coverage,
     shell:
         """
-        samtools depth -@ {threads} {input.bam} | datamash median 3 > {output.cov}
+        samtools depth -@ {threads} {input.bam} | cut -f 3 | datamash median 1 > {output.cov}
         MEDIAN=$(cat {output.cov})
 
         # calculate minimum and maximum coverage        
