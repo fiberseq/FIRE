@@ -81,13 +81,12 @@ wildcard_constraints:
 
 
 localrules:
-    merge_model_results,
+    #merge_model_results,
     trackhub,
-    coverage,
-    clustering_vs_null,
-    percent_in_clusters,
-    hap_differences,
-    peaks_vs_percent,
+    #clustering_vs_null,
+    #percent_in_clusters,
+    #hap_differences,
+    #peaks_vs_percent,
 
 
 rule all:
