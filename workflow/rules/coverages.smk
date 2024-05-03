@@ -26,7 +26,7 @@ rule genome_bedgraph:
 
 rule coverage:
     input:
-        bam=rules.merged_fire_bam.output.bam,
+        bg=rules.genome_bedgraph.output.bg,
     output:
         cov="results/{sm}/coverage/{sm}.median.coverage.txt",
         minimum="results/{sm}/coverage/{sm}.minimum.coverage.txt",

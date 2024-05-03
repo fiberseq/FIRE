@@ -26,7 +26,7 @@ def weighted_median(df, val, weight):
 
 
 df = pd.read_csv(
-    snakemake.input.bedgraph,
+    snakemake.input.bg,
     sep="\t",
     header=None,
     names=["chr", "start", "end", "coverage"],
