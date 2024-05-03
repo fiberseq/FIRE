@@ -111,7 +111,7 @@ rule fiber_locations:
         MAX=$(cat {input.maximum})
         bedtools intersect -header -sorted -v -f 0.2 \
             -a {output.bed} \
-            -b <(zcat {input.bg} | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX') \
+            -b <(zcat {input.bg} | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX' | sort -k1,1 -k2,3n) \
         | bgzip -@ {threads} \
         > {output.filtered}
         tabix -f -p bed {output.filtered}
