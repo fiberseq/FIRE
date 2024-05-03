@@ -32,30 +32,31 @@ rule coverage:
         minimum="results/{sm}/coverage/{sm}.minimum.coverage.txt",
         maximum="results/{sm}/coverage/{sm}.maximum.coverage.txt",
     conda:
-        default_env
+        "../envs/python.yaml"
     threads: 16
     params:
         n_sd=coverage_within_n_sd,
         mincov=min_coverage,
-    shell:
-        """
-        samtools depth -@ {threads} {input.bam} | cut -f 3 | datamash median 1 > {output.cov}
-        MEDIAN=$(cat {output.cov})
+    script: "../scripts/cov.py"
 
-        # calculate minimum and maximum coverage        
-        echo $MEDIAN \
-            | awk '{{print int($0 + {params.n_sd} * sqrt($0) + 0.5) }}' \
-            > {output.maximum}
+"""
+samtools depth -@ {threads} {input.bam} | cut -f 3 | datamash median 1 > {output.cov}
+MEDIAN=$(cat {output.cov})
 
-        echo $MEDIAN \
-            | awk '{{print int($0 - {params.n_sd} * sqrt($0) + 0.5) }}' \
-            | awk '{{if ($0 < {params.mincov}) print {params.mincov}; else print $0}}' \
-            > {output.minimum}
+# calculate minimum and maximum coverage        
+echo $MEDIAN \
+    | awk '{{print int($0 + {params.n_sd} * sqrt($0) + 0.5) }}' \
+    > {output.maximum}
 
-        echo "Median coverage: $MEDIAN"
-        echo "Minimum coverage: $(cat {output.minimum})"
-        echo "Maximum coverage: $(cat {output.maximum})"
-        """
+echo $MEDIAN \
+    | awk '{{print int($0 - {params.n_sd} * sqrt($0) + 0.5) }}' \
+    | awk '{{if ($0 < {params.mincov}) print {params.mincov}; else print $0}}' \
+    > {output.minimum}
+
+echo "Median coverage: $MEDIAN"
+echo "Minimum coverage: $(cat {output.minimum})"
+echo "Maximum coverage: $(cat {output.maximum})"
+"""
 
 #
 # fiber locations and coverages
