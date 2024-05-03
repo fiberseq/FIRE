@@ -36,12 +36,13 @@ rule coverage:
         "../envs/python.yaml"
     threads: 1
     resources:
-        mem_mb= 48 * 1024,
+        mem_mb=48 * 1024,
     params:
         coverage_within_n_sd=coverage_within_n_sd,
         min_coverage=min_coverage,
         chroms=get_chroms(),
-    script: "../scripts/cov.py"
+    script:
+        "../scripts/cov.py"
 
 
 #
