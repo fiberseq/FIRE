@@ -32,8 +32,7 @@ df = pd.read_csv(
     names=["chr", "start", "end", "coverage"],
 )
 df = df.loc[df["coverage"] > 0]
-df = df[df["chr"].isin(snakemake.params.chroms)]
-df = df[~df["chr"].isin(["chrX", "chrY", "chrM", "chrEBV"])]
+df = df.loc[df["chr"].isin(snakemake.params.chroms)]
 df["weight"] = df["end"] - df["start"]
 print(df, file=sys.stderr)
 coverage = weighted_median(df, "coverage", "weight")
