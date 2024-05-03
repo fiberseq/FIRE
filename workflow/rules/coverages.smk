@@ -43,6 +43,7 @@ rule coverage:
         chroms=get_chroms(),
     script: "../scripts/cov.py"
 
+
 #
 # fiber locations and coverages
 #

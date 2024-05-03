@@ -28,7 +28,7 @@ Then snakemake installs all the additional requirements as conda envs in that di
 
 ## Configuring
 
-See the [configuration README](`config/README.md`), the example [configuration file](`config/config.yaml`), and the example [manifest file](`config/config.tbl`) for configuration options.
+See the [configuration README](/config/README.md), the example [configuration file](/config/config.yaml), and the example [manifest file](/config/config.tbl) for configuration options.
 
 
 ## Run
