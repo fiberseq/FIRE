@@ -20,6 +20,11 @@ def get_chroms():
     chroms = sorted([chrom for chrom in fai["chr"] if "chrUn_" not in chrom])
     chroms = [chrom for chrom in chroms if "_random" not in chrom]
     chroms = [chrom for chrom in chroms if re.fullmatch(keep_chrs, chrom)]
+
+    if FIRST_REPORT:
+        FIRST_REPORT = False
+        print(f"INFO: Using N chromosomes: {len(chroms)}", file=sys.stderr)
+
     if len(chroms) == 0:
         raise ValueError(
             f"No chromosomes left after filtering. Check your keep_chromosomes parameter in config.yaml. "
