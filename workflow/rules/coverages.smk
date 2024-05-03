@@ -16,6 +16,7 @@ rule genome_bedgraph:
     shell:
         """ 
         mosdepth -t {threads} tmp {input.bam}
+        ls * 
         zcat tmp.regions.bed.gz \
             | bedtools sort \
             | bgzip -@ {threads} \
