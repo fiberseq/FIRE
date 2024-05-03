@@ -41,6 +41,9 @@ df["weight"] = df["end"] - df["start"]
 print(df, file=sys.stderr)
 coverage = weighted_median(df, "coverage", "weight")
 
+mean = (df["coverage"] * df["weight"]).sum() / df["weight"].sum()
+print(f"\nmean: {mean}\n", file=sys.stderr)
+
 min_coverage = get_min_coverage(coverage)
 max_coverage = get_max_coverage(coverage)
 print(coverage, file=sys.stderr)
