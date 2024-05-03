@@ -37,6 +37,8 @@ rule coverage:
     threads: 1
     resources:
         mem_mb=48 * 1024,
+    benchmark:
+        "results/{sm}/coverage/{sm}.coverage.benchmark.txt"
     params:
         coverage_within_n_sd=coverage_within_n_sd,
         min_coverage=min_coverage,
