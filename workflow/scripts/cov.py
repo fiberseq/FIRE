@@ -25,10 +25,10 @@ def weighted_median(df, val, weight):
     gdf = df.groupby(val)[weight].sum().reset_index().sort_values(val)
     print(gdf, file=sys.stderr)
     
-    df["cumsum"] = df[weight].cumsum()
-    df["cutoff"] = df[weight].sum() / 2.0
-    print(df, file=sys.stderr)
-    comparison = df[df["cumsum"] >= df["cutoff"]][val]
+    gdf["cumsum"] = gdf[weight].cumsum()
+    gdf["cutoff"] = gdf[weight].sum() / 2.0
+    print(gdf, file=sys.stderr)
+    comparison = gdf[gdf["cumsum"] >= gdf["cutoff"]][val]
     #print(comparison, file=sys.stderr)
     return comparison.iloc[0]
 
