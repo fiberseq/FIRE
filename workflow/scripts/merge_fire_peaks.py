@@ -176,10 +176,8 @@ def main(
     # add a column indicating if the peak passes coverage filters
     df = df.with_columns(
         pass_coverage=(pl.col("coverage") >= min_cov) & (pl.col("coverage") <= max_cov),
-    ).filter(
-        pl.col("fire_coverage")/pl.col("coverage") >= min_frac_accessible 
-    )
-    
+    ).filter(pl.col("fire_coverage") / pl.col("coverage") >= min_frac_accessible)
+
     # write to stdout
     (
         df.sort(["#chrom", "peak_start", "peak_end"])
