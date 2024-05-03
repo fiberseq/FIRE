@@ -34,7 +34,9 @@ rule coverage:
         maximum="results/{sm}/coverage/{sm}.maximum.coverage.txt",
     conda:
         "../envs/python.yaml"
-    threads: 16
+    threads: 1
+    resources:
+        mem_mb= 48 * 1024,
     params:
         coverage_within_n_sd=coverage_within_n_sd,
         min_coverage=min_coverage,
