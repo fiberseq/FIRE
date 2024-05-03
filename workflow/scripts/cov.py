@@ -19,10 +19,10 @@ def get_max_coverage(median):
 
 
 def weighted_median(df, val, weight):
-    df_sorted = df.sort_values(val)
-    cumsum = df_sorted[weight].cumsum()
-    cutoff = df_sorted[weight].sum() / 2.0
-    return df_sorted[cumsum >= cutoff][val].iloc[0]
+    df.sort_values(val, inplace=True)
+    cumsum = df[weight].cumsum()
+    cutoff = df[weight].sum() / 2.0
+    return df[cumsum >= cutoff][val].iloc[0]
 
 
 df = pd.read_csv(
@@ -31,7 +31,7 @@ df = pd.read_csv(
     header=None,
     names=["chr", "start", "end", "coverage"],
 )
-df = df[df.coverage > 0]
+df = df.loc[df["coverage"] > 0]
 df = df[df["chr"].isin(snakemake.params.chroms)]
 df = df[~df["chr"].isin(["chrX", "chrY", "chrM", "chrEBV"])]
 df["weight"] = df["end"] - df["start"]
