@@ -15,6 +15,7 @@ rule genome_bedgraph:
         default_env
     shell:
         """ 
+        export LC_ALL=C
         mosdepth -t {threads} tmp {input.bam}
         ls * 
         zcat tmp.per-base.bed.gz \
