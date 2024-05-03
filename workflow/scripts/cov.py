@@ -41,12 +41,12 @@ df["weight"] = df["end"] - df["start"]
 print(df, file=sys.stderr)
 coverage = weighted_median(df, "coverage", "weight")
 
-mean = (df["coverage"] * df["weight"]).sum() / df["weight"].sum()
-print(f"\nmean: {mean}\n", file=sys.stderr)
-
 min_coverage = get_min_coverage(coverage)
 max_coverage = get_max_coverage(coverage)
-print(coverage, file=sys.stderr)
+mean = (df["coverage"] * df["weight"]).sum() / df["weight"].sum()
+print(f"\nmean coverage: {mean}", file=sys.stderr)
+print(f"median coverage: {coverage}\n", file=sys.stderr)
+
 if coverage <= 1:
     raise ValueError(
         f"Median coverage is {coverage}! Did you use the correct reference, or is data missing from most of your genome. If so consider the keep_chromosomes parameter in config.yaml"
