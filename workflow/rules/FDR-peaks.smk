@@ -110,6 +110,7 @@ rule fdr_track:
             allow_missing=True,
         ),
     output:
+        fofn=temp("temp/{sm}/FDR-peaks/FDR.track.fofn"),
         bed="results/{sm}/FDR-peaks/FDR.track.bed.gz",
         tbi="results/{sm}/FDR-peaks/FDR.track.bed.gz.tbi",
     threads: 8
@@ -117,12 +118,18 @@ rule fdr_track:
         default_env
     shell:
         """
+        printf "\nMaking FOFN\n"
+        echo {input.beds} > {output.fofn}
+        
+        printf "\nConcatenating\n"
         ( \
-            cat {input.beds} | rg "^#" | head -n 1; \
-            cat {input.beds} | rg -v "^#" \
+            cat $(cat {output.fofn}) | rg "^#" | head -n 1; \
+            cat $(cat {output.fofn}) | rg -v "^#" \
         ) \
             | bgzip -@ {threads} \
         > {output.bed}
+
+        printf "\nIndexing\n"
         tabix -f -p bed {output.bed}
         """
 
