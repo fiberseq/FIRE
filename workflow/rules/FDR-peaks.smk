@@ -118,20 +118,20 @@ rule fdr_track:
         default_env
     shell:
         """
-        printf "\nMaking FOFN\n"
+        printf '\nMaking FOFN\n'
         echo {input.beds} > {output.fofn}
         
-        printf "\nMake header\n"
+        printf '\nMake header\n'
         (cat $(cat {output.fofn}) | rg "^#" | head -n 1) || true; \
             | bgzip -@ {threads} \
             > {output.bed}
 
-        printf "\nConcatenating\n"
+        printf '\nConcatenating\n'
         cat $(cat {output.fofn}) | rg -v "^#" \
             | bgzip -@ {threads} \
         >> {output.bed}
 
-        printf "\nIndexing\n"
+        printf '\nIndexing\n'
         tabix -f -p bed {output.bed}
         """
 
