@@ -230,7 +230,7 @@ rule element_coverages_per_chrom:
     threads: 2
     shell:
         """
-        HAS_LINES=$(zcat {input.beds} | grep -cv '^#') || true
+        HAS_LINES=$(zcat {input.beds} | head | grep -cv '^#') || true
         if [ $HAS_LINES -eq 0 ]; then
             echo "No element coverages found for {wildcards.sm} {wildcards.hp} {wildcards.chrom}"
             printf "#chrom\\tstart\\tend\\t{params.names}\\n{wildcards.chrom}\\t0\\t1\\t0\\t0\\t0\\n" \
