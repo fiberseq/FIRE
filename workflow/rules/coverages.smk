@@ -10,7 +10,7 @@ rule genome_bedgraph:
         tbi="results/{sm}/coverage/{sm}.bed.gz.tbi",
     threads: 16
     shadow:
-        "shallow"
+        "minimal"
     conda:
         default_env
     benchmark:
