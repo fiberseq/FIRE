@@ -122,7 +122,7 @@ rule fdr_track:
         echo {input.beds} > {output.fofn}
         
         printf '\nMake header\n'
-        (cat $(cat {output.fofn}) | rg "^#" | head -n 1) || true \
+        ((cat $(cat {output.fofn}) | rg "^#" | head -n 1) || true) \
             | bgzip -@ {threads} \
             > {output.bed}
 
