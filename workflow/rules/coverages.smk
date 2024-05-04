@@ -4,6 +4,7 @@
 rule genome_bedgraph:
     input:
         bam=rules.merged_fire_bam.output.bam,
+        bai=rules.merged_fire_bam.output.bai,
         fai=ancient(f"{ref}.fai"),
     output:
         bg="results/{sm}/coverage/{sm}.bed.gz",
