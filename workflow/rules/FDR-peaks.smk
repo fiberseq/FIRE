@@ -263,8 +263,7 @@ rule fdr_peaks_by_fire_elements:
 
         printf "\nConcatenating\n"
         cat $(cat {input.beds}) | bgzip -cd -@ {threads} | grep -v "^#" \
-            | bgzip -@ {threads} \
-            > {output.bed}
+            | bgzip -@ {threads} >> {output.bed}
         
         printf "\nIndexing\n"
         tabix -f -p bed {output.bed}
