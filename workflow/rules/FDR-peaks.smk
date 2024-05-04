@@ -254,12 +254,19 @@ rule fdr_peaks_by_fire_elements:
         default_env
     shell:
         """
-        ( \
-            cat {input.beds} | bgzip -cd | rg "^#" | head -n 1; \
-            cat {input.beds} | bgzip -cd -@ {threads} | rg -v "^#" \
-        ) \
+        printf "\nMaking FOFN\n"
+        echo {input.beds} > {output.fofn}
+
+        printf "\nMaking header\n"        
+        ((cat $(cat {output.fofn}) | bgzip -cd | grep "^#" | head -n 1) || true) \
+            | bgzip -@ {threads} > {output.bed}
+
+        printf "\nConcatenating\n"
+        cat $(cat {input.beds}) | bgzip -cd -@ {threads} | grep -v "^#" \
             | bgzip -@ {threads} \
             > {output.bed}
+        
+        printf "\nIndexing\n"
         tabix -f -p bed {output.bed}
         """
 
