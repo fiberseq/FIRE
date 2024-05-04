@@ -247,6 +247,7 @@ rule fdr_peaks_by_fire_elements:
             allow_missing=True,
         ),
     output:
+        fofn=temp("temp/{sm}/FDR-peaks/FDR-FIRE-peaks.fofn"),
         bed="results/{sm}/FDR-peaks/FDR-FIRE-peaks.bed.gz",
         tbi="results/{sm}/FDR-peaks/FDR-FIRE-peaks.bed.gz.tbi",
     threads: 8
