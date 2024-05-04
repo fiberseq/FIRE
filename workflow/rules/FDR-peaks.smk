@@ -123,7 +123,7 @@ rule fdr_track:
         
         printf "\nConcatenating\n"
         ( \
-            cat $(cat {output.fofn}) | rg "^#" | head -n 1; \
+            (cat $(cat {output.fofn}) | rg "^#" | head -n 1) || true; \
             cat $(cat {output.fofn}) | rg -v "^#" \
         ) \
             | bgzip -@ {threads} \
