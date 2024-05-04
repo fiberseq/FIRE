@@ -157,6 +157,7 @@ rule unreliable_coverage_regions:
         MIN=$(cat {input.minimum})
         MAX=$(cat {input.maximum})
         zcat {input.bg} \
+            | awk '$4>0' \
             | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX' \
             | bedtools merge -i - \
         > $TMP
