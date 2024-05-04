@@ -36,6 +36,8 @@ rule merged_fire_bam:
         mem_mb=8 * 1024,
     conda:
         default_env
+    benchmark:
+        "results/{sm}/benchmarks/merged_fire_bam/{sm}.txt"
     shell:
         """
         samtools merge -@ {threads} -o {output.bam} {input.bams}
@@ -77,6 +79,8 @@ rule merge_model_results:
         default_env
     params:
         n_chunks=len(get_chroms()) + 1,
+    benchmark:
+        "results/{sm}/benchmarks/merge_model_results/{sm}.txt"
     priority: 20
     shell:
         """

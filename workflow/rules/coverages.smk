@@ -13,6 +13,8 @@ rule genome_bedgraph:
         "shallow"
     conda:
         default_env
+    benchmark:
+        "results/{sm}/benchmarks/genome_bedgraph/{sm}.txt"
     shell:
         """ 
         mosdepth -t {threads} tmp {input.bam}
@@ -38,7 +40,7 @@ rule coverage:
     resources:
         mem_mb=48 * 1024,
     benchmark:
-        "results/{sm}/coverage/{sm}.coverage.benchmark.txt"
+        "results/{sm}/benchmarks/coverage/{sm}.txt"
     params:
         coverage_within_n_sd=coverage_within_n_sd,
         min_coverage=min_coverage,

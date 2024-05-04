@@ -50,6 +50,8 @@ rule fdr_table:
         fai=ancient(f"{ref}.fai"),
     output:
         tbl="results/{sm}/FDR-peaks/FIRE.score.to.FDR.tbl",
+    benchmark:
+        "results/{sm}/benchmarks/fdr_table/{sm}.txt"
     threads: 8
     conda:
         "../envs/python.yaml"
