@@ -121,13 +121,15 @@ rule fdr_track:
         printf "\nMaking FOFN\n"
         echo {input.beds} > {output.fofn}
         
-        printf "\nConcatenating\n"
-        ( \
-            (cat $(cat {output.fofn}) | rg "^#" | head -n 1) || true; \
-            cat $(cat {output.fofn}) | rg -v "^#" \
-        ) \
+        printf "\nMake header\n"
+        (cat $(cat {output.fofn}) | rg "^#" | head -n 1) || true; \
             | bgzip -@ {threads} \
-        > {output.bed}
+            > {output.bed}
+
+        printf "\nConcatenating\n"
+        cat $(cat {output.fofn}) | rg -v "^#" \
+            | bgzip -@ {threads} \
+        >> {output.bed}
 
         printf "\nIndexing\n"
         tabix -f -p bed {output.bed}
