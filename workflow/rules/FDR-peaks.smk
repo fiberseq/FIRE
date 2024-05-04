@@ -122,13 +122,13 @@ rule fdr_track:
         echo {input.beds} > {output.fofn}
         
         printf '\nMake header\n'
-        ((cat $(cat {output.fofn}) | rg "^#" | head -n 1) || true) \
+        ((cat $(cat {output.fofn}) | grep "^#" | head -n 1) || true) \
             | bgzip -@ {threads} \
             > {output.bed}
 
         printf '\nConcatenating\n'
         cat $(cat {output.fofn}) \
-            | rg -v "^#" \
+            | grep -v "^#" \
             | bgzip -@ {threads} \
         >> {output.bed}
 
