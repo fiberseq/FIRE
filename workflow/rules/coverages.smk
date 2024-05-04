@@ -5,7 +5,6 @@ rule genome_bedgraph:
     input:
         bam=rules.merged_fire_bam.output.bam,
         bai=rules.merged_fire_bam.output.bai,
-        fai=ancient(f"{ref}.fai"),
     output:
         bg="results/{sm}/coverage/{sm}.bed.gz",
         tbi="results/{sm}/coverage/{sm}.bed.gz.tbi",
@@ -19,9 +18,8 @@ rule genome_bedgraph:
     shell:
         """ 
         mosdepth -t {threads} tmp {input.bam}
-        ls * 
         zcat tmp.per-base.bed.gz \
-            | LC_ALL=C sort -k1,1 -k2,2n -k3,3n -k4,4  \
+            | LC_ALL=C sort --parallel={threads} -k1,1 -k2,2n -k3,3n -k4,4  \
             | bgzip -@ {threads} \
         > {output.bg}
         tabix -f -p bed {output.bg}
