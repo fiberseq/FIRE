@@ -331,7 +331,10 @@ rule peaks_vs_percent:
     input:
         bed=rules.fdr_peaks_by_fire_elements.output.bed,
     output:
-        fig1="results/{sm}/FDR-peaks/{sm}.peaks-vs-percent.pdf",
+        fig1=report(
+            "results/{sm}/FDR-peaks/{sm}.peaks-vs-percent.pdf",
+            category="Peak calls",
+        ),
     threads: 8
     conda:
         "../envs/R.yaml"
