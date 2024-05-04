@@ -82,7 +82,9 @@ wildcard_constraints:
 
 localrules:
     trackhub,
-
+    # this may need to be a local rule if the number of contigs
+    # is too large for the cluster and gives srun errors?
+    fdr_track,
 
 rule all:
     input:
