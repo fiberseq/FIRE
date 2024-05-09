@@ -123,8 +123,6 @@ rule trackhub:
         decorators_2=rules.decorate_fibers_2.output.bb,
     output:
         hub="results/{sm}/trackHub/hub.txt",
-    benchmark:
-        "benchmarks/{sm}/trackhub.tsv"
     resources:
         load=get_load,
     threads: 4

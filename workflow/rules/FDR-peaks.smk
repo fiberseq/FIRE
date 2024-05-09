@@ -50,6 +50,8 @@ rule fdr_table:
         fai=ancient(f"{ref}.fai"),
     output:
         tbl="results/{sm}/FDR-peaks/FIRE.score.to.FDR.tbl",
+    benchmark:
+        "results/{sm}/benchmarks/fdr_table/{sm}.txt"
     threads: 8
     conda:
         "../envs/python.yaml"
@@ -108,6 +110,7 @@ rule fdr_track:
             allow_missing=True,
         ),
     output:
+        fofn=temp("temp/{sm}/FDR-peaks/FDR.track.fofn"),
         bed="results/{sm}/FDR-peaks/FDR.track.bed.gz",
         tbi="results/{sm}/FDR-peaks/FDR.track.bed.gz.tbi",
     threads: 8
@@ -115,12 +118,21 @@ rule fdr_track:
         default_env
     shell:
         """
-        ( \
-            cat {input.beds} | rg "^#" | head -n 1; \
-            cat {input.beds} | rg -v "^#" \
-        ) \
+        printf '\nMaking FOFN\n'
+        echo {input.beds} > {output.fofn}
+        
+        printf '\nMake header\n'
+        ((cat $(cat {output.fofn}) | grep "^#" | head -n 1) || true) \
             | bgzip -@ {threads} \
-        > {output.bed}
+            > {output.bed}
+
+        printf '\nConcatenating\n'
+        cat $(cat {output.fofn}) \
+            | grep -v "^#" \
+            | bgzip -@ {threads} \
+        >> {output.bed}
+
+        printf '\nIndexing\n'
         tabix -f -p bed {output.bed}
         """
 
@@ -235,6 +247,7 @@ rule fdr_peaks_by_fire_elements:
             allow_missing=True,
         ),
     output:
+        fofn=temp("temp/{sm}/FDR-peaks/FDR-FIRE-peaks.fofn"),
         bed="results/{sm}/FDR-peaks/FDR-FIRE-peaks.bed.gz",
         tbi="results/{sm}/FDR-peaks/FDR-FIRE-peaks.bed.gz.tbi",
     threads: 8
@@ -242,12 +255,18 @@ rule fdr_peaks_by_fire_elements:
         default_env
     shell:
         """
-        ( \
-            cat {input.beds} | bgzip -cd | rg "^#" | head -n 1; \
-            cat {input.beds} | bgzip -cd -@ {threads} | rg -v "^#" \
-        ) \
-            | bgzip -@ {threads} \
-            > {output.bed}
+        printf "\nMaking FOFN\n"
+        echo {input.beds} > {output.fofn}
+
+        printf "\nMaking header\n"        
+        ((cat $(cat {output.fofn}) | bgzip -cd | grep "^#" | head -n 1) || true) \
+            | bgzip -@ {threads} > {output.bed}
+
+        printf "\nConcatenating\n"
+        cat $(cat {output.fofn}) | bgzip -cd -@ {threads} | grep -v "^#" \
+            | bgzip -@ {threads} >> {output.bed}
+        
+        printf "\nIndexing\n"
         tabix -f -p bed {output.bed}
         """
 
@@ -329,7 +348,10 @@ rule peaks_vs_percent:
     input:
         bed=rules.fdr_peaks_by_fire_elements.output.bed,
     output:
-        fig1="results/{sm}/FDR-peaks/{sm}.peaks-vs-percent.pdf",
+        fig1=report(
+            "results/{sm}/FDR-peaks/{sm}.peaks-vs-percent.pdf",
+            category="Peak calls",
+        ),
     threads: 8
     conda:
         "../envs/R.yaml"

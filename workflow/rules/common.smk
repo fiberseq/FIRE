@@ -2,12 +2,28 @@ import re
 import logging
 import sys
 
+FIRST_REPORT = True
+
 
 def get_chroms():
-    chroms = fai["chr"]
-    chroms = sorted([chrom for chrom in fai["chr"] if "chrUn_" not in chrom])
+    global FIRST_REPORT
+    min_contig_length = config.get("min_contig_length", 0)
+    skipped_contigs = fai["chr"][fai["length"] < min_contig_length]
+    if len(skipped_contigs) > 0 and FIRST_REPORT:
+        print(
+            f"WARNING: Skipping contigs with length < {min_contig_length:,}: {skipped_contigs}",
+            file=sys.stderr,
+        )
+
+    chroms = fai["chr"][fai["length"] >= min_contig_length]
+    chroms = sorted([chrom for chrom in chroms if "chrUn_" not in chrom])
     chroms = [chrom for chrom in chroms if "_random" not in chrom]
     chroms = [chrom for chrom in chroms if re.fullmatch(keep_chrs, chrom)]
+
+    if FIRST_REPORT:
+        FIRST_REPORT = False
+        print(f"INFO: Using N chromosomes: {len(chroms)}", file=sys.stderr)
+
     if len(chroms) == 0:
         raise ValueError(
             f"No chromosomes left after filtering. Check your keep_chromosomes parameter in config.yaml. "

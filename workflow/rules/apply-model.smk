@@ -36,6 +36,8 @@ rule merged_fire_bam:
         mem_mb=8 * 1024,
     conda:
         default_env
+    benchmark:
+        "results/{sm}/benchmarks/merged_fire_bam/{sm}.txt"
     shell:
         """
         samtools merge -@ {threads} -o {output.bam} {input.bams}
@@ -77,6 +79,8 @@ rule merge_model_results:
         default_env
     params:
         n_chunks=len(get_chroms()) + 1,
+    benchmark:
+        "results/{sm}/benchmarks/merge_model_results/{sm}.txt"
     priority: 20
     shell:
         """
@@ -226,7 +230,7 @@ rule element_coverages_per_chrom:
     threads: 2
     shell:
         """
-        HAS_LINES=$(zcat {input.beds} | grep -cv '^#') || true
+        HAS_LINES=$(zcat {input.beds} | head | grep -cv '^#') || true
         if [ $HAS_LINES -eq 0 ]; then
             echo "No element coverages found for {wildcards.sm} {wildcards.hp} {wildcards.chrom}"
             printf "#chrom\\tstart\\tend\\t{params.names}\\n{wildcards.chrom}\\t0\\t1\\t0\\t0\\t0\\n" \

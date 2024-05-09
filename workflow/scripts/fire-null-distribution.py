@@ -176,7 +176,7 @@ def fire_tracks(fire, outfile, min_coverage=4):
     ).shape[0]
     if null_count > 0:
         logging.warn(f"Null count: {null_count}")
-    
+
     for chrom, g in fire.group_by("chrom", maintain_order=True):
         logging.info(f"Processing {chrom}")
         # fibers for this chromosome
@@ -197,7 +197,7 @@ def fire_tracks(fire, outfile, min_coverage=4):
         if g.shape[0] == 0:
             logging.warning(f"No data for {chrom}")
             continue
-        
+
         # get coverage for this chromosome and the shuffled fibers
         chrom_length = g.length[0].astype(int)
         coverage_array = make_coverage_array(

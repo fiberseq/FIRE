@@ -46,8 +46,14 @@ rule hap_differences:
     input:
         bed=rules.fdr_peaks_by_fire_elements.output.bed,
     output:
-        fig1="results/{sm}/hap1-vs-hap2/hap1-vs-hap2.pdf",
-        fig2="results/{sm}/hap1-vs-hap2/hap1-vs-hap2-volcano.pdf",
+        fig1=report(
+            "results/{sm}/hap1-vs-hap2/hap1-vs-hap2.pdf",
+            category="Haplotype selectivity",
+        ),
+        fig2=report(
+            "results/{sm}/hap1-vs-hap2/hap1-vs-hap2-volcano.pdf",
+            category="Haplotype selectivity",
+        ),
         bed="results/{sm}/hap1-vs-hap2/FIRE.hap.differences.bed",
         bed9="results/{sm}/hap1-vs-hap2/FIRE.hap.differences.bed9",
     threads: 8

@@ -4,55 +4,49 @@
 rule genome_bedgraph:
     input:
         bam=rules.merged_fire_bam.output.bam,
-        fai=ancient(f"{ref}.fai"),
+        bai=rules.merged_fire_bam.output.bai,
     output:
         bg="results/{sm}/coverage/{sm}.bed.gz",
-        csi="results/{sm}/coverage/{sm}.bed.gz.csi",
+        tbi="results/{sm}/coverage/{sm}.bed.gz.tbi",
     threads: 16
     shadow:
-        "shallow"
+        "minimal"
     conda:
         default_env
+    benchmark:
+        "results/{sm}/benchmarks/genome_bedgraph/{sm}.txt"
     shell:
         """ 
         mosdepth -t {threads} tmp {input.bam}
-        mv tmp.per-base.bed.gz {output.bg}
-        mv tmp.per-base.bed.gz.csi {output.csi}
+        zcat tmp.per-base.bed.gz \
+            | LC_ALL=C sort --parallel={threads} -k1,1 -k2,2n -k3,3n -k4,4  \
+            | bgzip -@ {threads} \
+        > {output.bg}
+        tabix -f -p bed {output.bg}
         """
 
 
 rule coverage:
     input:
-        bam=rules.merged_fire_bam.output.bam,
+        bg=rules.genome_bedgraph.output.bg,
     output:
         cov="results/{sm}/coverage/{sm}.median.coverage.txt",
         minimum="results/{sm}/coverage/{sm}.minimum.coverage.txt",
         maximum="results/{sm}/coverage/{sm}.maximum.coverage.txt",
     conda:
-        default_env
-    threads: 16
+        "../envs/python.yaml"
+    threads: 1
+    resources:
+        mem_mb=48 * 1024,
+    benchmark:
+        "results/{sm}/benchmarks/coverage/{sm}.txt"
     params:
-        n_sd=coverage_within_n_sd,
-        mincov=min_coverage,
-    shell:
-        """
-        samtools depth -@ {threads} {input.bam} | datamash median 3 > {output.cov}
-        MEDIAN=$(cat {output.cov})
+        coverage_within_n_sd=coverage_within_n_sd,
+        min_coverage=min_coverage,
+        chroms=get_chroms(),
+    script:
+        "../scripts/cov.py"
 
-        # calculate minimum and maximum coverage        
-        echo $MEDIAN \
-            | awk '{{print int($0 + {params.n_sd} * sqrt($0) + 0.5) }}' \
-            > {output.maximum}
-
-        echo $MEDIAN \
-            | awk '{{print int($0 - {params.n_sd} * sqrt($0) + 0.5) }}' \
-            | awk '{{if ($0 < {params.mincov}) print {params.mincov}; else print $0}}' \
-            > {output.minimum}
-
-        echo "Median coverage: $MEDIAN"
-        echo "Minimum coverage: $(cat {output.minimum})"
-        echo "Maximum coverage: $(cat {output.maximum})"
-        """
 
 #
 # fiber locations and coverages
@@ -162,6 +156,7 @@ rule unreliable_coverage_regions:
         MIN=$(cat {input.minimum})
         MAX=$(cat {input.maximum})
         zcat {input.bg} \
+            | awk '$4>0' \
             | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX' \
             | bedtools merge -i - \
         > $TMP

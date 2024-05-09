@@ -37,6 +37,12 @@ excludes:
     - annotations/cnvs.bed
 ```
 
+Reference contigs smaller than this length are skipped by the FIRE pipeline. Default is `0`.
+```
+min_contig_length: 0
+```
+
+
 # Developer options, not for general use
 Min coverage of FIRE elements for calling a FIRE peak. Default is `4`.
 ```

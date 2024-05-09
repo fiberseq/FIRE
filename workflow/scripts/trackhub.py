@@ -308,7 +308,7 @@ def generate_trackhub(
         if hap == "all":
             color = "0,0,0"
             trackDb.write(PER_ACC_COMP.format(sample=sample))
-            #trackDb.write(FIRE_SCORE_COMP.format(sample=sample, file=f"bw/score.bw"))
+            # trackDb.write(FIRE_SCORE_COMP.format(sample=sample, file=f"bw/score.bw"))
         elif hap == "hap1":
             color = "0,0,255"
         elif hap == "hap2":
@@ -321,8 +321,8 @@ def generate_trackhub(
                     sample=sample, hap=hap, file=file, color=color, viz=viz
                 )
             )
-            #zhap = "" if hap == "all" else f"_{hap}".replace("hap", "H")
-            #trackDb.write(
+            # zhap = "" if hap == "all" else f"_{hap}".replace("hap", "H")
+            # trackDb.write(
             #    FIRE_SCORE.format(
             #        sample=sample,
             #        hap=hap,
@@ -330,7 +330,7 @@ def generate_trackhub(
             #        viz=viz,
             #        color=color,
             #    )
-            #)
+            # )
 
         # new bin files
         if hap == "all":
