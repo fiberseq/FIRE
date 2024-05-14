@@ -6,6 +6,6 @@ channels:
   - defaults
 dependencies:
   - tqdm
-  - numpy==1.24 # use this version to avoid cxx errors
-  - pandas==1.4 # pandas versions later than this have cxx errors
+  - numpy
+  - pandas
   - pysam==0.21
