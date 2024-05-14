@@ -8,4 +8,7 @@ dependencies:
   - tqdm
   - numpy
   - pandas
+  - pip
+  - pip:
+      - pysam
   # TODO add in pysam for bam validation once 3.12 is finally supported on bioconda
