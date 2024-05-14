@@ -22,7 +22,7 @@ def get_fai():
 
 
 def get_excludes():
-    config.get("excludes", [])
+    excludes = config.get("excludes", [])
     if REF_NAME == "hg38" or REF_NAME == "GRCh38":
         files = [
             "annotations/hg38.blacklist.ENCFF356LFX.bed.gz",
