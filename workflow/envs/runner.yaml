@@ -8,4 +8,4 @@ dependencies:
   - tqdm
   - numpy
   - pandas
-  - pysam==0.21
+  - pysam
