@@ -12,7 +12,7 @@ rule genome_bedgraph:
     shadow:
         "minimal"
     conda:
-        default_env
+        DEFAULT_ENV
     benchmark:
         "results/{sm}/benchmarks/genome_bedgraph/{sm}.txt"
     shell:
@@ -41,8 +41,8 @@ rule coverage:
     benchmark:
         "results/{sm}/benchmarks/coverage/{sm}.txt"
     params:
-        coverage_within_n_sd=coverage_within_n_sd,
-        min_coverage=min_coverage,
+        coverage_within_n_sd=COVERAGE_WITHIN_N_SD,
+        min_coverage=MIN_COVERAGE,
         chroms=get_chroms(),
     script:
         "../scripts/cov.py"
@@ -58,7 +58,7 @@ rule fiber_locations_chromosome:
         bed=temp("temp/{sm}/coverage/{chrom}.fiber-locations.bed.gz"),
     threads: 8
     conda:
-        default_env
+        DEFAULT_ENV
     shell:
         """
         # get fiber locations
@@ -88,7 +88,7 @@ rule fiber_locations:
         filtered_tbi="results/{sm}/coverage/filtered-for-coverage/fiber-locations.bed.gz.tbi",
     threads: 4
     conda:
-        default_env
+        DEFAULT_ENV
     shell:
         """
         cat {input.fibers} > {output.bed}
@@ -112,14 +112,14 @@ rule fiber_locations:
 rule exclude_from_shuffle:
     input:
         filtered=rules.fiber_locations.output.filtered,
-        fai=ancient(f"{ref}.fai"),
+        fai=ancient(FAI),
     output:
         bed="results/{sm}/coverage/exclude-from-shuffles.bed.gz",
     threads: 4
     conda:
-        default_env
+        DEFAULT_ENV
     params:
-        exclude=excludes,
+        exclude=EXCLUDES,
     shell:
         """
 
@@ -140,14 +140,14 @@ rule unreliable_coverage_regions:
         bg=rules.genome_bedgraph.output.bg,
         minimum=rules.coverage.output.minimum,
         maximum=rules.coverage.output.maximum,
-        fai=ancient(f"{ref}.fai"),
+        fai=ancient(FAI),
     output:
         bed="results/{sm}/coverage/unreliable-coverage-regions.bed.gz",
         bed_tbi="results/{sm}/coverage/unreliable-coverage-regions.bed.gz.tbi",
         bb="results/{sm}/trackHub/bb/unreliable-coverage-regions.bb",
     threads: 4
     conda:
-        default_env
+        DEFAULT_ENV
     shell:
         """
         FILE={output.bed}

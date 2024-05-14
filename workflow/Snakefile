@@ -6,58 +6,55 @@ from snakemake.utils import min_version
 
 min_version("8.4.0")
 
+# forces pandas pysam etc to be available in the environment
+# TODO need simpler yaml without pip
+# conda: "envs/python.yaml"
+
 # Force users to use the same underlying OS via singularity.
 # container: "docker://condaforge/mambaforge:23.3.1-1"
 # container: "docker://continuumio/miniconda3"
 
 
-ref = config["ref"]
-ref_name = config["ref_name"]
+# setup shared functions
+include: "rules/common.smk"
 
-dhs = config.get("dhs", workflow.source_path("annotations/GM12878_DHS.bed.gz"))
-excludes = config.get("excludes", [])
-if ref_name == "hg38" or ref_name == "GRCh38":
-    files = [
-        "annotations/hg38.blacklist.ENCFF356LFX.bed.gz",
-        "annotations/hg38.gap.bed.gz",
-        "annotations/SDs.merged.hg38.bed.gz",
-    ]
-    excludes += [workflow.source_path(file) for file in files]
 
-max_t = config.get("max_t", 4)
-keep_chrs = config.get("keep_chromosomes", ".*")
+# reference genome and reference regions
+REF = get_ref()
+FAI = get_fai()
+REF_NAME = config["ref_name"]
+EXCLUDES = get_excludes()
+KEEP_CHRS = config.get("keep_chromosomes", ".*")
 
 # coverage requirements
-min_coverage = config.get("min_coverage", 4)
-coverage_within_n_sd = config.get("coverage_within_n_sd", 5)
+MIN_COVERAGE = config.get("min_coverage", 4)
+COVERAGE_WITHIN_N_SD = config.get("coverage_within_n_sd", 5)
 
 # sample, haplotype, and chromosome wildcard building
-fai = pd.read_csv(f"{ref}.fai", sep="\t", names=["chr", "length", "x", "y", "z"])
-default_env = config.get("env", "../envs/env.yaml")
-data = pd.read_csv(config["manifest"], sep=r"\s+", comment="#").set_index("sample")
-haps = ["all", "hap1", "hap2", "unk"]
-not_all = ["hap1", "hap2", "unk"]
-not_unk = ["all", "hap1", "hap2"]
-min_fire_fdr = config.get("min_fire_fdr", 0.10)
+FAI_DF = get_fai_df()
+DEFAULT_ENV = config.get("env", "../envs/env.yaml")
+MANIFEST = get_manifest()
+MIN_FIRE_FDR = config.get("min_fire_fdr", 0.10)
 
 # FDR / peak calling thresholds
-max_peak_fdr = config.get("max_peak_fdr", 0.05)
-min_per_acc_peak = config.get("min_per_acc_peak", None)
-if min_per_acc_peak is None:
-    min_per_acc_peak = 0.0
+MAX_PEAK_FDR = config.get("max_peak_fdr", 0.05)
+MIN_PER_ACC_PEAK = config.get("min_per_acc_peak", None)
+if MIN_PER_ACC_PEAK is None:
+    MIN_PER_ACC_PEAK = 0.0
 else:
-    max_peak_fdr = 1.0
+    MAX_PEAK_FDR = 1.0
+MIN_FRAC_ACCESSIBLE = config.get("min_frac_accessible", 0)
 
-
+# Misc sets of wildcards
+haps = ["all", "hap1", "hap2", "unk"]
+not_unk = ["all", "hap1", "hap2"]
 types = ["fdr", "acc", "link", "nuc"]
 types_to_col = {"fdr": 4, "acc": 5, "link": 6, "nuc": 7}
-
 bw_types = ["log_FDR"]  # "score", "FDR",
 bw_types = bw_types + [f"{t}_H1" for t in bw_types] + [f"{t}_H2" for t in bw_types]
 el_types = ["fire", "linker", "nucleosome"]
 
 
-include: "rules/common.smk"
 include: "rules/apply-model.smk"
 include: "rules/coverages.smk"
 include: "rules/FDR-peaks.smk"
@@ -66,13 +63,10 @@ include: "rules/decorated-reads.smk"
 include: "rules/track-hub.smk"
 
 
-chroms = get_chroms()
-
-
 wildcard_constraints:
-    chrom="|".join(chroms),
+    chrom="|".join(get_chroms()),
     call="|".join(["msp", "m6a"]),
-    sm="|".join(data.index),
+    sm="|".join(MANIFEST.index),
     types="|".join(types),
     fdr=r"\d+",
     hp="|".join(haps),
@@ -83,39 +77,40 @@ wildcard_constraints:
 localrules:
     trackhub,
 
+
 rule all:
     input:
         # coverage information
-        expand(rules.genome_bedgraph.output, sm=data.index),
-        expand(rules.coverage.output, sm=data.index),
-        expand(rules.exclude_from_shuffle.output, sm=data.index),
-        expand(rules.unreliable_coverage_regions.output, sm=data.index),
+        expand(rules.genome_bedgraph.output, sm=MANIFEST.index),
+        expand(rules.coverage.output, sm=MANIFEST.index),
+        expand(rules.exclude_from_shuffle.output, sm=MANIFEST.index),
+        expand(rules.unreliable_coverage_regions.output, sm=MANIFEST.index),
         # model results
-        expand(rules.fire_sites.output, sm=data.index),
+        expand(rules.fire_sites.output, sm=MANIFEST.index),
         # fiber locations
-        expand(rules.fiber_locations.output, sm=data.index),
-        expand(rules.filtered_and_shuffled_fiber_locations.output, sm=data.index),
+        expand(rules.fiber_locations.output, sm=MANIFEST.index),
+        expand(rules.filtered_and_shuffled_fiber_locations.output, sm=MANIFEST.index),
         # coverage of elements
         expand(
             rules.element_coverages.output,
-            sm=data.index,
+            sm=MANIFEST.index,
             hp=not_unk,
             el_type=el_types,
         ),
         # FDR results
-        expand(rules.fdr_track.output, sm=data.index),
-        expand(rules.fdr_peaks_by_fire_elements.output, sm=data.index),
-        expand(rules.wide_fdr_peaks.output, sm=data.index),
-        expand(rules.peaks_vs_percent.output, sm=data.index),
-        expand(rules.one_percent_fdr_peaks.output, sm=data.index),
+        expand(rules.fdr_track.output, sm=MANIFEST.index),
+        expand(rules.fdr_peaks_by_fire_elements.output, sm=MANIFEST.index),
+        expand(rules.wide_fdr_peaks.output, sm=MANIFEST.index),
+        expand(rules.peaks_vs_percent.output, sm=MANIFEST.index),
+        expand(rules.one_percent_fdr_peaks.output, sm=MANIFEST.index),
         # trackhub
-        expand(rules.fdr_track_to_bw.output.bw, sm=data.index, col=bw_types),
-        expand(rules.fdr_peaks_by_fire_elements_to_bb.output.bb, sm=data.index),
-        expand(rules.percent_accessible.output.bw, hp=not_unk, sm=data.index),
+        expand(rules.fdr_track_to_bw.output.bw, sm=MANIFEST.index, col=bw_types),
+        expand(rules.fdr_peaks_by_fire_elements_to_bb.output.bb, sm=MANIFEST.index),
+        expand(rules.percent_accessible.output.bw, hp=not_unk, sm=MANIFEST.index),
         expand(
             rules.element_coverages_bw.output.bw,
-            sm=data.index,
+            sm=MANIFEST.index,
             hp=not_unk,
             el_type=el_types,
         ),
-        expand(rules.trackhub.output, sm=data.index),
+        expand(rules.trackhub.output, sm=MANIFEST.index),

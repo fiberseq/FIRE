@@ -3,7 +3,7 @@
 #
 rule fire:
     input:
-        bam=ancient(lambda wc: data.loc[wc.sm, "bam"]),
+        bam=ancient(get_input_bam),
     output:
         bam=temp("temp/{sm}/fire/{chrom}.fire.bam"),
     threads: 8
@@ -13,7 +13,7 @@ rule fire:
         min_msp=config.get("min_msp", 10),
         min_ave_msp_size=config.get("min_ave_msp_size", 10),
     conda:
-        default_env
+        DEFAULT_ENV
     shell:
         """
         samtools view -u -@ {threads} {input.bam} {wildcards.chrom} \
@@ -35,7 +35,7 @@ rule merged_fire_bam:
     resources:
         mem_mb=8 * 1024,
     conda:
-        default_env
+        DEFAULT_ENV
     benchmark:
         "results/{sm}/benchmarks/merged_fire_bam/{sm}.txt"
     shell:
@@ -52,7 +52,7 @@ rule extract_from_fire:
         bed=temp("temp/{sm}/chrom/{chrom}.sorted.bed.gz"),
     threads: 4
     conda:
-        default_env
+        DEFAULT_ENV
     resources:
         mem_mb=16 * 1024,
     priority: 10
@@ -76,7 +76,7 @@ rule merge_model_results:
         bed=temp("temp/{sm}/fiber-calls/model.results.bed.gz"),
     threads: 8
     conda:
-        default_env
+        DEFAULT_ENV
     params:
         n_chunks=len(get_chroms()) + 1,
     benchmark:
@@ -94,7 +94,7 @@ rule index_model_results:
     output:
         tbi=temp(rules.merge_model_results.output.bed + ".tbi"),
     conda:
-        default_env
+        DEFAULT_ENV
     shell:
         """
         tabix -p bed {input.bed}
@@ -109,9 +109,9 @@ rule fire_sites_chrom:
         bed=temp("temp/{sm}/fiber-calls/{chrom}/FIRE.bed.gz"),
     threads: 4
     conda:
-        default_env
+        DEFAULT_ENV
     params:
-        min_fdr=min_fire_fdr,
+        min_fdr=MIN_FIRE_FDR,
     shell:
         """
         tabix {input.bed} {wildcards.chrom} \
@@ -132,9 +132,9 @@ rule fire_sites:
         bed="results/{sm}/fiber-calls/FIRE.bed.gz",
     threads: 8
     conda:
-        default_env
+        DEFAULT_ENV
     params:
-        min_fdr=min_fire_fdr,
+        min_fdr=MIN_FIRE_FDR,
     shell:
         """
         cat {input.beds} > {output.bed}
@@ -148,7 +148,7 @@ rule fire_sites_index:
         tbi=rules.fire_sites.output.bed + ".tbi",
     threads: 1
     conda:
-        default_env
+        DEFAULT_ENV
     shell:
         """
         tabix -p bed {input.bed}
@@ -159,13 +159,13 @@ rule split_by_hap_per_chrom:
     input:
         bed=rules.merge_model_results.output.bed,
         tbi=rules.index_model_results.output.tbi,
-        fai=f"{ref}.fai",
+        fai=ancient(FAI),
     output:
         both=pipe("temp/{sm}/coverage/all/{chrom}.bed"),
         H1=pipe("temp/{sm}/coverage/hap1/{chrom}.bed"),
         H2=pipe("temp/{sm}/coverage/hap2/{chrom}.bed"),
     conda:
-        default_env
+        DEFAULT_ENV
     resources:
         disk_mb=100,
         runtime=240,
@@ -182,16 +182,16 @@ rule split_by_hap_per_chrom:
 rule split_hap_by_element_type_per_chrom:
     input:
         bed="temp/{sm}/coverage/{hp}/{chrom}.bed",
-        fai=f"{ref}.fai",
+        fai=ancient(FAI),
     output:
         fire=temp("temp/{sm}/coverage/{hp}/fire_{chrom}.bed.gz"),
         link=temp("temp/{sm}/coverage/{hp}/linker_{chrom}.bed.gz"),
         nuc=temp("temp/{sm}/coverage/{hp}/nucleosome_{chrom}.bed.gz"),
     params:
-        min_fire_fdr=min_fire_fdr,
+        min_fire_fdr=MIN_FIRE_FDR,
     threads: 2
     conda:
-        default_env
+        DEFAULT_ENV
     resources:
         disk_mb=100,
         mem_mb=8 * 1024,
@@ -222,7 +222,7 @@ rule element_coverages_per_chrom:
     output:
         bed=temp("temp/{sm}/coverage/{hp}_{chrom}_element_coverages.bed.gz"),
     conda:
-        default_env
+        DEFAULT_ENV
     params:
         names="\t".join(el_types),
     resources:
@@ -256,7 +256,7 @@ rule element_coverages:
         bed="results/{sm}/coverage/{hp}_element_coverages.bed.gz",
         tbi="results/{sm}/coverage/{hp}_element_coverages.bed.gz.tbi",
     conda:
-        default_env
+        DEFAULT_ENV
     threads: 1
     shell:
         """

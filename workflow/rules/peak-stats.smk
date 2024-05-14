@@ -4,14 +4,14 @@
 rule clustering_vs_null:
     input:
         bed=rules.fire_sites.output.bed,
-        fai=ancient(f"{ref}.fai"),
+        fai=ancient(FAI),
     output:
         tmp=temp("temp/{sm}/tmp.pre.calls.bed"),
         null=temp("temp/{sm}/null.calls.bed"),
         bed="results/{sm}/clustering-vs-null.bed.gz",
     threads: 8
     conda:
-        default_env
+        DEFAULT_ENV
     shell:
         """
         bgzip -cd -@{threads} {input.bed} | cut -f 1-3 > {output.tmp}
@@ -33,7 +33,7 @@ rule percent_in_clusters:
         txt="results/{sm}/percent-in-clusters.txt",
     threads: 8
     conda:
-        default_env
+        DEFAULT_ENV
     params:
         script=workflow.source_path("../scripts/percent-in-clusters.sh"),
     shell:

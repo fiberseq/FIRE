@@ -2,12 +2,12 @@ rule filtered_and_shuffled_fiber_locations_chromosome:
     input:
         filtered=rules.fiber_locations.output.filtered,
         exclude=rules.exclude_from_shuffle.output.bed,
-        fai=ancient(f"{ref}.fai"),
+        fai=ancient(FAI),
     output:
         shuffled=temp("temp/{sm}/coverage/{chrom}.fiber-locations-shuffled.bed.gz"),
     threads: 4
     conda:
-        default_env
+        DEFAULT_ENV
     shell:
         """
         tabix -h {input.filtered} {wildcards.chrom} \
@@ -32,7 +32,7 @@ rule filtered_and_shuffled_fiber_locations:
         shuffled="results/{sm}/coverage/filtered-for-coverage/fiber-locations-shuffled.bed.gz",
     threads: 1
     conda:
-        default_env
+        DEFAULT_ENV
     shell:
         """
         cat {input.shuffled} > {output.shuffled}
@@ -47,7 +47,7 @@ rule fdr_table:
         fire=rules.fire_sites.output.bed,
         fiber_locations=rules.fiber_locations.output.filtered,
         shuffled=rules.filtered_and_shuffled_fiber_locations.output.shuffled,
-        fai=ancient(f"{ref}.fai"),
+        fai=ancient(FAI),
     output:
         tbl="results/{sm}/FDR-peaks/FIRE.score.to.FDR.tbl",
     benchmark:
@@ -70,7 +70,7 @@ rule fdr_track_chromosome:
         fire=rules.fire_sites.output.bed,
         fire_tbi=rules.fire_sites_index.output.tbi,
         fiber_locations=rules.fiber_locations.output.bed,
-        fai=ancient(f"{ref}.fai"),
+        fai=ancient(FAI),
         fdr_tbl=rules.fdr_table.output.tbl,
     output:
         fire=temp("temp/{sm}/FDR-peaks/{chrom}-fire.bed"),
@@ -115,7 +115,7 @@ rule fdr_track:
         tbi="results/{sm}/FDR-peaks/FDR.track.bed.gz.tbi",
     threads: 8
     conda:
-        default_env
+        DEFAULT_ENV
     shell:
         """
         printf '\nMaking FOFN\n'
@@ -147,7 +147,7 @@ rule fdr_track_filtered:
         tbi="results/{sm}/FDR-peaks/FDR.track.coverage.filtered.bed.gz.tbi",
     threads: 8
     conda:
-        default_env
+        DEFAULT_ENV
     shell:
         """
         MIN=$(cat {input.minimum})
@@ -173,10 +173,10 @@ rule helper_fdr_peaks_by_fire_elements:
         bed=temp("temp/{sm}/FDR-peaks/{chrom}-FDR-FIRE-peaks.bed.gz"),
     threads: 2
     conda:
-        default_env
+        DEFAULT_ENV
     params:
-        max_peak_fdr=max_peak_fdr,
-        min_per_acc_peak=min_per_acc_peak,
+        max_peak_fdr=MAX_PEAK_FDR,
+        min_per_acc_peak=MIN_PER_ACC_PEAK,
     shell:
         """
         HEADER=$(zcat {input.bed} | head -n 1 || true)
@@ -226,7 +226,7 @@ rule fdr_peaks_by_fire_elements_chromosome:
         "../envs/python.yaml"
     params:
         script=workflow.source_path("../scripts/merge_fire_peaks.py"),
-        min_frac_accessible=config.get("min_frac_accessible", 0),
+        min_frac_accessible=MIN_FRAC_ACCESSIBLE,
     shell:
         """
         zcat {input.bed} \
@@ -252,7 +252,7 @@ rule fdr_peaks_by_fire_elements:
         tbi="results/{sm}/FDR-peaks/FDR-FIRE-peaks.bed.gz.tbi",
     threads: 8
     conda:
-        default_env
+        DEFAULT_ENV
     shell:
         """
         printf "\nMaking FOFN\n"
@@ -275,18 +275,18 @@ rule wide_fdr_peaks:
     input:
         bed=rules.fdr_peaks_by_fire_elements.output.bed,
         track=rules.fdr_track.output.bed,
-        fai=ancient(f"{ref}.fai"),
+        fai=ancient(FAI),
     output:
         bed="results/{sm}/FDR-peaks/FDR-wide-peaks.bed.gz",
         tbi="results/{sm}/FDR-peaks/FDR-wide-peaks.bed.gz.tbi",
         bb="results/{sm}/trackHub/bb/FDR-wide-peaks.bb",
     conda:
-        default_env
+        DEFAULT_ENV
     threads: 4
     params:
         nuc_size=config.get("nucleosome_size", 147),
-        max_peak_fdr=max_peak_fdr,
-        min_frac_acc=max(config.get("min_frac_accessible", 0), min_per_acc_peak),
+        max_peak_fdr=MAX_PEAK_FDR,
+        min_frac_acc=max(MIN_FRAC_ACCESSIBLE, MIN_PER_ACC_PEAK),
     shell:
         """
         FILE={output.bed}
@@ -320,7 +320,7 @@ rule one_percent_fdr_peaks:
         wide_tbi="results/{sm}/FDR-peaks/one-percent-FDR/FDR-01-FIRE-wide-peaks.bed.gz.tbi",
     threads: 4
     conda:
-        default_env
+        DEFAULT_ENV
     params:
         nuc_size=config.get("nucleosome_size", 147),
     shell:
