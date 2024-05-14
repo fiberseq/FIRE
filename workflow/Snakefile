@@ -7,8 +7,7 @@ from snakemake.utils import min_version
 min_version("8.4.0")
 
 # forces pandas pysam etc to be available in the environment
-# TODO need simpler yaml without pip
-# conda: "envs/python.yaml"
+conda: "envs/runner.yaml"
 
 # Force users to use the same underlying OS via singularity.
 # container: "docker://condaforge/mambaforge:23.3.1-1"
