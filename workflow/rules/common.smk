@@ -78,7 +78,7 @@ def get_manifest():
 
 
 def get_input_bam(wc):
-    return MANIFEST.loc[wc.sample, "bam"]
+    return MANIFEST.loc[wc.sm, "bam"]
 
 
 def get_mem_mb(wildcards, attempt):
