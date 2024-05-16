@@ -27,10 +27,12 @@ rule fire:
 
 rule merged_fire_bam:
     input:
+        ref=ancient(REF),
+        fai=ancient(FAI),
         bams=expand(rules.fire.output.bam, chrom=get_chroms(), allow_missing=True),
     output:
-        bam="results/{sm}/fire/{sm}.fire.bam",
-        bai="results/{sm}/fire/{sm}.fire.bam.bai",
+        cram="results/{sm}/fire/{sm}.fire.cram",
+        bai="results/{sm}/fire/{sm}.fire.cram.crai",
     threads: 16
     resources:
         mem_mb=16 * 1024,
@@ -41,11 +43,13 @@ rule merged_fire_bam:
         "results/{sm}/benchmarks/merged_fire_bam/{sm}.txt"
     shell:
         """
-        samtools merge \
-            -@ {threads} \
-            --write-index \
-            -o {output.bam}##idx##{output.bai} \
-            {input.bams}
+        samtools merge -@ {threads} -u {input.bams} \
+            | samtools view \
+                -C -@ {threads} \
+                -T {input.ref} \
+                --output-fmt-option embed_ref=1 \
+                --write-index \
+            -o {output.bam}
         """
 
 

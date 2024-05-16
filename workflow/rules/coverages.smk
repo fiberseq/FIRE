@@ -3,8 +3,8 @@
 #
 rule genome_bedgraph:
     input:
-        bam=rules.merged_fire_bam.output.bam,
-        bai=rules.merged_fire_bam.output.bai,
+        cram=rules.merged_fire_bam.output.cram,
+        crai=rules.merged_fire_bam.output.crai,
     output:
         bg="results/{sm}/coverage/{sm}.bed.gz",
         tbi="results/{sm}/coverage/{sm}.bed.gz.tbi",
@@ -17,7 +17,7 @@ rule genome_bedgraph:
         "results/{sm}/benchmarks/genome_bedgraph/{sm}.txt"
     shell:
         """ 
-        mosdepth -t {threads} tmp {input.bam}
+        mosdepth -t {threads} tmp {input.cram}
         zcat tmp.per-base.bed.gz \
             | LC_ALL=C sort --parallel={threads} -k1,1 -k2,2n -k3,3n -k4,4  \
             | bgzip -@ {threads} \
@@ -53,7 +53,8 @@ rule coverage:
 #
 rule fiber_locations_chromosome:
     input:
-        bam=rules.merged_fire_bam.output.bam,
+        cram=rules.merged_fire_bam.output.cram,
+        crai=rules.merged_fire_bam.output.crai,
     output:
         bed=temp("temp/{sm}/coverage/{chrom}.fiber-locations.bed.gz"),
     threads: 8
@@ -62,7 +63,7 @@ rule fiber_locations_chromosome:
     shell:
         """
         # get fiber locations
-        (samtools view -@ {threads} -F 2308 -u {input.bam} {wildcards.chrom} \
+        (samtools view -@ {threads} -F 2308 -u {input.cram} {wildcards.chrom} \
             | ft extract -t {threads} -s --all - \
             | hck -F '#ct' -F st -F en -F fiber -F strand -F HP ) \
             | (grep -v "^#" || true) \

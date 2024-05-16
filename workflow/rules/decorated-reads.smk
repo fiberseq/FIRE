@@ -1,6 +1,7 @@
 rule decorate_fibers_chromosome:
     input:
-        bam=rules.merged_fire_bam.output.bam,
+        cram=rules.merged_fire_bam.output.cram,
+        crai=rules.merged_fire_bam.output.crai,
     output:
         bed=temp("temp/{sm}/decorate/{chrom}.bed.gz"),
         decorated=temp("temp/{sm}/decorate/{chrom}.dec.bed.gz"),
@@ -11,7 +12,7 @@ rule decorate_fibers_chromosome:
         DEFAULT_ENV
     shell:
         """
-        samtools view -@ {threads} -u {input.bam} {wildcards.chrom} \
+        samtools view -@ {threads} -u {input.cram} {wildcards.chrom} \
             | ft track-decorators -t {threads} --bed12 {output.bed} \
             | sort -k1,1 -k2,2n -k3,3n -k4,4 \
             | bgzip -@ {threads} \
