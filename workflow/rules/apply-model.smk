@@ -33,15 +33,19 @@ rule merged_fire_bam:
         bai="results/{sm}/fire/{sm}.fire.bam.bai",
     threads: 16
     resources:
-        mem_mb=8 * 1024,
+        mem_mb=16 * 1024,
+        runtime=300,
     conda:
         DEFAULT_ENV
     benchmark:
         "results/{sm}/benchmarks/merged_fire_bam/{sm}.txt"
     shell:
         """
-        samtools merge -@ {threads} -o {output.bam} {input.bams}
-        samtools index -@ {threads} {output.bam}
+        samtools merge \
+            -@ {threads} \
+            --write-index \
+            -o {output.bam}##idx##{output.bai} \
+            {input.bams}
         """
 
 
