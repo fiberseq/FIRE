@@ -245,8 +245,12 @@ rule element_coverages_per_chrom:
                 | bgzip -@{threads} \
                 > {output.bed}
         else
-            bedtools unionbedg -header -i {input.beds} -names {params.names} \
-                | sed 's/^chrom/#chrom/' \
+            # bedtools unionbedg -header -i {input.beds} -names {params.names} 
+            #    | sed 's/^chrom/#chrom/' 
+            ( \
+                printf "#chrom\\tstart\\tend\\t{params.names}\\n"; \
+                gia unionbedg -s -i {input.beds} \
+            ) \
                 | bgzip -@ {threads} \
             > {output.bed}
         fi
