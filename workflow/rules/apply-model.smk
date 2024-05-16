@@ -49,7 +49,7 @@ rule merged_fire_bam:
                 -T {input.ref} \
                 --output-fmt-option embed_ref=1 \
                 --write-index \
-            -o {output.bam}
+            -o {output.cram}
         """
 
 
