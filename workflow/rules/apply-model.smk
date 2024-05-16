@@ -32,7 +32,7 @@ rule merged_fire_bam:
         bams=expand(rules.fire.output.bam, chrom=get_chroms(), allow_missing=True),
     output:
         cram="results/{sm}/fire/{sm}.fire.cram",
-        bai="results/{sm}/fire/{sm}.fire.cram.crai",
+        crai="results/{sm}/fire/{sm}.fire.cram.crai",
     threads: 16
     resources:
         mem_mb=16 * 1024,
