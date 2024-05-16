@@ -3,6 +3,8 @@
 #
 rule genome_bedgraph:
     input:
+        ref=ancient(REF),
+        fai=ancient(FAI),
         cram=rules.merged_fire_bam.output.cram,
         crai=rules.merged_fire_bam.output.crai,
     output:
@@ -17,7 +19,7 @@ rule genome_bedgraph:
         "results/{sm}/benchmarks/genome_bedgraph/{sm}.txt"
     shell:
         """ 
-        mosdepth -t {threads} tmp {input.cram}
+        mosdepth -f {input.ref} -t {threads} tmp {input.cram}
         zcat tmp.per-base.bed.gz \
             | LC_ALL=C sort --parallel={threads} -k1,1 -k2,2n -k3,3n -k4,4  \
             | bgzip -@ {threads} \
