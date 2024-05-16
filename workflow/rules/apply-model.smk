@@ -43,7 +43,7 @@ rule merged_fire_bam:
         "results/{sm}/benchmarks/merged_fire_bam/{sm}.txt"
     shell:
         """
-        samtools merge -@ {threads} -u {input.bams} \
+        samtools merge -@ {threads} -u {input.bams} -o - \
             | samtools view \
                 -C -@ {threads} \
                 -T {input.ref} \
