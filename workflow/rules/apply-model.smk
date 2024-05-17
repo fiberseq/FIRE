@@ -197,7 +197,6 @@ rule split_hap_by_element_type_per_chrom:
         nuc=temp("temp/{sm}/coverage/{hp}/nucleosome_{chrom}.bed.gz"),
     params:
         min_fire_fdr=MIN_FIRE_FDR,
-        chrom=get_chroms()[0],
     threads: 2
     conda:
         DEFAULT_ENV
@@ -223,7 +222,7 @@ rule split_hap_by_element_type_per_chrom:
         for f in {output.fire} {output.link} {output.nuc}; do
             HAS_LINES=$(zcat $f | head | grep -cv '^#') || true
             if [ $HAS_LINES -eq 0 ]; then
-                printf "{params.chrom}\\t0\\t1\\t0\\n" \
+                printf "{wildcards.chrom}\\t0\\t1\\t0\\n" \
                     | bgzip -@{threads} > $f
             fi
         done
