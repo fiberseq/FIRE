@@ -102,9 +102,7 @@ The peak results are reported in the file `FDR-peaks/FDR-FIRE-peaks.bed.gz` with
 |               | {sample}.{median, maximum,minimum}.coverage.txt | Allowed coverage range for analysis                                     |
 | fiber-calls   |                                                 |                                                                         |
 |               | FIRE.bed.gz                                     | Every FIRE element in every fiber                                       |
-|               | model.results.bed.gz                            | Every FIRE, linker, and nucleosome in every fiber                       |
 |               | fire-fibers.bed.gz                              | bed12 start and end of every fiber                                      |
-|               | fire-fiber-decorators.bed.gz                    | decorator file that adds annotations of FIRE elements to the bed12 file |
 | FDR-peaks     |                                                 |                                                                         |
 |               | FDR-FIRE-peaks.bed.gz                           | Fiber-seq peak calls                                                    |
 |               | FDR-wide-peaks.bed.gz                           | Fiber-seq wide peak calls                                               |
