@@ -53,6 +53,7 @@ def get_chroms():
     chroms = [chrom for chrom in chroms if "_random" not in chrom]
     chroms = [chrom for chrom in chroms if re.fullmatch(KEEP_CHRS, chrom)]
 
+
     if FIRST_REPORT:
         FIRST_REPORT = False
         print(f"INFO: Using N chromosomes: {len(chroms)}", file=sys.stderr)
