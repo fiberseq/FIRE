@@ -86,9 +86,9 @@ pecdf=df %>%
 
 by_5_per = df %>%
     mutate(
-        group = floor(acc_percent * 100) 
+        group = floor(20 * acc_percent ) / 20 * 100 
     ) %>%
-    filter(group %% 5 == 0) %>%
+    #filter(group %% 5 == 0) %>%
     group_by(group) %>%
     slice_max(order_by = count, n = 1)
 
