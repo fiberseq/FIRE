@@ -1,0 +1,13 @@
+name: runner
+channels:
+  - numba
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - tqdm
+  - numpy
+  - pandas
+  - pip
+  - pip:
+      - pysam
