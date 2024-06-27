@@ -27,7 +27,7 @@ rule clustering_vs_null:
 
 rule fires_in_peaks:
     input:
-        fire=rules.fdr_track_filtered.output.bed,
+        fire=rules.fire_sites.output.bed,
         exclude=rules.unreliable_coverage_regions.output.bed,
         peaks=rules.fdr_peaks_by_fire_elements.output.bed,
     output:
