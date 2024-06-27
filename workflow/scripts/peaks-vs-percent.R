@@ -90,7 +90,9 @@ by_5_per = df %>%
     ) %>%
     #filter(group %% 5 == 0) %>%
     group_by(group) %>%
-    slice_max(order_by = count, n = 1)
+    filter(count == max(count)) %>%
+    slice_max(order_by = count, n = 1) %>%
+    select(group, acc_percent, count) 
 
 print(by_5_per, nrow=25)
 
