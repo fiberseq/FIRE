@@ -1,6 +1,6 @@
 # Install
 
-You will need **snakemake** and all the **UCSC Kent utilities** and the **latest version** of them (v455).
+You will need **snakemake**, all the **UCSC Kent utilities** (version >= 455), and [gia](https://github.com/noamteyssier/gia).
 
 You can install snakemake using conda/mamba, e.g.:
 ```
@@ -8,6 +8,8 @@ mamba create -c conda-forge -c bioconda -n snakemake 'snakemake>=8.4'
 ```
 
 You can find the UCSC kent utilities at [this url](http://hgdownload.soe.ucsc.edu/admin/exe/). You will need to add the directory containing the utilities to your `PATH` environment variable.
+
+And you can find install instructions for gia at [this url](https://github.com/noamteyssier/gia).
 
 Finally, if you wish to distribute jobs across a cluster you will need to install the appropriate [snakemake executor plugin](https://snakemake.github.io/snakemake-plugin-catalog/). For example, to use SLURM you can install the `snakemake-executor-slurm` plugin using pip:
 ```  
