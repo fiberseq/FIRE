@@ -102,6 +102,7 @@ rule all:
         expand(rules.wide_fdr_peaks.output, sm=MANIFEST.index),
         expand(rules.peaks_vs_percent.output, sm=MANIFEST.index),
         expand(rules.one_percent_fdr_peaks.output, sm=MANIFEST.index),
+        expand(rules.fires_in_peaks.output.txt, sm=MANIFEST.index),
         # trackhub
         expand(rules.fdr_track_to_bw.output.bw, sm=MANIFEST.index, col=bw_types),
         expand(rules.fdr_peaks_by_fire_elements_to_bb.output.bb, sm=MANIFEST.index),
