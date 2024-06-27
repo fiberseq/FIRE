@@ -11,7 +11,7 @@ rule filtered_and_shuffled_fiber_locations_chromosome:
     shell:
         """
         tabix -h {input.filtered} {wildcards.chrom} \
-            | bedtools shuffle -chrom \
+            | bedtools shuffle -chrom -seed 42 \
                 -excl {input.exclude} \
                 -i - \
                 -g {input.fai} \
