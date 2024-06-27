@@ -98,7 +98,7 @@ print(by_5_per, nrow=25)
 
 
 p5hist=by_5_per %>%
-    ggplot(aes(x=acc_percent-2.5/100, y=count)) +
+    ggplot(aes(x=acc_percent+2.5/100, y=count)) +
     geom_bar(stat="identity")+
     geom_text_repel(
         aes(
