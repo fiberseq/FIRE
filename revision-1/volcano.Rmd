@@ -1,0 +1,218 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, echo=FALSE}
+system("mkdir -p Figures")
+
+system("mkdir -p Tables")
+source('Rscripts/utils.R')
+```
+
+```{r}
+library(valr)
+f="results/UDN318336_retinal/hap1-vs-hap2/FIRE.hap.differences.bed"
+#f="results/UDN318336/hap1-vs-hap2/FIRE.hap.differences.bed"
+d=my_read_bed(f)
+imprinted=my_read_bed("data/lcl_dmr_coordinates_Akbari.bed.gz")
+ttdf=bind_rows(
+    list(d)
+    ) %>%
+    bed_map(imprinted, imprinted=(length(V4) > 0)) %>%
+    replace_na(list(imprinted=FALSE)) %>%
+    group_by(sample)%>%
+    mutate(
+        #imprinted=FALSE,
+        #p_cor = p_value * n(),
+        p_adjust = p.adjust(p_value, method="BH"),
+    ) %>%
+    data.table()
+MAB21L1="chr13:35,476,695-35,476,695"
+slop=1e3
+MAB21L1.gr = data.frame(GRanges(
+    seqnames="chr13",
+    ranges=IRanges(start=35476695-slop, end=35476695+slop))
+    )
+MAB21L1.gr$chrom = MAB21L1.gr$seqnames
+chr13 = copy(ttdf[chrom=="chr13" & ttdf$imprinted==F])
+chr13$autosome="chr13"
+imprinted_df = copy(ttdf[ttdf$imprinted==T])
+imprinted_df$autosome="imprinted"
+
+pdf = bind_rows(ttdf[ttdf$imprinted==F], chr13, imprinted_df) %>%
+    bed_map(MAB21L1.gr, MAB21L1=n()>0) %>%
+    replace_na(list(MAB21L1=FALSE)) %>%
+    group_by(autosome) %>%
+    arrange(p_value) %>%
+    mutate(
+        rank = row_number(),
+        imprinted=MAB21L1,
+    ) %>%
+    data.table() 
+sum(pdf$imprinted & pdf$p_value <= 0.05) 
+#pdf$p_adjust
+```
+
+```{r}
+make_hap_plots = function(SM, show_imprinted=FALSE, p_threshold = 0.05, height=3, width=4){
+    tdf = pdf %>%
+        filter(sample==SM) 
+    z=tdf %>%
+        ggplot(aes(x=hap1_frac_acc, y=hap2_frac_acc)) +
+        stat_cor(size=2) +
+        geom_hex(bins=75) +
+        geom_abline(aes(intercept=0, slope=1), linetype="dashed")+
+        scale_fill_distiller("", palette = "Spectral", trans="log10") +
+        scale_x_continuous("Paternal accessibility", labels=percent) +
+        scale_y_continuous("Maternal accessibility", labels=percent) +
+        #annotation_logticks(sides="lb") +
+        facet_wrap(~autosome, ncol=2)+
+        my_grid()
+    #my_ggsave("Figures/{SM}_hap1_vs_hap2.pdf", height=3, width=6)
+    
+    cor_p_threshold = max(tdf[p_adjust <= p_threshold]$p_value)
+    y_lim = ceil( max(-log10(tdf$p_value)))
+    y_by = 1 
+    if(y_lim > 10){
+        y_by = 2
+    }
+    # add p-value col, volcano plot
+    n=comma(nrow(tdf))
+    p = tdf %>%
+        ggplot(aes(x=diff, y=p_value)) +
+        geom_hex(bins=100) + scale_fill_distiller("", palette = "Spectral", trans="log10") +
+        geom_text_repel(
+            data=. %>% filter(imprinted, p_value <= 0.05) %>% filter(rank <= 10000),
+            aes(label=rank),
+            size=2,
+            min.segment.length=0.0,
+            segment.size=0.2,
+            nugde_x=0.2,
+            nugde_y=1,
+        ) +
+        geom_hline(aes(yintercept=(p_threshold)), linetype="dashed", color="darkblue")+
+        #geom_hline(aes(yintercept=(cor_p_threshold)), linetype="dashed", color="darkred")+
+        geom_text(
+            data = . %>% 
+                filter(p_value<=p_threshold) %>%
+                dplyr::group_by(autosome) %>%
+                dplyr::summarize(diff=0.75, count=n(), y=p_threshold),
+            aes(
+                x=diff,
+                y=y, 
+                label=glue("n={comma(count)}"),
+            ),
+            size=2,
+            color="darkblue",
+            vjust=-0.2,
+        )+
+        facet_wrap(~autosome, scale="free_y")+
+        scale_x_continuous("Difference between paternal and maternal accessibility", labels=percent) +
+        scale_y_continuous(
+            glue("p-value   (n = {n})"), 
+            #labels=comma,
+            breaks=10**(-seq(0, y_lim, y_by)),
+            minor_breaks=10**(-seq(0, y_lim, 0.1)),
+            trans=reverselog_trans(10),
+            labels=scientific_10,
+        ) + 
+        my_grid()
+    if(show_imprinted){
+        p + geom_point(
+            data=tdf%>% 
+                filter(imprinted>0, p_value <= 0.05),
+            aes(x=diff, y=p_value),
+            shape="*",
+            size=3,
+            #alpha=0.75,
+            color="darkred",
+        )
+    }
+    my_ggsave("Figures/{SM}_volcano_hap1_vs_hap2.pdf", height=height, width=width)
+}
+SM="UDN318336_retinal"
+make_hap_plots(SM, show_imprinted=TRUE)
+```
+
+```{r}
+make_hap_plots = function(SM, show_imprinted=FALSE, p_threshold = 0.05){
+    tdf = pdf %>%
+        filter(sample==SM) 
+    tdf %>%
+        ggplot(aes(x=hap1_frac_acc, y=hap2_frac_acc)) +
+        stat_cor(size=2) +
+        geom_hex(bins=75) +
+        geom_abline(aes(intercept=0, slope=1), linetype="dashed")+
+        scale_fill_distiller("", palette = "Spectral", trans="log10") +
+        scale_x_continuous("Paternal accessibility", labels=percent) +
+        scale_y_continuous("Maternal accessibility", labels=percent) +
+        #annotation_logticks(sides="lb") +
+        facet_wrap(~autosome, ncol=2)+
+        my_grid()
+    my_ggsave("Figures/{SM}_hap1_vs_hap2.pdf", height=3, width=6)
+    
+    cor_p_threshold = max(tdf[p_adjust <= p_threshold]$p_value)
+    y_lim = ceil( max(-log10(tdf$p_value)))
+    y_by = 1 
+    if(y_lim > 10){
+        y_by = 2
+    }
+    # add p-value col, volcano plot
+    n=comma(nrow(tdf))
+    p = tdf %>%
+        ggplot(aes(x=diff, y=p_value)) +
+        geom_hex(bins=100) + scale_fill_distiller("", palette = "Spectral", trans="log10") +
+        geom_hline(aes(yintercept=(p_threshold)), linetype="dashed", color="darkblue")+
+        geom_hline(aes(yintercept=(cor_p_threshold)), linetype="dashed", color="darkred")+
+        facet_wrap(~autosome, ncol=2)+
+        scale_x_continuous("Difference between paternal and maternal accessibility", labels=percent) +
+        scale_y_continuous(
+            glue("p-value   (n = {n})"), 
+            #labels=comma,
+            breaks=10**(-seq(0, y_lim, y_by)),
+            minor_breaks=10**(-seq(0, y_lim, 0.1)),
+            trans=reverselog_trans(10),
+            labels=scientific_10,
+        ) + 
+        my_grid()
+    if(show_imprinted){
+        p + geom_point(
+            data=tdf%>% 
+                filter(imprinted>0, p_value <= 0.05),
+            aes(x=diff, y=p_value),
+            shape="+",
+            #alpha=0.75,
+            color="darkred",
+        )
+    }
+    my_ggsave("Figures/{SM}_volcano_hap1_vs_hap2.pdf", height=3, width=5)
+}
+
+f="results/GM20129_PS00447/hap1-vs-hap2/FIRE.hap.differences.bed"
+gm20129=my_read_bed(f) 
+f="results/HG02630_PS00445/hap1-vs-hap2/FIRE.hap.differences.bed"
+hg02630=my_read_bed(f) 
+
+pdf = bind_rows(
+    list(
+        GM20129=gm20129,
+        HG02630=hg02630
+        ),
+    .id="sample",
+) %>%
+bed_map(imprinted, imprinted=(length(V4) > 0)) %>%
+replace_na(list(imprinted=FALSE)) %>%
+mutate(
+    rank=10000000,
+) %>%
+data.table
+
+SM="HG02630"
+make_hap_plots(SM, show_imprinted=TRUE)
+SM="GM20129"
+make_hap_plots(SM, show_imprinted=TRUE)
+```
+

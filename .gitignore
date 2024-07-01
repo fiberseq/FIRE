@@ -1,3 +1,10 @@
+**.bam
+**.csi
+**.bai 
+**.tbl.gz
+**.pdf
+**.bed.gz
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

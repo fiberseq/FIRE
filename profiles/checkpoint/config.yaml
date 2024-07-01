@@ -2,7 +2,7 @@ cluster:
   mkdir -p cluster_logs/{rule} &&
   sbatch
     --account=stergachislab
-    --partition=ckpt
+    --partition=compute
     --nodes=1 
     --ntasks-per-node={threads} 
     --mem={resources.mem_mb} 
