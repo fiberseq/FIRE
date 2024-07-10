@@ -13,7 +13,7 @@ rule decorate_fibers_chromosome:
     shell:
         """
         samtools view -@ {threads} -u {input.cram} {wildcards.chrom} \
-            | ft track-decorators -t {threads} --bed12 {output.bed} \
+            | {FT_EXE} track-decorators -t {threads} --bed12 {output.bed} \
             | sort -k1,1 -k2,2n -k3,3n -k4,4 \
             | bgzip -@ {threads} \
         > {output.decorated}

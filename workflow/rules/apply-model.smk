@@ -17,7 +17,7 @@ rule fire:
     shell:
         """
         samtools view -u -@ {threads} {input.bam} {wildcards.chrom} \
-            | ft fire -t {threads} \
+            | {FT_EXE} fire -t {threads} \
                 --min-msp {params.min_msp} \
                 --min-ave-msp-size {params.min_ave_msp_size} \
                 --skip-no-m6a \
@@ -66,7 +66,7 @@ rule extract_from_fire:
     priority: 10
     shell:
         """
-        ft fire -t {threads} --extract {input.bam} \
+        {FT_EXE} fire -t {threads} --extract {input.bam} \
             | LC_ALL=C sort \
                 --parallel={threads} \
                 -k1,1 -k2,2n -k3,3n -k4,4 \
