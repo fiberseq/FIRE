@@ -58,7 +58,7 @@ FT_EXE = config.get("ft_exe", "ft")
 ONT = config.get("ont", False)
 USE_ONT = ""
 if ONT:
-    USE_ONT = " --ont "
+    USE_ONT = " --ont --ml 225 "
 
 
 include: "rules/apply-model.smk"
