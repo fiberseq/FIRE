@@ -12,12 +12,14 @@ rule fire:
     params:
         min_msp=config.get("min_msp", 10),
         min_ave_msp_size=config.get("min_ave_msp_size", 10),
+        use_ont=lambda ONT: "--ont" if ONT else "",
     conda:
         DEFAULT_ENV
     shell:
         """
         samtools view -u -@ {threads} {input.bam} {wildcards.chrom} \
             | {FT_EXE} fire -t {threads} \
+                {params.use_ont} \
                 --min-msp {params.min_msp} \
                 --min-ave-msp-size {params.min_ave_msp_size} \
                 --skip-no-m6a \
