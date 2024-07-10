@@ -56,6 +56,9 @@ el_types = ["fire", "linker", "nucleosome"]
 # developer options
 FT_EXE = config.get("ft_exe", "ft")
 ONT = config.get("ont", False)
+USE_ONT = ""
+if ONT:
+    USE_ONT = " --ont "
 
 
 include: "rules/apply-model.smk"

@@ -12,7 +12,7 @@ rule fire:
     params:
         min_msp=config.get("min_msp", 10),
         min_ave_msp_size=config.get("min_ave_msp_size", 10),
-        use_ont=lambda ONT: "--ont" if ONT else "",
+        use_ont=USE_ONT,
     conda:
         DEFAULT_ENV
     shell:
