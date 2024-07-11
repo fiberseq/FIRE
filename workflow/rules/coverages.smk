@@ -149,6 +149,8 @@ rule unreliable_coverage_regions:
         bed_tbi="results/{sm}/coverage/unreliable-coverage-regions.bed.gz.tbi",
         bb="results/{sm}/trackHub/bb/unreliable-coverage-regions.bb",
     threads: 4
+    params:
+        min_len=MIN_UNRELIABLE_COVERAGE_LEN,
     conda:
         DEFAULT_ENV
     shell:
@@ -162,6 +164,7 @@ rule unreliable_coverage_regions:
             | awk '$4>0' \
             | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX' \
             | bedtools merge -i - \
+            | awk '$3-$2 >= {params.min_len}' \
         > $TMP
         bedToBigBed $TMP {input.fai} {output.bb}
         # compress 

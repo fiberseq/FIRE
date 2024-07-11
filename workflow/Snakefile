@@ -59,7 +59,7 @@ ONT = config.get("ont", False)
 USE_ONT = ""
 if ONT:
     USE_ONT = " --ont --ml 225 "
-
+MIN_UNRELIABLE_COVERAGE_LEN = config.get("min_unreliable_coverage_len", 50)
 
 include: "rules/apply-model.smk"
 include: "rules/coverages.smk"
