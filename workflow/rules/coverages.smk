@@ -39,7 +39,7 @@ rule coverage:
         "../envs/python.yaml"
     threads: 1
     resources:
-        mem_mb=48 * 1024,
+        mem_mb=64 * 1024,
     benchmark:
         "results/{sm}/benchmarks/coverage/{sm}.txt"
     params:
