@@ -48,19 +48,19 @@ def pandas_read():
 
 def polars_read():
     # Reading the CSV file using the lazy API
-    df = pl.scan_csv(
-        snakemake.input.bg,
-        separator="\t",
-        has_header=False,
-        #new_columns=["chr", "start", "end", "coverage"],
-    )
-    # Applying filters and adding the new column using the lazy API
     df = (
-        df.filter(pl.col("coverage") > 0)
+        pl.read_csv(
+            snakemake.input.bg,
+            separator="\t",
+            has_header=False,
+            new_columns=["chr", "start", "end", "coverage"],
+        )
+        .filter(pl.col("coverage") > 0)
         .filter(pl.col("chr").is_in(snakemake.params.chroms))
         .with_column((pl.col("end") - pl.col("start")).alias("weight"))
     )
-    return df.collect().to_pandas() 
+    return df.to_pandas()
+
 
 df = polars_read()
 print(df, file=sys.stderr)
