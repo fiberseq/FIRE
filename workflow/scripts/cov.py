@@ -54,6 +54,7 @@ def polars_read():
             separator="\t",
             has_header=False,
             new_columns=["chr", "start", "end", "coverage"],
+            low_memory=True,
         )
         .filter(pl.col("coverage") > 0)
         .filter(pl.col("chr").is_in(snakemake.params.chroms))
