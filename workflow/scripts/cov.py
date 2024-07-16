@@ -59,12 +59,13 @@ def polars_read():
         .filter(pl.col("chr").is_in(snakemake.params.chroms))
         .drop("chr")
         .with_columns((pl.col("end") - pl.col("start")).alias("weight"))
+        .drop(["start", "end"])
         .to_pandas()
     )
     return df
 
 
-df = pandas_read()
+df = polars_read()
 print(df, file=sys.stderr)
 coverage = weighted_median(df, "coverage", "weight")
 
