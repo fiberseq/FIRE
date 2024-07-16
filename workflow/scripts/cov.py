@@ -56,11 +56,13 @@ def polars_read():
             new_columns=["chr", "start", "end", "coverage"],
             low_memory=True,
         )
+        .lazy()
         .filter(pl.col("coverage") > 0)
         .filter(pl.col("chr").is_in(snakemake.params.chroms))
         .drop("chr")
         .with_columns((pl.col("end") - pl.col("start")).alias("weight"))
         .drop(["start", "end"])
+        .collect()
         .to_pandas()
     )
     return df
