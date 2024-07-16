@@ -57,9 +57,11 @@ def polars_read():
         )
         .filter(pl.col("coverage") > 0)
         .filter(pl.col("chr").is_in(snakemake.params.chroms))
+        .drop("chr")
         .with_columns((pl.col("end") - pl.col("start")).alias("weight"))
+        .to_pandas()
     )
-    return df.to_pandas()
+    return df
 
 
 df = polars_read()
