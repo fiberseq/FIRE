@@ -50,7 +50,7 @@ def polars_read():
     # Reading the CSV file using the lazy API
     df = pl.scan_csv(
         snakemake.input.bg,
-        sep="\t",
+        separator="\t",
         has_header=False,
         new_columns=["chr", "start", "end", "coverage"],
     )
