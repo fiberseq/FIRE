@@ -3,6 +3,7 @@ import numpy as np
 import sys
 import os
 import math
+import polars as pl
 
 coverage_within_n_sd = snakemake.params.coverage_within_n_sd
 MIN_coverage = snakemake.params.min_coverage
@@ -32,15 +33,36 @@ def weighted_median(df, val, weight):
     return comparison.iloc[0]
 
 
-df = pd.read_csv(
-    snakemake.input.bg,
-    sep="\t",
-    header=None,
-    names=["chr", "start", "end", "coverage"],
-)
-df = df.loc[df["coverage"] > 0]
-df = df.loc[df["chr"].isin(snakemake.params.chroms)]
-df["weight"] = df["end"] - df["start"]
+def pandas_read():
+    df = pd.read_csv(
+        snakemake.input.bg,
+        sep="\t",
+        header=None,
+        names=["chr", "start", "end", "coverage"],
+    )
+    df = df.loc[df["coverage"] > 0]
+    df = df.loc[df["chr"].isin(snakemake.params.chroms)]
+    df["weight"] = df["end"] - df["start"]
+    return df
+
+
+def polars_read():
+    # Reading the CSV file using the lazy API
+    df = pl.scan_csv(
+        snakemake.input.bg,
+        sep="\t",
+        has_header=False,
+        new_columns=["chr", "start", "end", "coverage"],
+    )
+    # Applying filters and adding the new column using the lazy API
+    df = (
+        df.filter(pl.col("coverage") > 0)
+        .filter(pl.col("chr").is_in(snakemake.params.chroms))
+        .with_column((pl.col("end") - pl.col("start")).alias("weight"))
+    )
+    return df.collect().to_pandas() 
+
+df = polars_read()
 print(df, file=sys.stderr)
 coverage = weighted_median(df, "coverage", "weight")
 
