@@ -52,7 +52,7 @@ def polars_read():
         snakemake.input.bg,
         separator="\t",
         has_header=False,
-        new_columns=["chr", "start", "end", "coverage"],
+        #new_columns=["chr", "start", "end", "coverage"],
     )
     # Applying filters and adding the new column using the lazy API
     df = (
