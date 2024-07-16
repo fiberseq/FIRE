@@ -64,7 +64,7 @@ def polars_read():
     return df
 
 
-df = polars_read()
+df = pandas_read()
 print(df, file=sys.stderr)
 coverage = weighted_median(df, "coverage", "weight")
 
