@@ -30,7 +30,7 @@ if [[ "${has_config}" == false ]]; then
 fi
 
 # check for executables
-for x in snakemake; do
+for x in snakemake bedToBigBed; do
     if [[ ! $(type -P "${x}") ]]; then
         echo "Error: ${x} not found in PATH, but it is required for FIRE."
         exit 1
