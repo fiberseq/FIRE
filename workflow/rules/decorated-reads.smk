@@ -71,6 +71,12 @@ rule decorate_fibers_2:
     shell:
         """
         cat {input.decorated} > {output.decorated}
-        bedToBigBed -allow1bpOverlap -type=bed12+ -as={params.dec_as} \
-            {output.decorated} {input.fai} {output.bb}
+        
+        bgzip -cd -@ {threads} {output.decorated} \
+            | bigtools bedtobigbed \
+                -a {params.dec_as} -s start \
+                - {input.fai} {output.bb}
+        
+        # bedToBigBed -allow1bpOverlap -type=bed12+ -as={params.dec_as}\
+        # {output.decorated} {input.fai} {output.bb}
         """
