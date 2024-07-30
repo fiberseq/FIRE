@@ -302,7 +302,7 @@ rule wide_fdr_peaks:
         > {output.bed}
         
         bgzip -cd -@ 16 {output.bed} \
-            | bigtools bedtobigbed - {input.fai} {output.bb}        
+            | bigtools bedtobigbed -s start - {input.fai} {output.bb}        
         
         tabix -p bed {output.bed}
         """
