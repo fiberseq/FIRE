@@ -24,7 +24,9 @@ rule percent_accessible:
 
         # skip if the file is empty
         if [[ -s {output.tmp} ]]; then
-            bigtools bedgraphtobigwig -s start {output.tmp} {input.fai} {output.bw}
+            bigtools bedgraphtobigwig \
+                --nzooms 10 -s start \
+                {output.tmp} {input.fai} {output.bw}
         else
             touch {output.bw}
         fi
@@ -47,7 +49,9 @@ rule element_coverages_bw:
         zcat {input.bed} \
             | hck -f 1-3 -F {wildcards.el_type} \
             | grep -v "^#" \
-            | bigtools bedgraphtobigwig -s start - {input.fai} {output.bw}
+            | bigtools bedgraphtobigwig \
+                -s start --nzooms 10 \
+                - {input.fai} {output.bw}
         """
 
 
@@ -64,7 +68,9 @@ rule fdr_track_to_bw:
         """
         hck -z -f 1-3 -F {wildcards.col} {input.bed} \
             | grep -v "^#" \
-            | bigtools bedgraphtobigwig -s start - {input.fai} {output.bw}
+            | bigtools bedgraphtobigwig \
+                -s start --nzooms 10 \
+                - {input.fai} {output.bw}
         """
 
 
