@@ -155,9 +155,6 @@ rule unreliable_coverage_regions:
         DEFAULT_ENV
     shell:
         """
-        FILE={output.bed}
-        TMP="${{FILE%.*}}"
-
         MIN=$(cat {input.minimum})
         MAX=$(cat {input.maximum})
         zcat {input.bg} \
@@ -165,9 +162,13 @@ rule unreliable_coverage_regions:
             | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX' \
             | bedtools merge -i - \
             | awk '$3-$2 >= {params.min_len}' \
-        > $TMP
-        bedToBigBed $TMP {input.fai} {output.bb}
-        # compress 
-        bgzip -f -@ {threads} $TMP
+            | bgzip -@ {threads} \
+        > {output.bed}
+
+        # bigbed
+        bgzip -cd {output.bed} -@ {threads} \ 
+            | bigtools bedtobigbed -s start - {input.fai} {output.bb}
+
+        # index 
         tabix -f -p bed {output.bed}
         """

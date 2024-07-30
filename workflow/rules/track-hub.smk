@@ -82,12 +82,11 @@ rule fdr_peaks_by_fire_elements_to_bb:
     shell:
         """
         zcat {input.bed} \
-        | bioawk -tc hdr '{{print $1,$2,$3,"peak-"NR,int($score*10),".",$score,"-1",$log_FDR,int($start/2+$end/2)-$peak_start}}' \
-        | bioawk -tc hdr '$5<=1000' \
-        > {output.tmp} 
-        bedToBigBed \
-            -type=bed6+4 -as={params.bedfmt} \
-            {output.tmp} {input.fai} {output.bb}
+            | bioawk -tc hdr '{{print $1,$2,$3,"peak-"NR,int($score*10),".",$score,"-1",$log_FDR,int($start/2+$end/2)-$peak_start}}' \
+            | bioawk -tc hdr '$5<=1000' \
+            | bigtools bedtobigbed \
+                -a {params.bedfmt} -s start \
+                - {input.fai} {output.bb}
         """
 
 
@@ -109,7 +108,8 @@ rule hap_differences_track:
         """
         printf "{params.chrom}\t0\t1\tfake\t100\t+\t0\t1\t230,230,230\\n" > {output.bed}
         bedtools sort -i {input.bed9} >> {output.bed}
-        bedToBigBed {output.bed} {input.fai} {output.bb}
+        
+        bigtools bedtobigbed {output.bed} {input.fai} {output.bb}
         """
 
 

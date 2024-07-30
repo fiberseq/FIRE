@@ -289,10 +289,6 @@ rule wide_fdr_peaks:
         min_frac_acc=max(MIN_FRAC_ACCESSIBLE, MIN_PER_ACC_PEAK),
     shell:
         """
-        FILE={output.bed}
-        TMP="${{FILE%.*}}"
-        echo $TMP
-
         ( \
             zcat {input.bed}; \
             bioawk -tc hdr 'NR==1 || $FDR<={params.max_peak_fdr}' {input.track} \
@@ -302,9 +298,12 @@ rule wide_fdr_peaks:
             | cut -f 1-3 \
             | bedtools sort \
             | bedtools merge -d {params.nuc_size} \
-        > $TMP
-        bedToBigBed $TMP {input.fai} {output.bb}        
-        bgzip -f -@ {threads} $TMP
+            | bgzip -@ {threads} \
+        > {output.bed}
+        
+        bgzip -cd -@ 16 {output.bed} \
+            | bigtools bedtobigbed - {input.fai} {output.bb}        
+        
         tabix -p bed {output.bed}
         """
 

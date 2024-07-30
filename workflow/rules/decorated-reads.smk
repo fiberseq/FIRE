@@ -57,7 +57,6 @@ rule decorate_fibers_2:
         ),
         fai=ancient(FAI),
     output:
-        decorated=temp("temp/{sm}/fiber-calls/fire-fiber-decorators.bed.gz"),
         bb="results/{sm}/trackHub/bb/fire-fiber-decorators.bb",
     benchmark:
         "results/{sm}/benchmarks/decorate_fibers_2/{sm}.txt"
@@ -70,13 +69,9 @@ rule decorate_fibers_2:
         dec_as=workflow.source_path("../templates/decoration.as"),
     shell:
         """
-        cat {input.decorated} > {output.decorated}
-        
-        bgzip -cd -@ {threads} {output.decorated} \
+        cat {input.decorated} \  
+            | bgzip -cd -@ {threads} \
             | bigtools bedtobigbed \
                 -a {params.dec_as} -s start \
                 - {input.fai} {output.bb}
-        
-        #bedToBigBed -allow1bpOverlap -type=bed12+ -as={params.dec_as}\
-        #    {output.decorated} {input.fai} {output.bb}
         """
