@@ -95,7 +95,6 @@ rule hap_differences_track:
         bed9=rules.hap_differences.output.bed9,
         fai=ancient(FAI),
     output:
-        bed=temp("temp/{sm}/hap_differences/temp.bed"),
         bb="results/{sm}/trackHub/bb/hap_differences.bb",
     threads: 1
     resources:
@@ -104,15 +103,16 @@ rule hap_differences_track:
         DEFAULT_ENV
     params:
         chrom=get_chroms()[0],
-        bed3_as=workflow.source_path("../templates/bed3.as"),
+        bed9_as=workflow.source_path("../templates/bed9.as"),
     shell:
         """
-        printf "{params.chrom}\t0\t1\tfake\t100\t+\t0\t1\t230,230,230\\n" > {output.bed}
-        bedtools sort -i {input.bed9} >> {output.bed}
-
-        bigtools bedtobigbed \
-            -s start -a {params.bed3_as} \
-            {output.bed} {input.fai} {output.bb}
+        ( \
+            printf "{params.chrom}\t0\t1\tfake\t100\t+\t0\t1\t230,230,230\\n"; \
+            bedtools sort -i {input.bed9} \
+        ) \
+            | bigtools bedtobigbed \
+                -s start -a {params.bed9_as} \
+                - {input.fai} {output.bb}
         """
 
 
