@@ -63,6 +63,7 @@ rule fdr_track_to_bw:
     shell:
         """
         hck -z -f 1-3 -F {wildcards.col} {input.bed} \
+            | grep -v "^#" \
             | bigtools bedgraphtobigwig -s start - {input.fai} {output.bw}
         """
 
