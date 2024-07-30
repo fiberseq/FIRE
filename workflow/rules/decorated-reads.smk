@@ -43,8 +43,11 @@ rule decorate_fibers_1:
     shell:
         """
         cat {input.bed} > {output.bed}
-        bedToBigBed -allow1bpOverlap -type=bed12+ -as={params.bed_as} \
-            {output.bed} {input.fai} {output.bb}
+
+        bgzip -cd -@ {threads} {output.bed} \
+            | bigtools bedtobigbed \
+                -s start -a {params.bed_as} \
+                - {input.fai} {output.bb}
         """
 
 
