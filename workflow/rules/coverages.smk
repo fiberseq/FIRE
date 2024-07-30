@@ -151,6 +151,7 @@ rule unreliable_coverage_regions:
     threads: 4
     params:
         min_len=MIN_UNRELIABLE_COVERAGE_LEN,
+        bed3_as=workflow.source_path("../templates/bed3.as"),
     conda:
         DEFAULT_ENV
     shell:
@@ -167,7 +168,9 @@ rule unreliable_coverage_regions:
 
         # bigbed
         bgzip -cd {output.bed} -@ {threads} \
-            | bigtools bedtobigbed -s start - {input.fai} {output.bb}
+            | bigtools bedtobigbed \
+                -s start -a {params.bed3_as} \
+                - {input.fai} {output.bb}
 
         # index 
         tabix -f -p bed {output.bed}

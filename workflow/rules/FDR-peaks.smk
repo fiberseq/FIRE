@@ -287,6 +287,7 @@ rule wide_fdr_peaks:
         nuc_size=config.get("nucleosome_size", 147),
         max_peak_fdr=MAX_PEAK_FDR,
         min_frac_acc=max(MIN_FRAC_ACCESSIBLE, MIN_PER_ACC_PEAK),
+        bed3_as=workflow.source_path("../templates/bed3.as"),
     shell:
         """
         ( \
@@ -302,7 +303,9 @@ rule wide_fdr_peaks:
         > {output.bed}
         
         bgzip -cd -@ 16 {output.bed} \
-            | bigtools bedtobigbed -s start - {input.fai} {output.bb}        
+            | bigtools bedtobigbed \
+                -s start -a {params.bed3_as} \
+                - {input.fai} {output.bb}        
         
         tabix -p bed {output.bed}
         """

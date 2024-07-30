@@ -104,12 +104,15 @@ rule hap_differences_track:
         DEFAULT_ENV
     params:
         chrom=get_chroms()[0],
+        bed3_as=workflow.source_path("../templates/bed3.as"),
     shell:
         """
         printf "{params.chrom}\t0\t1\tfake\t100\t+\t0\t1\t230,230,230\\n" > {output.bed}
         bedtools sort -i {input.bed9} >> {output.bed}
 
-        bigtools bedtobigbed -s start {output.bed} {input.fai} {output.bb}
+        bigtools bedtobigbed \
+            -s start -a {params.bed3_as} \
+            {output.bed} {input.fai} {output.bb}
         """
 
 
