@@ -69,9 +69,9 @@ rule decorate_fibers_2:
         dec_as=workflow.source_path("../templates/decoration.as"),
     shell:
         """
-        cat {input.decorated} \  
+        cat {input.decorated} \
             | bgzip -cd -@ {threads} \
             | bigtools bedtobigbed \
-                -a {params.dec_as} -s start \
+                -a {params.dec_as} -s start g
                 - {input.fai} {output.bb}
         """
