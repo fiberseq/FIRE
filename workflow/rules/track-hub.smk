@@ -73,7 +73,6 @@ rule fdr_peaks_by_fire_elements_to_bb:
         fai=ancient(FAI),
     output:
         bb="results/{sm}/trackHub/bb/FDR-FIRE-peaks.bb",
-        tmp=temp("temp/{sm}/trackHub/bb/FDR-FIRE-peaks.bb.tmp"),
     threads: 4
     conda:
         DEFAULT_ENV
