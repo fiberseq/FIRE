@@ -68,7 +68,7 @@ rule extract_from_fire:
     priority: 10
     shell:
         """
-        {FT_EXE} fire -t {threads} --extract {input.bam} \
+        {FT_EXE} fire -t {threads} --all --extract {input.bam} \
             | LC_ALL=C sort \
                 --parallel={threads} \
                 -k1,1 -k2,2n -k3,3n -k4,4 \
