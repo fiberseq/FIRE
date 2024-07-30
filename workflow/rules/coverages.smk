@@ -166,7 +166,7 @@ rule unreliable_coverage_regions:
         > {output.bed}
 
         # bigbed
-        bgzip -cd {output.bed} -@ {threads} \ 
+        bgzip -cd {output.bed} -@ {threads} \
             | bigtools bedtobigbed -s start - {input.fai} {output.bb}
 
         # index 
