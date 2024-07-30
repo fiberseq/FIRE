@@ -71,6 +71,7 @@ rule decorate_fibers_2:
         """
         cat {input.decorated} \
             | bgzip -cd -@ {threads} \
+            | rg -v '^#' \
             | bigtools bedtobigbed \
                 -a {params.dec_as} -s start \
                 - {input.fai} {output.bb}
