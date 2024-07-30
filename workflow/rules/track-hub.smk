@@ -24,7 +24,7 @@ rule percent_accessible:
 
         # skip if the file is empty
         if [[ -s {output.tmp} ]]; then
-            bedGraphToBigWig {output.tmp} {input.fai} {output.bw}
+            bigtools bedgraphtobigwig -s start {output.tmp} {input.fai} {output.bw}
         else
             touch {output.bw}
         fi
@@ -39,14 +39,15 @@ rule element_coverages_bw:
         bed=rules.element_coverages.output.bed,
         fai=ancient(FAI),
     output:
-        tmp=temp("temp/{sm}/trackHub/bw/{hp}.{el_type}.coverage.bed"),
         bw="results/{sm}/trackHub/bw/{hp}.{el_type}.coverage.bw",
     conda:
         DEFAULT_ENV
     shell:
         """
-        zcat {input.bed} | hck -f 1-3 -F {wildcards.el_type} > {output.tmp}
-        bedGraphToBigWig {output.tmp} {input.fai} {output.bw}
+        zcat {input.bed} \
+            | hck -f 1-3 -F {wildcards.el_type} \
+            | grep -v "^#" \
+            | bigtools bedgraphtobigwig -s start - {input.fai} {output.bw}
         """
 
 
@@ -56,14 +57,13 @@ rule fdr_track_to_bw:
         fai=ancient(FAI),
     output:
         bw="results/{sm}/trackHub/bw/{col}.bw",
-        tmp=temp("temp/{sm}/trackHub/bw/{col}.tmp.bed"),
     threads: 4
     conda:
         DEFAULT_ENV
     shell:
         """
-        hck -z -f 1-3 -F {wildcards.col} {input.bed} > {output.tmp} 
-        bedGraphToBigWig {output.tmp} {input.fai} {output.bw}
+        hck -z -f 1-3 -F {wildcards.col} {input.bed} \
+            | bigtools bedgraphtobigwig -s start - {input.fai} {output.bw}
         """
 
 
