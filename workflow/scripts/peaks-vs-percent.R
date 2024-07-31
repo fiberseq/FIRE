@@ -86,18 +86,23 @@ pecdf=df %>%
 
 by_5_per = df %>%
     mutate(
-        group = floor(acc_percent * 100) 
+        group = floor(20 * acc_percent ) / 20 * 100 
     ) %>%
-    filter(group %% 5 == 0) %>%
+    #filter(group %% 5 == 0) %>%
     group_by(group) %>%
-    slice_max(order_by = count, n = 1)
+    filter(count == max(count)) %>%
+    slice_max(order_by = count, n = 1) %>%
+    select(group, acc_percent, count) 
+
+print(by_5_per, nrow=25)
+
 
 p5hist=by_5_per %>%
-    ggplot(aes(x=acc_percent-2.5/100, y=count)) +
+    ggplot(aes(x=(group+2.5)/100, y=count)) +
     geom_bar(stat="identity")+
     geom_text_repel(
         aes(
-            x=acc_percent-2.5/100,
+            #x=acc_percent-2.5/100,
             label=paste(
                 comma(count)
             ),

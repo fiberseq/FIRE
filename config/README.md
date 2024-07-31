@@ -10,7 +10,7 @@ Reference `fasta` file:
 ```
 ref: /path/to/hg38.fa
 ```
-Manifest of input sample(s), must have two white-space separated columns: sample name (`sample`) and input bam file path (`bam`). See `config.tbl` for an example.
+Manifest of input sample(s), must have two white-space separated columns: sample name (`sample`) and input bam file path (`bam`). See `config.tbl` for an example. The `bam` file must be indexed and aligned to the reference genome in the `ref` option.
 ```
 manifest: config/config.tbl
 ```

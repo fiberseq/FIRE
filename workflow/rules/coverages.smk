@@ -3,8 +3,10 @@
 #
 rule genome_bedgraph:
     input:
-        bam=rules.merged_fire_bam.output.bam,
-        bai=rules.merged_fire_bam.output.bai,
+        ref=ancient(REF),
+        fai=ancient(FAI),
+        cram=rules.merged_fire_bam.output.cram,
+        crai=rules.merged_fire_bam.output.crai,
     output:
         bg="results/{sm}/coverage/{sm}.bed.gz",
         tbi="results/{sm}/coverage/{sm}.bed.gz.tbi",
@@ -12,12 +14,12 @@ rule genome_bedgraph:
     shadow:
         "minimal"
     conda:
-        default_env
+        DEFAULT_ENV
     benchmark:
         "results/{sm}/benchmarks/genome_bedgraph/{sm}.txt"
     shell:
         """ 
-        mosdepth -t {threads} tmp {input.bam}
+        mosdepth -f {input.ref} -t {threads} tmp {input.cram}
         zcat tmp.per-base.bed.gz \
             | LC_ALL=C sort --parallel={threads} -k1,1 -k2,2n -k3,3n -k4,4  \
             | bgzip -@ {threads} \
@@ -37,12 +39,12 @@ rule coverage:
         "../envs/python.yaml"
     threads: 1
     resources:
-        mem_mb=48 * 1024,
+        mem_mb=64 * 1024,
     benchmark:
         "results/{sm}/benchmarks/coverage/{sm}.txt"
     params:
-        coverage_within_n_sd=coverage_within_n_sd,
-        min_coverage=min_coverage,
+        coverage_within_n_sd=COVERAGE_WITHIN_N_SD,
+        min_coverage=MIN_COVERAGE,
         chroms=get_chroms(),
     script:
         "../scripts/cov.py"
@@ -53,17 +55,18 @@ rule coverage:
 #
 rule fiber_locations_chromosome:
     input:
-        bam=rules.merged_fire_bam.output.bam,
+        cram=rules.merged_fire_bam.output.cram,
+        crai=rules.merged_fire_bam.output.crai,
     output:
         bed=temp("temp/{sm}/coverage/{chrom}.fiber-locations.bed.gz"),
     threads: 8
     conda:
-        default_env
+        DEFAULT_ENV
     shell:
         """
         # get fiber locations
-        (samtools view -@ {threads} -F 2308 -u {input.bam} {wildcards.chrom} \
-            | ft extract -t {threads} -s --all - \
+        (samtools view -@ {threads} -F 2308 -u {input.cram} {wildcards.chrom} \
+            | {FT_EXE} extract -t {threads} -s --all - \
             | hck -F '#ct' -F st -F en -F fiber -F strand -F HP ) \
             | (grep -v "^#" || true) \
             | bgzip -@ {threads} \
@@ -88,7 +91,7 @@ rule fiber_locations:
         filtered_tbi="results/{sm}/coverage/filtered-for-coverage/fiber-locations.bed.gz.tbi",
     threads: 4
     conda:
-        default_env
+        DEFAULT_ENV
     shell:
         """
         cat {input.fibers} > {output.bed}
@@ -112,14 +115,14 @@ rule fiber_locations:
 rule exclude_from_shuffle:
     input:
         filtered=rules.fiber_locations.output.filtered,
-        fai=ancient(f"{ref}.fai"),
+        fai=ancient(FAI),
     output:
         bed="results/{sm}/coverage/exclude-from-shuffles.bed.gz",
     threads: 4
     conda:
-        default_env
+        DEFAULT_ENV
     params:
-        exclude=excludes,
+        exclude=EXCLUDES,
     shell:
         """
 
@@ -140,28 +143,35 @@ rule unreliable_coverage_regions:
         bg=rules.genome_bedgraph.output.bg,
         minimum=rules.coverage.output.minimum,
         maximum=rules.coverage.output.maximum,
-        fai=ancient(f"{ref}.fai"),
+        fai=ancient(FAI),
     output:
         bed="results/{sm}/coverage/unreliable-coverage-regions.bed.gz",
         bed_tbi="results/{sm}/coverage/unreliable-coverage-regions.bed.gz.tbi",
         bb="results/{sm}/trackHub/bb/unreliable-coverage-regions.bb",
     threads: 4
+    params:
+        min_len=MIN_UNRELIABLE_COVERAGE_LEN,
+        bed3_as=workflow.source_path("../templates/bed3.as"),
     conda:
-        default_env
+        DEFAULT_ENV
     shell:
         """
-        FILE={output.bed}
-        TMP="${{FILE%.*}}"
-
         MIN=$(cat {input.minimum})
         MAX=$(cat {input.maximum})
         zcat {input.bg} \
             | awk '$4>0' \
             | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX' \
             | bedtools merge -i - \
-        > $TMP
-        bedToBigBed $TMP {input.fai} {output.bb}
-        # compress 
-        bgzip -f -@ {threads} $TMP
+            | awk '$3-$2 >= {params.min_len}' \
+            | bgzip -@ {threads} \
+        > {output.bed}
+
+        # bigbed
+        bgzip -cd {output.bed} -@ {threads} \
+            | bigtools bedtobigbed \
+                -s start -a {params.bed3_as} \
+                - {input.fai} {output.bb}
+
+        # index 
         tabix -f -p bed {output.bed}
         """

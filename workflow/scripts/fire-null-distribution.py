@@ -87,7 +87,7 @@ def fire_scores_per_chrom(
     min_allowed_q=0.01,
     min_coverage=4,
 ):
-    fire_scores = np.zeros(chrom_length, dtype=np.float64)
+    fire_scores = np.zeros(int(chrom_length), dtype=np.float64)
 
     multi = -50.0  # a multi of -50 and a min_allowed_q of 0.01 gives a max score of 100
     max_add = multi * np.log10(min_allowed_q)
@@ -160,7 +160,7 @@ def get_coverage_from_array(starts, ends, coverage_array, stat="median"):
 
 @njit
 def make_coverage_array(starts, ends, chrom_length):
-    coverage_array = np.zeros(chrom_length, dtype=np.float64)
+    coverage_array = np.zeros(int(chrom_length), dtype=np.float64)
     for start, end in zip(starts, ends):
         coverage_array[start:end] += 1
     return coverage_array

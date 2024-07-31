@@ -4,14 +4,14 @@
 rule clustering_vs_null:
     input:
         bed=rules.fire_sites.output.bed,
-        fai=ancient(f"{ref}.fai"),
+        fai=ancient(FAI),
     output:
         tmp=temp("temp/{sm}/tmp.pre.calls.bed"),
         null=temp("temp/{sm}/null.calls.bed"),
         bed="results/{sm}/clustering-vs-null.bed.gz",
     threads: 8
     conda:
-        default_env
+        DEFAULT_ENV
     shell:
         """
         bgzip -cd -@{threads} {input.bed} | cut -f 1-3 > {output.tmp}
@@ -25,20 +25,28 @@ rule clustering_vs_null:
         """
 
 
-rule percent_in_clusters:
+rule fires_in_peaks:
     input:
-        bed=rules.clustering_vs_null.output.bed,
-        fire=rules.fdr_track_filtered.output.bed,
+        fire=rules.fire_sites.output.bed,
+        exclude=rules.unreliable_coverage_regions.output.bed,
+        peaks=rules.fdr_peaks_by_fire_elements.output.bed,
     output:
-        txt="results/{sm}/percent-in-clusters.txt",
+        tmp=temp("temp/{sm}/tmp.FIREs-in-peaks.bed"),
+        txt="results/{sm}/tables/FIREs-in-peaks.txt",
     threads: 8
     conda:
-        default_env
+        DEFAULT_ENV
     params:
         script=workflow.source_path("../scripts/percent-in-clusters.sh"),
     shell:
         """
-        bash {params.script} {input.bed} {input.fire} {output.txt}
+        bedtools intersect -sorted -a {input.fire} -b {input.exclude} -v > {output.tmp}
+
+        echo "Total # of FIREs within normal coverage regions" >> {output.txt}
+        wc -l {output.tmp} >> {output.txt}
+
+        echo "# of FIREs within peaks" >> {output.txt}
+        bedtools intersect -sorted -u -a {input.fire} -b {input.peaks} | wc -l >> {output.txt} 
         """
 
 
