@@ -105,11 +105,11 @@ rule all:
             el_type=el_types,
         ),
         # FDR results
-        expand(rules.fdr_track.output, sm=MANIFEST.index),
-        expand(rules.fdr_peaks_by_fire_elements.output, sm=MANIFEST.index),
-        expand(rules.wide_fdr_peaks.output, sm=MANIFEST.index),
-        expand(rules.peaks_vs_percent.output, sm=MANIFEST.index),
-        expand(rules.one_percent_fdr_peaks.output, sm=MANIFEST.index),
+        expand(rules.fdr_track.output.bed, sm=MANIFEST.index),
+        expand(rules.fdr_peaks_by_fire_elements.output.bed, sm=MANIFEST.index),
+        expand(rules.wide_fdr_peaks.output.bed, sm=MANIFEST.index),
+        expand(rules.one_percent_fdr_peaks.output.bed, sm=MANIFEST.index),
+        expand(rules.peaks_vs_percent.output.fig1, sm=MANIFEST.index),
         expand(rules.fires_in_peaks.output.txt, sm=MANIFEST.index),
         # trackhub
         expand(rules.fdr_track_to_bw.output.bw, sm=MANIFEST.index, col=bw_types),
@@ -121,4 +121,4 @@ rule all:
             hp=not_unk,
             el_type=el_types,
         ),
-        expand(rules.trackhub.output, sm=MANIFEST.index),
+        expand(rules.trackhub.output.hub, sm=MANIFEST.index),
