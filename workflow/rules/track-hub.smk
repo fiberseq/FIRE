@@ -125,13 +125,7 @@ rule hap_differences_track:
 
 rule trackhub:
     input:
-        fai=ancient(FAI),
-        fire=rules.fdr_peaks_by_fire_elements_to_bb.output.bb,
         cov=rules.coverage.output.cov,
-        hap_diffs=rules.hap_differences_track.output.bb,
-        wide=rules.wide_fdr_peaks.output.bb,
-        decorators_1=rules.decorate_fibers_1.output.bb,
-        decorators_2=rules.decorate_fibers_2.output.bb,
     output:
         hub="results/{sm}/trackHub/hub.txt",
     resources:
