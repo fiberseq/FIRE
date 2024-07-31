@@ -119,6 +119,9 @@ rule all:
         expand(rules.fdr_track_to_bw.output.bw, sm=MANIFEST.index, col=bw_types),
         expand(rules.fdr_peaks_by_fire_elements_to_bb.output.bb, sm=MANIFEST.index),
         expand(rules.percent_accessible.output.bw, hp=not_unk, sm=MANIFEST.index),
+        expand(rules.decorate_fibers_1.output.bb, sm=MANIFEST.index),
+        expand(rules.decorate_fibers_2.output.bb, sm=MANIFEST.index),
+        expand(rules.hap_differences_track.output.bb, sm=MANIFEST.index),
         expand(
             rules.element_coverages_bw.output.bw,
             sm=MANIFEST.index,
