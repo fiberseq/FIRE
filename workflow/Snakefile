@@ -58,7 +58,11 @@ FT_EXE = config.get("ft_exe", "ft")
 ONT = config.get("ont", False)
 USE_ONT = ""
 if ONT:
-    USE_ONT = " --ont --ml 225 "
+    ont_ml = config.get("ont_ml", None)
+    if ont_ml is not None:
+        USE_ONT = f" --ont --ml {ont_ml} "
+    else:
+        USE_ONT = " --ont "
 MIN_UNRELIABLE_COVERAGE_LEN = config.get("min_unreliable_coverage_len", 50)
 
 
