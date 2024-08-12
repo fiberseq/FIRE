@@ -63,6 +63,9 @@ maxItems 100000
 visibility full
 maxHeightPixels 100:50:8
 priority 1
+yLineOnOff on
+yLineMark 100
+gridDefault on
 """
 
 PER_ACC_TEMPLATE = """
