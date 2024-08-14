@@ -25,8 +25,12 @@ rule percent_accessible:
 
         # add fake if file is empty
         if [[ -s {output.tmp} ]]; then
+            echo "File is not empty"
+        else
+            echo "File is empty"
             printf "{params.chrom}\t0\t1\t0\\n" > {output.tmp}
         fi
+
 
         bigtools bedgraphtobigwig \
             --nzooms 10 -s start \
