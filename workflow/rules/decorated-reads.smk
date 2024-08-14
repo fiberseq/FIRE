@@ -46,6 +46,7 @@ rule decorate_fibers_1:
 
         bgzip -cd -@ {threads} {output.bed} \
             | bigtools bedtobigbed \
+                --nzooms 9 \
                 -s start -a {params.bed_as} \
                 - {input.fai} {output.bb}
         """
@@ -76,6 +77,7 @@ rule decorate_fibers_2:
             | bgzip -cd -@ {threads} \
             | rg -v '^#' \
             | bigtools bedtobigbed \
+                --nzooms 9 \
                 -a {params.dec_as} -s start \
                 - {input.fai} {output.bb}
         """
