@@ -46,7 +46,7 @@ rule decorate_fibers_1:
     params:
         bed_as=workflow.source_path("../templates/bed12_filter.as"),
         nzooms=NZOOMS,
-        items=ITEMS_PER_SLOT,
+        items_per_slot=ITEMS_PER_SLOT,
         block_size=BLOCK_SIZE,
     shell:
         """
@@ -54,7 +54,8 @@ rule decorate_fibers_1:
 
         bgzip -cd -@ {threads} {output.bed} \
             | bigtools bedtobigbed \
-                --inmemory --block-size {params.block_size} --items-per-slot {params.items} \
+                --inmemory \
+                --block-size {params.block_size} --items-per-slot {params.items_per_slot} \
                 --nzooms {params.nzooms} \
                 -s start -a {params.bed_as} \
                 - {input.fai} {output.bb}
@@ -81,7 +82,7 @@ rule decorate_fibers_2:
     params:
         dec_as=workflow.source_path("../templates/decoration.as"),
         nzooms=NZOOMS,
-        items=ITEMS_PER_SLOT,
+        items_per_slot=ITEMS_PER_SLOT,
         block_size=BLOCK_SIZE,
     shell:
         """
@@ -89,7 +90,8 @@ rule decorate_fibers_2:
             | bgzip -cd -@ {threads} \
             | rg -v '^#' \
             | bigtools bedtobigbed \
-                --inmemory --block-size {params.block_size} --items-per-slot {params.items} \
+                --inmemory \
+                --block-size {params.block_size} --items-per-slot {params.items_per_slot} \
                 --nzooms {params.nzooms} \
                 -a {params.dec_as} -s start \
                 - {input.fai} {output.bb}
