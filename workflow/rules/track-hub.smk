@@ -36,13 +36,6 @@ rule percent_accessible:
         tabix -p bed {output.bed}
         """
 
-    params:
-        bed9_as=workflow.source_path("../templates/bed9.as"),
-    shell:
-        """
-        ( \
-            bedtools sort -i {input.bed9} \
-
 rule element_coverages_bw:
     input:
         bed=rules.element_coverages.output.bed,
