@@ -14,6 +14,7 @@ rule percent_accessible:
         mem_mb=get_mem_mb,
     params:
         cols=hap_hck_columns,
+        chrom=get_chroms()[0],
     shell:
         """
         zcat {input.bed} \
@@ -22,19 +23,25 @@ rule percent_accessible:
             | awk -v OFS='\t' '$5 > 0 {{print $1,$2,$3,$4*100/$5}}' \
         > {output.tmp}
 
-        # skip if the file is empty
+        # add fake if file is empty
         if [[ -s {output.tmp} ]]; then
-            bigtools bedgraphtobigwig \
-                --nzooms 10 -s start \
-                {output.tmp} {input.fai} {output.bw}
-        else
-            touch {output.bw}
+            printf "{params.chrom}\t0\t1\t0\\n" > {output.tmp}
         fi
-        
+
+        bigtools bedgraphtobigwig \
+            --nzooms 10 -s start \
+            {output.tmp} {input.fai} {output.bw}
+
         bgzip -@{threads} -c {output.tmp} > {output.bed}
         tabix -p bed {output.bed}
         """
 
+    params:
+        bed9_as=workflow.source_path("../templates/bed9.as"),
+    shell:
+        """
+        ( \
+            bedtools sort -i {input.bed9} \
 
 rule element_coverages_bw:
     input:
