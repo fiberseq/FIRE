@@ -103,7 +103,7 @@ rule hap_differences_track:
         fai=ancient(FAI),
     output:
         bb="results/{sm}/trackHub/bb/hap_differences.bb",
-    threads: 1
+    threads: 4
     resources:
         mem_mb=get_mem_mb,
     conda:
