@@ -1,7 +1,8 @@
 # Number of items to bundle in r-tree [default: 256]
 BLOCK_SIZE = 256 * 4
-#Number of data points bundled at lowest level [default: 1024]
+# Number of data points bundled at lowest level [default: 1024]
 ITEMS_PER_SLOT = 1024 * 4
+
 
 rule decorate_fibers_chromosome:
     input:

@@ -41,6 +41,7 @@ rule percent_accessible:
         tabix -p bed {output.bed}
         """
 
+
 rule element_coverages_bw:
     input:
         bed=rules.element_coverages.output.bed,
