@@ -40,13 +40,14 @@ rule decorate_fibers_1:
         DEFAULT_ENV
     params:
         bed_as=workflow.source_path("../templates/bed12_filter.as"),
+        nzooms=NZOOMS,
     shell:
         """
         cat {input.bed} > {output.bed}
 
         bgzip -cd -@ {threads} {output.bed} \
             | bigtools bedtobigbed \
-                --nzooms 9 \
+                --nzooms {params.nzooms} \
                 -s start -a {params.bed_as} \
                 - {input.fai} {output.bb}
         """
@@ -71,13 +72,14 @@ rule decorate_fibers_2:
         DEFAULT_ENV
     params:
         dec_as=workflow.source_path("../templates/decoration.as"),
+        nzooms=NZOOMS,
     shell:
         """
         cat {input.decorated} \
             | bgzip -cd -@ {threads} \
             | rg -v '^#' \
             | bigtools bedtobigbed \
-                --nzooms 9 \
+                --nzooms {params.nzooms} \
                 -a {params.dec_as} -s start \
                 - {input.fai} {output.bb}
         """

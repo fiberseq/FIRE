@@ -14,6 +14,7 @@ rule percent_accessible:
         mem_mb=get_mem_mb,
     params:
         cols=hap_hck_columns,
+        nzooms=NZOOMS,
         chrom=get_chroms()[0],
     shell:
         """
@@ -33,7 +34,7 @@ rule percent_accessible:
 
 
         bigtools bedgraphtobigwig \
-            --nzooms 10 -s start \
+            --nzooms {params.nzooms} -s start \
             {output.tmp} {input.fai} {output.bw}
 
         bgzip -@{threads} -c {output.tmp} > {output.bed}
@@ -48,13 +49,15 @@ rule element_coverages_bw:
         bw="results/{sm}/trackHub/bw/{hp}.{el_type}.coverage.bw",
     conda:
         DEFAULT_ENV
+    params:
+        nzooms=NZOOMS,
     shell:
         """
         zcat {input.bed} \
             | hck -f 1-3 -F {wildcards.el_type} \
             | grep -v "^#" \
             | bigtools bedgraphtobigwig \
-                -s start --nzooms 10 \
+                -s start --nzooms {params.nzooms} \
                 - {input.fai} {output.bw}
         """
 
@@ -68,12 +71,14 @@ rule fdr_track_to_bw:
     threads: 4
     conda:
         DEFAULT_ENV
+    params:
+        nzooms=NZOOMS,
     shell:
         """
         hck -z -f 1-3 -F {wildcards.col} {input.bed} \
             | grep -v "^#" \
             | bigtools bedgraphtobigwig \
-                -s start --nzooms 10 \
+                -s start --nzooms {params.nzooms} \
                 - {input.fai} {output.bw}
         """
 

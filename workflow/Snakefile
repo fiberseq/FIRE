@@ -44,6 +44,9 @@ else:
     MAX_PEAK_FDR = 1.0
 MIN_FRAC_ACCESSIBLE = config.get("min_frac_accessible", 0)
 
+# Misc options
+NZOOMS = config.get("nzooms", 20)
+
 # Misc sets of wildcards
 haps = ["all", "hap1", "hap2", "unk"]
 not_unk = ["all", "hap1", "hap2"]
