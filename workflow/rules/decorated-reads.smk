@@ -1,3 +1,8 @@
+# Number of items to bundle in r-tree [default: 256]
+BLOCK_SIZE = 256 * 4
+#Number of data points bundled at lowest level [default: 1024]
+ITEMS_PER_SLOT = 1024 * 4
+
 rule decorate_fibers_chromosome:
     input:
         cram=rules.merged_fire_bam.output.cram,
@@ -41,12 +46,15 @@ rule decorate_fibers_1:
     params:
         bed_as=workflow.source_path("../templates/bed12_filter.as"),
         nzooms=NZOOMS,
+        items=ITEMS_PER_SLOT,
+        block_size=BLOCK_SIZE,
     shell:
         """
         cat {input.bed} > {output.bed}
 
         bgzip -cd -@ {threads} {output.bed} \
             | bigtools bedtobigbed \
+                --inmemory --block-size {params.block_size} --items-per-slot {params.items} \
                 --nzooms {params.nzooms} \
                 -s start -a {params.bed_as} \
                 - {input.fai} {output.bb}
@@ -73,12 +81,15 @@ rule decorate_fibers_2:
     params:
         dec_as=workflow.source_path("../templates/decoration.as"),
         nzooms=NZOOMS,
+        items=ITEMS_PER_SLOT,
+        block_size=BLOCK_SIZE,
     shell:
         """
         cat {input.decorated} \
             | bgzip -cd -@ {threads} \
             | rg -v '^#' \
             | bigtools bedtobigbed \
+                --inmemory --block-size {params.block_size} --items-per-slot {params.items} \
                 --nzooms {params.nzooms} \
                 -a {params.dec_as} -s start \
                 - {input.fai} {output.bb}

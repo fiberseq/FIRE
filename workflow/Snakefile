@@ -45,7 +45,7 @@ else:
 MIN_FRAC_ACCESSIBLE = config.get("min_frac_accessible", 0)
 
 # Misc options
-NZOOMS = config.get("nzooms", 15)
+NZOOMS = config.get("nzooms", 12)
 
 # Misc sets of wildcards
 haps = ["all", "hap1", "hap2", "unk"]
