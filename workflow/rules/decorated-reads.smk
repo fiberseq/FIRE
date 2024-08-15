@@ -53,6 +53,12 @@ rule decorate_fibers_1:
         """
         cat {input.bed} > {output.bed}
 
+        bedToBigBed \
+            -allow1bpOverlap -type=bed12+ -as={params.bed_as} \
+            {output.bed} {input.fai} {output.bb}
+        """
+        # bigtools version
+        """
         bgzip -cd -@ {threads} {output.bed} \
             | bigtools bedtobigbed \
                 --inmemory \
@@ -73,6 +79,7 @@ rule decorate_fibers_2:
         fai=ancient(FAI),
     output:
         bb="results/{sm}/trackHub/bb/fire-fiber-decorators.bb",
+        bed=temp("results/{sm}/trackHub/bb/fire-fiber-decorators.bed.gz"),
     benchmark:
         "results/{sm}/benchmarks/decorate_fibers_2/{sm}.txt"
     threads: 8
@@ -86,6 +93,13 @@ rule decorate_fibers_2:
         items_per_slot=ITEMS_PER_SLOT,
         block_size=BLOCK_SIZE,
     shell:
+        """
+        cat {input.decorated} > {output.bed}
+        bedToBigBed \
+            -allow1bpOverlap -type=bed12+ -as={params.dec_as} \
+            {output.bed} {input.fai} {output.bb}
+        """
+        # bigtools version
         """
         cat {input.decorated} \
             | bgzip -cd -@ {threads} \
