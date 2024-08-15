@@ -57,16 +57,16 @@ rule decorate_fibers_1:
             -allow1bpOverlap -type=bed12+ -as={params.bed_as} \
             {output.bed} {input.fai} {output.bb}
         """
-        # bigtools version
-        """
-        bgzip -cd -@ {threads} {output.bed} \
-            | bigtools bedtobigbed \
-                --inmemory \
-                --block-size {params.block_size} --items-per-slot {params.items_per_slot} \
-                --nzooms {params.nzooms} \
-                -s start -a {params.bed_as} \
-                - {input.fai} {output.bb}
-        """
+# bigtools version
+"""
+bgzip -cd -@ {threads} {output.bed} \
+    | bigtools bedtobigbed \
+        --inmemory \
+        --block-size {params.block_size} --items-per-slot {params.items_per_slot} \
+        --nzooms {params.nzooms} \
+        -s start -a {params.bed_as} \
+        - {input.fai} {output.bb}
+"""
 
 
 rule decorate_fibers_2:
@@ -99,15 +99,15 @@ rule decorate_fibers_2:
             -allow1bpOverlap -type=bed12+ -as={params.dec_as} \
             {output.bed} {input.fai} {output.bb}
         """
-        # bigtools version
-        """
-        cat {input.decorated} \
-            | bgzip -cd -@ {threads} \
-            | rg -v '^#' \
-            | bigtools bedtobigbed \
-                --inmemory \
-                --block-size {params.block_size} --items-per-slot {params.items_per_slot} \
-                --nzooms {params.nzooms} \
-                -a {params.dec_as} -s start \
-                - {input.fai} {output.bb}
-        """
+# bigtools version
+"""
+cat {input.decorated} \
+    | bgzip -cd -@ {threads} \
+    | rg -v '^#' \
+    | bigtools bedtobigbed \
+        --inmemory \
+        --block-size {params.block_size} --items-per-slot {params.items_per_slot} \
+        --nzooms {params.nzooms} \
+        -a {params.dec_as} -s start \
+        - {input.fai} {output.bb}
+"""
