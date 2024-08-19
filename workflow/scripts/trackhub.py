@@ -71,7 +71,7 @@ type bigWig 0 1000
 autoScale off
 alwaysZero on
 viewLimits 0:{upper_coverage}
-visibility full
+visibility {viz}
 maxHeightPixels 100:50:8
 html fire-description.html
 priority 90
@@ -233,6 +233,10 @@ def generate_trackhub(
     trackDb.write(TRACK_GROUPS.format(sample=sample))
 
     for hap in ["all", "hap1", "hap2", "unk"]:
+        if hap == "all":
+            viz = "full"
+        else:
+            viz = "hide"   
         # add coverage tracks
         if hap != "unk":
             acc = f"bw/{hap}.fire.coverage.bw"
@@ -245,6 +249,7 @@ def generate_trackhub(
                     nuc=nuc,
                     sample=sample,
                     hap=hap,
+                    viz=viz,
                     upper_coverage=upper_coverage,
                 )
             )
