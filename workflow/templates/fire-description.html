@@ -4,26 +4,21 @@
 <p>
   These tracks represent
   <a href="https://github.com/fiberseq/FIRE" target="_blank">FIRE</a> peak calls
-  inferred from regulatory elements in Fiber-seq data.
+  inferred from regulatory elements in Fiber-seq data. If you are unframiliar
+  with Fiber-seq please see the references below for a detailed description, but
+  in short it is useful to think of it as a long-read version of DNaseI/ATAC-seq
+  that can be used to identify regions of chromatin accessibility.
 </p>
 
 <p>
-  FIREs are MTase sensitive patches (MSPs) that are inferred to be regulatory
-  elements on single chromatin fibers. To do this we used semi-supervised
-  machine learning to identify MSPs that are likely to be regulatory elements
-  using the <code>Mokapot</code> framework and <code>XGBoost</code>. Every
-  individual FIRE element is associated with a precision value, which indicates
-  the probability that the FIRE element is a true regulatory element. The
-  precision of FIREs elements are estimated using <code>Mokapot</code> and
-  validation data not used in training. We train our model targeting FIRE
-  elements with at least 90% precision, MSPs with less than 90% precision are
-  considered to have average level of accessibility expected between two
-  nucleosomes, and are referred to as linker regions. Semi-superivized machine
-  learning with <code>Mokapot</code> requires a mixed-positive training set and
-  a clean negative training set. To create mixed positive training data we
-  selected MSPs that overlapped DNase hypersensitive sites (DHSs) and CTCF
-  ChIP-seq peaks. And to create a clean negative training set we selected MSPs
-  that did not overlap DHSs or CTCF ChIP-seq peaks.
+  FIREs are MTase sensitive patches (MSPs) on Fiber-seq reads that are inferred
+  to be regulatory elements on single chromatin fibers. To do this we used
+  semi-supervised machine learning to identify MSPs that are likely to be
+  regulatory elements using the <code>Mokapot</code> framework and
+  <code>XGBoost</code>. Every individual FIRE element is associated with a
+  precision value, which indicates the probability that the FIRE element is a
+  true regulatory element. Significantly more detail is avalible in our
+  manuscript and fiberseq website both of which are linked below.
 </p>
 
 <h2>Track Descriptions</h2>
@@ -50,6 +45,13 @@
     in the un-shuffled data. Displayed in the track is the -10log10
     transformation of this FDR value so the more significant FIRE scores appear
     as higher values.
+  </li>
+
+  <li>
+    <u>Unreliable FIRE coverage regions</u>: The unreliable FIRE coverage track
+    shows regions that were exlcuded from the FDR calculations due to low or
+    high sequencing depth. Defined as deviating from the median sequencing depth
+    by 5 or more standard deviations.
   </li>
 
   <li>
