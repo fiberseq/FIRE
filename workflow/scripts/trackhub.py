@@ -13,6 +13,7 @@ shortLabel {sample}-FIRE-fiberseq
 longLabel {sample}-FIRE-fiberseq
 genomesFile genomes.txt
 email mvollger.edu
+descriptionUrl fire-description.html
 """
 
 GENOMES = """
