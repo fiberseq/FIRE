@@ -115,7 +115,7 @@ html fire-description.html
     shortLabel {sample} -10log10 FDR
     longLabel {sample} -10log10 FDR
     autoScale on
-    visibility full
+    visibility hide
     yLineOnOff on
     yLineMark {y_line}
     gridDefault on
