@@ -11,7 +11,7 @@ def get_ref():
     ref = config["ref"]
     if not os.path.exists(ref):
         raise ValueError(f"FIRE: reference file {ref} does not exist")
-    return ref
+    return os.path.abspath(ref)
 
 
 def get_fai():
