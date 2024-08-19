@@ -25,24 +25,52 @@
   ChIP-seq peaks. And to create a clean negative training set we selected MSPs
   that did not overlap DHSs or CTCF ChIP-seq peaks.
 </p>
+
+<h2>Track Descriptions</h2>
 <p>
   <li>
     <u>FIRE peaks</u>: Peaks are called by identifying FIRE score local-maxima
     that have FDR values below a threshold. By default the pipeline reports
     results for both 1% and 5% FDR thresholds. Once a local-maxima is
     identified, the start and end positions of the peak are determined by the
-    median start and end positions of the underlying FIRE elements. We also
-    calculate and report wide peaks by taking the union of the FIRE peaks and
-    all regions below the FDR threshold and then merging resulting regions that
-    are within one nucleosome (147 bp) of one another.
+    median start and end positions of the underlying FIRE elements.
   </li>
 
   <li>
-    <u>FIRE peak FDR</u>: FDR calculation begins by shuffling the locations of
-    all the fibers across the genome and recalculating the FIRE score for each
+    <u> Wide FIRE peaks</u>: Wide peaks are the union of the FIRE peaks and all
+    regions below the FDR threshold. We then merge resulting regions that are
+    within one nucleosome (147 bp) of one another.
+  </li>
+
+  <li>
+    <u>FIRE FDR</u>: FDR calculation begins by shuffling the locations of all
+    the fibers across the genome and recalculating the FIRE score for each
     position in the genome. The FDR is then defined as the number of bases that
     have shuffled FIRE scores above a threshold divided by the number of bases
-    in the un-shuffled data.
+    in the un-shuffled data. Displayed in the track is the -10log10
+    transformation of this FDR value so the more significant FIRE scores appear
+    as higher values.
+  </li>
+
+  <li>
+    <u> FIRE coverage</u>: The FIRE coverage track shows the number of fibers
+    that are MSPs (purple), FIREs (red), and nucleosomes (gray) at each position
+    in the genome. The coverage track is calculated by counting the number of
+    fibers that have a MSP, FIRE, or nucleosome at each position in the genome.
+  </li>
+
+  <li>
+    <u>Percent accessible</u>: The percent of fibers that contain a FIRE element
+    overlaping a given position in the genome. The percent accessible for
+    haplotype one is displayed as a red line, haplotype 2 as a blue line, and
+    both haplotypes as a black line.
+  </li>
+
+  <li>
+    <u> FIRE fibers </u>: A decorator track that shows individual Fiber-seq
+    reads (fibers) along the genome. Each fiber is colored by the MSPs (purple),
+    FIREs (red), and nucleosomes (gray) that it contains. Optionally, you can
+    also display the raw 5mC or m6A information using the track configuration.
   </li>
 </p>
 
