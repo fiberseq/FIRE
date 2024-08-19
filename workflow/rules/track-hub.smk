@@ -138,6 +138,7 @@ rule trackhub:
         cov=rules.coverage.output.cov,
     output:
         hub="results/{sm}/trackHub/hub.txt",
+        description="results/{sm}/trackHub/fire-description.html",
     resources:
         load=get_load,
     threads: 4
@@ -146,6 +147,7 @@ rule trackhub:
     params:
         ref=REF_NAME,
         script=workflow.source_path("../scripts/trackhub.py"),
+        description=workflow.source_path("../templates/fire-description.html"),
     shell:
         """
         python {params.script} -v 2 \
@@ -153,4 +155,5 @@ rule trackhub:
           --reference {params.ref} \
           --sample {wildcards.sm} \
           --average-coverage $(cat {input.cov}) 
+        cp {params.description} {output.description}
         """
