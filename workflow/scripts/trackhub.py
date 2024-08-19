@@ -224,6 +224,8 @@ def generate_trackhub(
 ):
     if ref == "T2Tv2.0":
         ref = "GCA_009914755.4"
+    elif ref == "HG002v1.1":
+        ref = "HG002v1.1.PAT"
 
     upper_coverage = int(ave_coverage + 5 * np.sqrt(ave_coverage))
     os.makedirs(f"{trackhub_dir}/", exist_ok=True)
