@@ -42,6 +42,7 @@ maxHeightPixels 100:50:8
 priority 1
 yLineOnOff on
 yLineMark 100
+html fire-description.html
 gridDefault on
 """
 
@@ -72,6 +73,7 @@ alwaysZero on
 viewLimits 0:{upper_coverage}
 visibility full
 maxHeightPixels 100:50:8
+html fire-description.html
 priority 90
     
     track {sample}-{hap}-FIRE-accessible
@@ -105,6 +107,7 @@ maxItems 100000
 maxHeightPixels 100:50:1
 alwaysZero on
 priority 10
+html fire-description.html
 
     track {sample}-log-FIRE-FDR
     parent {sample}-FIRE-FDR
@@ -128,6 +131,7 @@ type bigBed 12 +
 maxItems 100000
 visibility dense
 priority 80
+html fire-description.html
 
 # grouping for peaks
 track {sample}-FIRE-peaks
@@ -138,6 +142,7 @@ type bigBed 12 +
 maxItems 100000
 visibility dense
 priority 30
+html fire-description.html
 
     # track of unreliable regions just above the peak tracks
     track {sample}-unreliable-FIRE-coverage-regions
@@ -155,6 +160,7 @@ superTrack on show
 shortLabel {sample}-FIRE-coverage
 longLabel {sample}-FIRE-coverage
 priority 90
+html fire-description.html
 """
 
 DECORATED = """
