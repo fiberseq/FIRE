@@ -93,6 +93,10 @@ rule fdr_track_chromosome:
             echo "No FIRE sites for {wildcards.chrom}"
             touch {output}
             exit 0
+        elif [ ! -s {output.fiber} ]; then
+            echo "No unfiltered fibers for {wildcards.chrom}"
+            touch {output}
+            exit 0
         fi
 
         python {params.script} -v 1 \
