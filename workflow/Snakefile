@@ -72,7 +72,7 @@ MIN_UNRELIABLE_COVERAGE_LEN = config.get("min_unreliable_coverage_len", 50)
 include: "rules/apply-model.smk"
 include: "rules/coverages.smk"
 include: "rules/FDR-peaks.smk"
-include: "rules/peak-stats.smk"
+include: "rules/stats.smk"
 include: "rules/decorated-reads.smk"
 include: "rules/track-hub.smk"
 
@@ -111,13 +111,15 @@ rule all:
             hp=not_unk,
             el_type=el_types,
         ),
+        # Stats and Tables
+        expand(rules.fires_in_peaks.output.txt, sm=MANIFEST.index),
+        expand(rules.ft_qc.output.tbl, sm=MANIFEST.index),
         # FDR results
         expand(rules.fdr_track.output.bed, sm=MANIFEST.index),
         expand(rules.fdr_peaks_by_fire_elements.output.bed, sm=MANIFEST.index),
         expand(rules.wide_fdr_peaks.output.bed, sm=MANIFEST.index),
         expand(rules.one_percent_fdr_peaks.output.bed, sm=MANIFEST.index),
         expand(rules.peaks_vs_percent.output.fig1, sm=MANIFEST.index),
-        expand(rules.fires_in_peaks.output.txt, sm=MANIFEST.index),
         # trackhub
         expand(rules.fdr_track_to_bw.output.bw, sm=MANIFEST.index, col=bw_types),
         expand(rules.fdr_peaks_by_fire_elements_to_bb.output.bb, sm=MANIFEST.index),

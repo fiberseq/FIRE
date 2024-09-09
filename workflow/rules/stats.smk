@@ -50,6 +50,20 @@ rule fires_in_peaks:
         """
 
 
+rule ft_qc:
+    input:
+        cram=rules.merged_fire_bam.output.cram,
+    output:
+        tbl="results/{sm}/fire/{sm}.fire.qc.tbl.gz",
+    conda:
+        DEFAULT_ENV
+    threads: 16
+    shell:
+        """
+        {FT_EXE} qc --acf -t {threads} {input.cram} {output.tbl}
+        """
+
+
 rule hap_differences:
     input:
         bed=rules.fdr_peaks_by_fire_elements.output.bed,
