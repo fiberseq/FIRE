@@ -9,4 +9,4 @@ printshellcmds: True
 show-failed-logs: True
 cores: 32
 local-cores: 4
-quiet: all # all rules or progress
+quiet: rules # all rules or progress, cannot use all because it hides the unlock error message (and others?)
