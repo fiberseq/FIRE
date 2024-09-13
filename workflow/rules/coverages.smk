@@ -20,7 +20,7 @@ rule genome_bedgraph:
     shell:
         """ 
         mosdepth -f {input.ref} -t {threads} tmp {input.cram}
-        zcat tmp.per-base.bed.gz \
+        bgzip -cd tmp.per-base.bed.gz \
             | LC_ALL=C sort --parallel={threads} -k1,1 -k2,2n -k3,3n -k4,4  \
             | bgzip -@ {threads} \
         > {output.bg}
@@ -102,7 +102,7 @@ rule fiber_locations:
         MAX=$(cat {input.maximum})
         bedtools intersect -header -sorted -v -f 0.2 \
             -a {output.bed} \
-            -b <(zcat {input.bg} | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX') \
+            -b <(bgzip -cd {input.bg} | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX') \
         | bgzip -@ {threads} \
         > {output.filtered}
         tabix -f -p bed {output.filtered}
@@ -158,7 +158,7 @@ rule unreliable_coverage_regions:
         """
         MIN=$(cat {input.minimum})
         MAX=$(cat {input.maximum})
-        zcat {input.bg} \
+        bgzip -cd {input.bg} \
             | awk '$4>0' \
             | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX' \
             | bedtools merge -i - \

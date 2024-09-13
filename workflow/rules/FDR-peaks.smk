@@ -156,10 +156,9 @@ rule fdr_track_filtered:
         """
         MIN=$(cat {input.minimum})
         MAX=$(cat {input.maximum})
-
         ( \
-            zcat {input.bed} | head -n 1 || true; \
-            zcat {input.bed} | bioawk -tc hdr -v MAX=$MAX -v MIN=$MIN  '$coverage > MIN && $coverage < MAX' \
+            bgzip -cd {input.bed} | head -n 1 || true; \
+            bgzip -cd {input.bed} | bioawk -tc hdr -v MAX=$MAX -v MIN=$MIN  '$coverage > MIN && $coverage < MAX' \
         ) \
             | bgzip -@ {threads} \
             > {output.bed}
@@ -183,7 +182,7 @@ rule helper_fdr_peaks_by_fire_elements:
         min_per_acc_peak=MIN_PER_ACC_PEAK,
     shell:
         """
-        HEADER=$(zcat {input.bed} | head -n 1 || true)
+        HEADER=$(bgzip -cd {input.bed} | head -n 1 || true)
         NC=$(echo $HEADER | awk '{{print NF}}' || true)
         FIRE_CT=$((NC+1))
         FIRE_ST=$((NC+2))
@@ -233,7 +232,7 @@ rule fdr_peaks_by_fire_elements_chromosome:
         min_frac_accessible=MIN_FRAC_ACCESSIBLE,
     shell:
         """
-        zcat {input.bed} \
+        bgzip -cd {input.bed} \
             | python {params.script} -v 1 \
                 --max-cov $(cat {input.maximum}) \
                 --min-cov $(cat {input.minimum}) \
@@ -295,7 +294,7 @@ rule wide_fdr_peaks:
     shell:
         """
         ( \
-            zcat {input.bed}; \
+            bgzip -cd {input.bed}; \
             bioawk -tc hdr 'NR==1 || $FDR<={params.max_peak_fdr}' {input.track} \
                 | bioawk -tc hdr 'NR==1 || $coverage>0' \
                 | bioawk -tc hdr 'NR==1 || ($fire_coverage/$coverage>={params.min_frac_acc})' \
@@ -331,14 +330,14 @@ rule one_percent_fdr_peaks:
         nuc_size=config.get("nucleosome_size", 147),
     shell:
         """
-        zcat {input.bed} \
+        bgzip -cd {input.bed} \
             | csvtk filter -tT -C '$' -f "FDR<=0.01" \
             | bgzip -@ {threads} \
             > {output.bed}
         tabix -f -p bed {output.bed}
 
         ( \
-            zcat {output.bed}; \
+            bgzip -cd {output.bed}; \
             bioawk -tc hdr '$FDR<=0.01' {input.track} \
         ) \
             | cut -f 1-3 \

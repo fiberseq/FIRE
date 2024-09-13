@@ -106,10 +106,8 @@ rule all:
         expand(rules.filtered_and_shuffled_fiber_locations.output, sm=MANIFEST.index),
         # coverage of elements
         expand(
-            rules.element_coverages.output,
+            rules.pileup.output.bed,
             sm=MANIFEST.index,
-            hp=not_unk,
-            el_type=el_types,
         ),
         # Stats and Tables
         expand(rules.fires_in_peaks.output.txt, sm=MANIFEST.index),

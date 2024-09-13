@@ -32,7 +32,7 @@ rule fires_in_peaks:
         peaks=rules.fdr_peaks_by_fire_elements.output.bed,
     output:
         tmp=temp("temp/{sm}/tmp.FIREs-in-peaks.bed"),
-        txt="results/{sm}/tables/FIREs-in-peaks.txt",
+        txt="results/{sm}/FDR-peaks/FIREs-in-peaks.txt",
     threads: 8
     conda:
         DEFAULT_ENV

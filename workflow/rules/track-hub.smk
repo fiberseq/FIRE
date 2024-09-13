@@ -5,8 +5,6 @@ rule percent_accessible:
     output:
         tmp=temp("temp/{sm}/{hp}/percent.accessible.bed"),
         bw="results/{sm}/trackHub/bw/{hp}.percent.accessible.bw",
-        bed="results/{sm}/{hp}/percent.accessible.bed.gz",
-        tbi="results/{sm}/{hp}/percent.accessible.bed.gz.tbi",
     threads: 4
     conda:
         DEFAULT_ENV
@@ -18,7 +16,7 @@ rule percent_accessible:
         chrom=get_chroms()[0],
     shell:
         """
-        zcat {input.bed} \
+        bgzip -cd {input.bed} \
             | hck -f 1-3 {params.cols} \
             | grep -v "^#" \
             | awk -v OFS='\t' '$5 > 0 {{print $1,$2,$3,$4*100/$5}}' \
@@ -36,15 +34,12 @@ rule percent_accessible:
         bigtools bedgraphtobigwig \
             --nzooms {params.nzooms} -s start \
             {output.tmp} {input.fai} {output.bw}
-
-        bgzip -@{threads} -c {output.tmp} > {output.bed}
-        tabix -p bed {output.bed}
         """
 
 
 rule element_coverages_bw:
     input:
-        bed=rules.element_coverages.output.bed,
+        bed=rules.pileup.output.bed,
         fai=ancient(FAI),
     output:
         bw="results/{sm}/trackHub/bw/{hp}.{el_type}.coverage.bw",
@@ -52,10 +47,11 @@ rule element_coverages_bw:
         DEFAULT_ENV
     params:
         nzooms=NZOOMS,
+        cut_cmd=pileup_cut_cmd,
     shell:
         """
-        zcat {input.bed} \
-            | hck -f 1-3 -F {wildcards.el_type} \
+        bgzip -cd {input.bed} \
+            | {params.cut_cmd} \
             | grep -v "^#" \
             | bigtools bedgraphtobigwig \
                 -s start --nzooms {params.nzooms} \
@@ -97,7 +93,7 @@ rule fdr_peaks_by_fire_elements_to_bb:
         bedfmt=workflow.source_path("../templates/fire_peak.as"),
     shell:
         """
-        zcat {input.bed} \
+        bgzip -cd {input.bed} \
             | bioawk -tc hdr '{{print $1,$2,$3,"peak-"NR,int($score*10),".",$score,"-1",$log_FDR,int($start/2+$end/2)-$peak_start}}' \
             | bioawk -tc hdr '$5<=1000' \
             | rg -v '^#' \

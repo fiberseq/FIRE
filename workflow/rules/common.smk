@@ -136,3 +136,23 @@ def hap_hck_columns(wc):
         return "-F fire_coverage_H2 -F coverage_H2"
     else:
         raise ValueError(f"Unknown haplotype {wc.hp}")
+
+
+def pileup_cut_cmd(wc):
+    if wc.hp == "all":
+        tail = ""
+    elif wc.hp == "hap1":
+        tail = "_H1"
+    elif wc.hp == "hap2":
+        tail = "_H2"
+    else:
+        raise ValueError(f"Unknown haplotype {wc.hp}")
+    if wc.el_type == "nucleosome":
+        col = f"nuc_coverage{tail}"
+    elif wc.el_type == "linker":
+        col = f"msp_coverage{tail}-fire_coverage{tail}"
+    elif wc.el_type == "fire":
+        col = f"fire_coverage{tail}"
+    else:
+        raise ValueError(f"Unknown element type {wc.el_type}")
+    return f"bioawk -tc hdr '{{print $1,$2,$3,{col}}}'"
