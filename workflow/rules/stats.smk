@@ -77,7 +77,7 @@ rule hap_differences:
             category="Haplotype selectivity",
         ),
         bed="results/{sm}/hap1-vs-hap2/FIRE.hap.differences.bed",
-        bed9="results/{sm}/hap1-vs-hap2/FIRE.hap.differences.bed9",
+        bed9=temp("temp/{sm}/hap1-vs-hap2/FIRE.hap.differences.bed9"),
     threads: 8
     conda:
         "../envs/R.yaml"

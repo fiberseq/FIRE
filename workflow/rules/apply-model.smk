@@ -46,12 +46,14 @@ rule merged_fire_bam:
     shell:
         """
         samtools merge -@ {threads} -u {input.bams} -o - \
-            | samtools view \
-                -C -@ {threads} \
-                -T {input.ref} \
+            | samtools view -C -@ {threads} -T {input.ref} \
                 --output-fmt-option embed_ref=1 \
-                --write-index \
-            -o {output.cram}
+            | samtools view -C -@ {threads} -T {input.ref} \
+                --output-fmt-option embed_ref=1 \
+                --input-fmt-option required_fields=0x1bff \
+                --write-index -o {output.cram}
+        # the second samtools view of CRAM file is needed to drop the quality scores
+        # this halves the size of the CRAM file
         """
 
 

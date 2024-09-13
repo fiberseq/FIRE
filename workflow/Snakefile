@@ -99,16 +99,16 @@ rule all:
         expand(rules.coverage.output, sm=MANIFEST.index),
         expand(rules.exclude_from_shuffle.output, sm=MANIFEST.index),
         expand(rules.unreliable_coverage_regions.output, sm=MANIFEST.index),
-        # model results
-        expand(rules.fire_sites.output, sm=MANIFEST.index),
-        # fiber locations
-        expand(rules.fiber_locations.output, sm=MANIFEST.index),
-        expand(rules.filtered_and_shuffled_fiber_locations.output, sm=MANIFEST.index),
-        # coverage of elements
         expand(
             rules.pileup.output.bed,
             sm=MANIFEST.index,
         ),
+        # model results
+        expand(rules.merged_fire_bam.output.cram, sm=MANIFEST.index),
+        expand(rules.fire_sites.output, sm=MANIFEST.index),
+        # fiber locations
+        expand(rules.fiber_locations.output, sm=MANIFEST.index),
+        expand(rules.filtered_and_shuffled_fiber_locations.output, sm=MANIFEST.index),
         # Stats and Tables
         expand(rules.fires_in_peaks.output.txt, sm=MANIFEST.index),
         expand(rules.ft_qc.output.tbl, sm=MANIFEST.index),
@@ -118,6 +118,10 @@ rule all:
         expand(rules.wide_fdr_peaks.output.bed, sm=MANIFEST.index),
         expand(rules.one_percent_fdr_peaks.output.bed, sm=MANIFEST.index),
         expand(rules.peaks_vs_percent.output.fig1, sm=MANIFEST.index),
+        # haplotype differences
+        expand(rules.hap_differences.output.fig1, sm=MANIFEST.index),
+        expand(rules.hap_differences.output.fig2, sm=MANIFEST.index),
+        expand(rules.hap_differences.output.bed, sm=MANIFEST.index),
         # trackhub
         expand(rules.fdr_track_to_bw.output.bw, sm=MANIFEST.index, col=bw_types),
         expand(rules.fdr_peaks_by_fire_elements_to_bb.output.bb, sm=MANIFEST.index),
