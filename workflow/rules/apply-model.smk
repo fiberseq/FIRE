@@ -13,11 +13,12 @@ rule fire:
         min_msp=config.get("min_msp", 10),
         min_ave_msp_size=config.get("min_ave_msp_size", 10),
         use_ont=USE_ONT,
+        flag=config.get("samtools-filter-flag", "2308"),
     conda:
         DEFAULT_ENV
     shell:
         """
-        samtools view -u -@ {threads} {input.bam} {wildcards.chrom} \
+        samtools view -F {params.flag} -u -@ {threads} {input.bam} {wildcards.chrom} \
             | {FT_EXE} fire -t {threads} \
                 {params.use_ont} \
                 --min-msp {params.min_msp} \

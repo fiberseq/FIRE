@@ -62,10 +62,12 @@ rule fiber_locations_chromosome:
     threads: 8
     conda:
         DEFAULT_ENV
+    params:
+        flag=config.get("samtools-filter-flag", "2308"),
     shell:
         """
         # get fiber locations
-        (samtools view -@ {threads} -F 2308 -u {input.cram} {wildcards.chrom} \
+        (samtools view -@ {threads} -F {params.flag} -u {input.cram} {wildcards.chrom} \
             | {FT_EXE} extract -t {threads} -s --all - \
             | hck -F '#ct' -F st -F en -F fiber -F strand -F HP ) \
             | (grep -v "^#" || true) \
