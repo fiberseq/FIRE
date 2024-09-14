@@ -148,11 +148,11 @@ def pileup_cut_cmd(wc):
     else:
         raise ValueError(f"Unknown haplotype {wc.hp}")
     if wc.el_type == "nucleosome":
-        col = f"nuc_coverage{tail}"
+        col = f"$nuc_coverage{tail}"
     elif wc.el_type == "linker":
-        col = f"msp_coverage{tail}-fire_coverage{tail}"
+        col = f"$msp_coverage{tail}-$fire_coverage{tail}"
     elif wc.el_type == "fire":
-        col = f"fire_coverage{tail}"
+        col = f"$fire_coverage{tail}"
     else:
         raise ValueError(f"Unknown element type {wc.el_type}")
     return f"bioawk -tc hdr '{{print $1,$2,$3,{col}}}'"
