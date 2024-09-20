@@ -13,7 +13,7 @@ rule fire:
         min_msp=config.get("min_msp", 10),
         min_ave_msp_size=config.get("min_ave_msp_size", 10),
         use_ont=USE_ONT,
-        flag=config.get("samtools-filter-flag", "2308"),
+        flag=FILTER_FLAG,
     conda:
         DEFAULT_ENV
     shell:
@@ -34,8 +34,8 @@ rule merged_fire_bam:
         fai=ancient(FAI),
         bams=expand(rules.fire.output.bam, chrom=get_chroms(), allow_missing=True),
     output:
-        cram="results/{sm}/fire/{sm}.fire.cram",
-        crai="results/{sm}/fire/{sm}.fire.cram.crai",
+        cram="results/{sm}/{sm}.fire.cram",
+        crai="results/{sm}/{sm}.fire.cram.crai",
     threads: 16
     resources:
         mem_mb=16 * 1024,
@@ -60,7 +60,7 @@ rule merged_fire_bam:
 
 rule fire_sites_chrom:
     input:
-        bam=rules.fire.output.bam,
+        cram=rules.merged_fire_bam.output.cram,
     output:
         bed=temp("temp/{sm}/chrom/{chrom}.sorted.bed.gz"),
     threads: 4
@@ -72,13 +72,14 @@ rule fire_sites_chrom:
         min_fdr=MIN_FIRE_FDR,
     shell:
         """
-        {FT_EXE} fire -t {threads} --extract {input.bam} \
-            | LC_ALL=C sort --parallel={threads} \
-                -k1,1 -k2,2n -k3,3n -k4,4 \
-            | bioawk -tc hdr '$10<={params.min_fdr}' \
-            | (grep '\\S' || true) \
-            | (grep -v '^#' || true) \
-            | bgzip -@ {threads} \
+        samtools view -@ {threads} -u {input.cram} {wildcards.chrom} \
+            | {FT_EXE} fire -t {threads} --extract - \
+                | LC_ALL=C sort --parallel={threads} \
+                    -k1,1 -k2,2n -k3,3n -k4,4 \
+                | bioawk -tc hdr '$10<={params.min_fdr}' \
+                | (grep '\\S' || true) \
+                | (grep -v '^#' || true) \
+                | bgzip -@ {threads} \
             > {output.bed}
         """
 
@@ -89,7 +90,7 @@ rule fire_sites:
             rules.fire_sites_chrom.output.bed, chrom=get_chroms(), allow_missing=True
         ),
     output:
-        bed="results/{sm}/fire/FIRE.bed.gz",
+        bed="results/{sm}/{sm}-fire-elements.bed.gz",
     threads: 8
     conda:
         DEFAULT_ENV
@@ -110,27 +111,4 @@ rule fire_sites_index:
     shell:
         """
         tabix -p bed {input.bed}
-        """
-
-
-# Colnames made by this
-# #chrom  start   end
-# coverage  fire_coverage   score   nuc_coverage    msp_coverage
-# coverage_H1  fire_coverage_H1  score_H1   nuc_coverage_H1 msp_coverage_H1
-# coverage_H2  fire_coverage_H2  score_H2   nuc_coverage_H2 msp_coverage_H2
-rule pileup:
-    input:
-        bam=rules.merged_fire_bam.output.cram,
-    output:
-        bed="results/{sm}/coverage/{sm}.pileup.bed.gz",
-        tbi="results/{sm}/coverage/{sm}.pileup.bed.gz.tbi",
-    threads: 12
-    conda:
-        DEFAULT_ENV
-    shell:
-        """
-        ft pileup --haps -t {threads} {input.bam} \
-            | bgzip -@ {threads} \
-            > {output.bed}
-        tabix -p bed {output.bed}
         """

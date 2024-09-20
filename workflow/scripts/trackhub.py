@@ -58,7 +58,6 @@ PER_ACC_TEMPLATE = """
 """
 
 
-
 MULTI_WIG = """
 track {sample}-{hap}-FIRE-coverage
 parent {sample}-FIRE-coverage
@@ -237,7 +236,7 @@ def generate_trackhub(
         if hap == "all":
             viz = "full"
         else:
-            viz = "hide"   
+            viz = "hide"
         # add coverage tracks
         if hap != "unk":
             acc = f"bw/{hap}.fire.coverage.bw"
@@ -256,15 +255,13 @@ def generate_trackhub(
             )
 
         if hap == "all":
-            file = f"bb/FDR-FIRE-peaks.bb"
+            file = f"bb/fire-peaks.bb"
             trackDb.write(FIRE_TEMPLATE.format(file=file, sample=sample))
             # add hap tracks
             file = f"bb/hap_differences.bb"
             trackDb.write(HAP_TEMPLATE.format(file=file, sample=sample))
-            file = "bb/FDR-wide-peaks.bb"
-            trackDb.write(
-                WIDE_TEMPLATE.format(file=file, sample=sample)
-            )
+            file = "bb/fire-wide-peaks.bb"
+            trackDb.write(WIDE_TEMPLATE.format(file=file, sample=sample))
 
         # add percent accessible tracks
         file = f"bw/{hap}.percent.accessible.bw"
@@ -283,7 +280,7 @@ def generate_trackhub(
                     sample=sample, hap=hap, file=file, color=color, viz=viz
                 )
             )
-        
+
         # new bin files
         if hap == "all":
             for z in ["H1", "H2", "UNK"]:

@@ -1,6 +1,6 @@
 rule percent_accessible:
     input:
-        bed=rules.fdr_track.output.bed,
+        bed=rules.pileup.output.bed,
         fai=ancient(FAI),
     output:
         tmp=temp("temp/{sm}/{hp}/percent.accessible.bed"),
@@ -61,7 +61,7 @@ rule element_coverages_bw:
 
 rule fdr_track_to_bw:
     input:
-        bed=rules.fdr_track.output.bed,
+        bed=rules.pileup.output.bed,
         fai=ancient(FAI),
     output:
         bw="results/{sm}/trackHub/bw/{col}.bw",
@@ -80,12 +80,12 @@ rule fdr_track_to_bw:
         """
 
 
-rule fdr_peaks_by_fire_elements_to_bb:
+rule fire_peaks_bb:
     input:
-        bed=rules.fdr_peaks_by_fire_elements.output.bed,
+        bed=rules.fire_peaks.output.bed,
         fai=ancient(FAI),
     output:
-        bb="results/{sm}/trackHub/bb/FDR-FIRE-peaks.bb",
+        bb="results/{sm}/trackHub/bb/fire-peaks.bb",
     threads: 4
     conda:
         DEFAULT_ENV

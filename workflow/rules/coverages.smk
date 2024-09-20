@@ -62,12 +62,10 @@ rule fiber_locations_chromosome:
     threads: 8
     conda:
         DEFAULT_ENV
-    params:
-        flag=config.get("samtools-filter-flag", "2308"),
     shell:
         """
         # get fiber locations
-        (samtools view -@ {threads} -F {params.flag} -u {input.cram} {wildcards.chrom} \
+        (samtools view -@ {threads} -u {input.cram} {wildcards.chrom} \
             | {FT_EXE} extract -t {threads} -s --all - \
             | hck -F '#ct' -F st -F en -F fiber -F strand -F HP ) \
             | (grep -v "^#" || true) \
@@ -87,10 +85,12 @@ rule fiber_locations:
         minimum=rules.coverage.output.minimum,
         maximum=rules.coverage.output.maximum,
     output:
-        bed="results/{sm}/coverage/fiber-locations.bed.gz",
-        bed_tbi="results/{sm}/coverage/fiber-locations.bed.gz.tbi",
-        filtered="results/{sm}/coverage/filtered-for-coverage/fiber-locations.bed.gz",
-        filtered_tbi="results/{sm}/coverage/filtered-for-coverage/fiber-locations.bed.gz.tbi",
+        bed=temp("temp/{sm}/coverage/fiber-locations.bed.gz"),
+        bed_tbi=temp("temp/{sm}/coverage/fiber-locations.bed.gz.tbi"),
+        filtered=temp("temp/{sm}/coverage/filtered-for-coverage/fiber-locations.bed.gz"),
+        filtered_tbi=temp(
+            "temp/{sm}/coverage/filtered-for-coverage/fiber-locations.bed.gz.tbi"
+        ),
     threads: 4
     conda:
         DEFAULT_ENV

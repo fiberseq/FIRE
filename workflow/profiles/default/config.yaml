@@ -1,7 +1,7 @@
 rerun-incomplete: True
 show-failed-logs: True
 rerun-triggers: mtime
-restart-times: 1
+restart-times: 0
 software-deployment-method:
   - apptainer
   - conda
