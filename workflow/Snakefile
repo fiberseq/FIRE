@@ -72,6 +72,7 @@ LEVIO_EXE = config.get("levio_exe", "leviosam2")
 FT_EXE = config.get("ft_exe", "ft")
 if FT_EXE is not "ft":
     print(f"INFO: Using FT_EXE: {FT_EXE}", file=sys.stderr)
+
 ONT = config.get("ont", False)
 USE_ONT = ""
 if ONT:
