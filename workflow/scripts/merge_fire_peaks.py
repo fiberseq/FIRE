@@ -1,14 +1,9 @@
 #!/usr/bin/env python
-import os
 import defopt
 import logging
-from pathlib import Path
-import numpy as np
-from typing import Optional
 import polars as pl
 import io
 import sys
-from numba import njit
 
 
 def is_grouped_with_previous(

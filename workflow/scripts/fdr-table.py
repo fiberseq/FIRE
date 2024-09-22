@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 import defopt
-import sys
-import gc
 import logging
 from pathlib import Path
 from typing import Optional
@@ -9,7 +7,6 @@ import pandas as pd
 import polars as pl
 import numpy as np
 import polars.selectors as cs
-from datetime import datetime
 
 # from numba import njit
 ROLLING_FIRE_SCORE_WINDOW_SIZE = 200

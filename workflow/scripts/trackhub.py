@@ -255,10 +255,10 @@ def generate_trackhub(
             )
 
         if hap == "all":
-            file = f"bb/fire-peaks.bb"
+            file = "bb/fire-peaks.bb"
             trackDb.write(FIRE_TEMPLATE.format(file=file, sample=sample))
             # add hap tracks
-            file = f"bb/hap_differences.bb"
+            file = "bb/hap_differences.bb"
             trackDb.write(HAP_TEMPLATE.format(file=file, sample=sample))
             file = "bb/fire-wide-peaks.bb"
             trackDb.write(WIDE_TEMPLATE.format(file=file, sample=sample))
@@ -290,8 +290,8 @@ def generate_trackhub(
     trackDb.write(
         FIRE_SCORE_AND_FDR.format(
             sample=sample,
-            fdr=f"bw/log_FDR.bw",
-            score=f"bw/score.bw",
+            fdr="bw/log_FDR.bw",
+            score="bw/score.bw",
             y_line=-10 * np.log10(0.05),
         )
     )
