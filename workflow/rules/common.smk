@@ -105,39 +105,6 @@ def get_load(wc):
     return 50
 
 
-def grep_command_for_el_type(wc):
-    if wc.el_type == "nucleosome":
-        return "awk '$10>1.0'"
-    elif wc.el_type == "linker":
-        return f"awk '$10<=1.0 && $10>{MIN_FIRE_FDR}'"
-    elif wc.el_type == "fire":
-        return f"awk '$10<={MIN_FIRE_FDR}'"
-    else:
-        raise ValueError(f"Unknown element type {wc.el_type}")
-
-
-def hap_grep_term(wc):
-    if wc.hp == "all":
-        return '""'
-    elif wc.hp == "hap1":
-        return "H1"
-    elif wc.hp == "hap2":
-        return "H2"
-    else:
-        raise ValueError(f"Unknown haplotype {wc.hp}")
-
-
-def hap_hck_columns(wc):
-    if wc.hp == "all":
-        return "-F fire_coverage -F coverage"
-    elif wc.hp == "hap1":
-        return "-F fire_coverage_H1 -F coverage_H1"
-    elif wc.hp == "hap2":
-        return "-F fire_coverage_H2 -F coverage_H2"
-    else:
-        raise ValueError(f"Unknown haplotype {wc.hp}")
-
-
 def get_hap_col_suffix(wc):
     if wc.hp == "all":
         return ""
