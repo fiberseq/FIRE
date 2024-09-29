@@ -18,6 +18,7 @@ rule percent_accessible:
         """
         bgzip -cd {input.bed} \
             | bioawk -tc hdr '$fire_coverage{params.suffix}>0' \
+            | bioawk -tc hdr '$coverage{params.suffix}>0' \
             | bioawk -tc hdr \
                 '{{print $1,$2,$3,100*$fire_coverage{params.suffix}/$coverage{params.suffix}}}' \
             | grep -v "^#" \
