@@ -19,7 +19,8 @@ rule percent_accessible:
         bgzip -cd {input.bed} \
             | hck -f 1-3 {params.cols} \
             | grep -v "^#" \
-            | awk -v OFS='\t' '$5 > 0 {{print $1,$2,$3,$4*100/$5}}' \
+            | bioawk -t '$4>0 && $5>0' \
+            | bioawk -t '{{print $1,$2,$3,$4*100/$5}}' \
         > {output.tmp}
 
         # add fake if file is empty
@@ -80,7 +81,7 @@ rule fdr_track_to_bw:
         """
 
 
-rule fire_peaks_bb:
+rule fdr_peaks_by_fire_elements_to_bb:
     input:
         bed=rules.fire_peaks.output.bed,
         fai=ancient(FAI),
