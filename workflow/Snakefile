@@ -74,13 +74,14 @@ if FT_EXE is not "ft":
     print(f"INFO: Using FT_EXE: {FT_EXE}", file=sys.stderr)
 
 ONT = config.get("ont", False)
-USE_ONT = ""
 if ONT:
     ont_ml = config.get("ont_ml", 0)
     if ont_ml != 0:
         USE_ONT = f" --ont --ml {ont_ml} "
     else:
         USE_ONT = " --ont "
+else:
+    USE_ONT = ""
 MIN_UNRELIABLE_COVERAGE_LEN = config.get("min_unreliable_coverage_len", 50)
 
 
