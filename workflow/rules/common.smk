@@ -138,6 +138,17 @@ def hap_hck_columns(wc):
         raise ValueError(f"Unknown haplotype {wc.hp}")
 
 
+def get_hap_col_suffix(wc):
+    if wc.hp == "all":
+        return ""
+    elif wc.hp == "hap1":
+        return "_H1"
+    elif wc.hp == "hap2":
+        return "_H2"
+    else:
+        raise ValueError(f"Unknown haplotype {wc.hp}")
+
+
 def pileup_cut_cmd(wc):
     if wc.hp == "all":
         tail = ""

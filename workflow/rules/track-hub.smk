@@ -11,16 +11,16 @@ rule percent_accessible:
     resources:
         mem_mb=get_mem_mb,
     params:
-        cols=hap_hck_columns,
+        suffix=get_hap_col_suffix,
         nzooms=NZOOMS,
         chrom=get_chroms()[0],
     shell:
         """
         bgzip -cd {input.bed} \
-            | hck -f 1-3 {params.cols} \
+            | bioawk -tc hdr '$fire_coverage{params.suffix}>0' \
+            | bioawk -tc hdr \
+                '{{print $1,$2,$3,100*$fire_coverage{params.suffix}/$coverage{params.suffix}}}' \
             | grep -v "^#" \
-            | bioawk -t '$4>0 && $5>0' \
-            | bioawk -t '{{print $1,$2,$3,$4*100/$5}}' \
         > {output.tmp}
 
         # add fake if file is empty
