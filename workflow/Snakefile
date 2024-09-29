@@ -70,7 +70,7 @@ LEVIO_EXE = config.get("levio_exe", "leviosam2")
 
 # developer options
 FT_EXE = config.get("ft_exe", "ft")
-if FT_EXE is not "ft":
+if FT_EXE != "ft":
     print(f"INFO: Using FT_EXE: {FT_EXE}", file=sys.stderr)
 
 ONT = config.get("ont", False)
