@@ -81,7 +81,7 @@ rule fdr_track_to_bw:
         """
 
 
-rule fdr_peaks_by_fire_elements_to_bb:
+rule fire_peaks_bb:
     input:
         bed=rules.fire_peaks.output.bed,
         fai=ancient(FAI),
