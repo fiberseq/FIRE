@@ -20,8 +20,7 @@ rule percent_accessible:
             | bioawk -tc hdr '$fire_coverage{params.suffix}>0' \
             | bioawk -tc hdr '$coverage{params.suffix}>0' \
             | bioawk -tc hdr \
-                '{{print $1,$2,$3,100*$fire_coverage{params.suffix}/$coverage{params.suffix}}}' \
-            | grep -v "^#" \
+              'NR>1{{print $1,$2,$3,100*$fire_coverage{params.suffix}/$coverage{params.suffix}}}' \
         > {output.tmp}
 
         # add fake if file is empty
