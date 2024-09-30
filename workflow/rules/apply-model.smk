@@ -90,7 +90,7 @@ rule fire_sites:
             rules.fire_sites_chrom.output.bed, chrom=get_chroms(), allow_missing=True
         ),
     output:
-        bed="results/{sm}/{sm}-fire-elements.bed.gz",
+        bed="results/{sm}/additional-outputs/fire-peaks/{sm}-fire-elements.bed.gz",
     threads: 8
     conda:
         DEFAULT_ENV
