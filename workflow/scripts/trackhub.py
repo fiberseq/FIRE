@@ -273,7 +273,7 @@ def generate_trackhub(
         elif hap == "hap2":
             color = "255,0,0"
 
-        if hap != "unk":
+        if hap == "all":
             viz = "full" if hap != "all" else "hide"
             trackDb.write(
                 PER_ACC_TEMPLATE.format(
