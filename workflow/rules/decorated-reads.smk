@@ -80,7 +80,7 @@ rule decorate_fibers_2:
         fai=ancient(FAI),
     output:
         bb="results/{sm}/trackHub/bb/fire-fiber-decorators.bb",
-        bed=temp("results/{sm}/trackHub/bb/fire-fiber-decorators.bed.gz"),
+        bed=temp("temp/{sm}/trackHub/bb/fire-fiber-decorators.bed.gz"),
     benchmark:
         "results/{sm}/additional-outputs/benchmarks/decorate_fibers_2/{sm}.txt"
     threads: 8
