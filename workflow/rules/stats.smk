@@ -76,7 +76,7 @@ rule hap_differences:
             "results/{sm}/additional-outputs/figures/{sm}-hap1-vs-hap2-volcano.pdf",
             category="Haplotype selectivity",
         ),
-        bed="results/{sm}/additional-outputs/hap1-vs-hap2/{sm}-hap-differences.bed.gz",
+        bed="results/{sm}/{sm}-hap-differences.bed.gz",
         bed9=temp("temp/{sm}/hap1-vs-hap2/FIRE.hap.differences.bed9"),
     threads: 8
     conda:
