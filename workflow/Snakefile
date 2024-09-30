@@ -142,7 +142,6 @@ rule all:
         expand(rules.hap_differences.output.fig2, sm=MANIFEST.index),
         expand(rules.hap_differences.output.bed, sm=MANIFEST.index),
         # trackhub
-        expand(rules.fdr_track_to_bw.output.bw, sm=MANIFEST.index, col=bw_types),
         expand(rules.fire_peaks_bb.output.bb, sm=MANIFEST.index),
         expand(rules.percent_accessible.output.bw, hp=not_unk, sm=MANIFEST.index),
         expand(rules.decorate_fibers_1.output.bb, sm=MANIFEST.index),
@@ -155,3 +154,5 @@ rule all:
             el_type=el_types,
         ),
         expand(rules.trackhub.output.hub, sm=MANIFEST.index),
+        # UNUSED
+        # expand(rules.fdr_track_to_bw.output.bw, sm=MANIFEST.index, col=bw_types),
