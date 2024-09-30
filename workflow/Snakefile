@@ -4,7 +4,7 @@ import sys
 import os
 from snakemake.utils import min_version
 
-min_version("8.12.0")
+min_version("8.20.4")
 
 # forces pandas pysam etc to be available in the environment
 conda: "envs/runner.yaml"
