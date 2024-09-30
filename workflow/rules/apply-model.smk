@@ -43,7 +43,7 @@ rule merged_fire_bam:
     conda:
         DEFAULT_ENV
     benchmark:
-        "results/{sm}/benchmarks/merged_fire_bam/{sm}.txt"
+        "results/{sm}/additional-outputs/benchmarks/{sm}-merged-fire-bam.txt"
     shell:
         """
         samtools merge -@ {threads} -u {input.bams} -o - \

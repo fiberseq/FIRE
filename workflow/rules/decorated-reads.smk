@@ -38,7 +38,7 @@ rule decorate_fibers_1:
         bed=temp("temp/{sm}/fiber-calls/fire-fibers.bed.gz"),
         bb="results/{sm}/trackHub/bb/fire-fibers.bb",
     benchmark:
-        "results/{sm}/benchmarks/decorate_fibers_1/{sm}.txt"
+        "results/{sm}/additional-outputs/benchmarks/decorate_fibers_1/{sm}.txt"
     threads: 8
     resources:
         runtime=240,
@@ -82,7 +82,7 @@ rule decorate_fibers_2:
         bb="results/{sm}/trackHub/bb/fire-fiber-decorators.bb",
         bed=temp("results/{sm}/trackHub/bb/fire-fiber-decorators.bed.gz"),
     benchmark:
-        "results/{sm}/benchmarks/decorate_fibers_2/{sm}.txt"
+        "results/{sm}/additional-outputs/benchmarks/decorate_fibers_2/{sm}.txt"
     threads: 8
     resources:
         runtime=60 * 16,

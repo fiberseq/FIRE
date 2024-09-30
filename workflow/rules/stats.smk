@@ -32,7 +32,7 @@ rule fires_in_peaks:
         peaks=rules.fire_peaks.output.bed,
     output:
         tmp=temp("temp/{sm}/tmp.FIREs-in-peaks.bed"),
-        txt="results/{sm}/fire-peaks/fires-in-peaks.txt",
+        txt="results/{sm}/additional-outputs/fire-peaks/{sm}-fires-in-peaks.txt",
     threads: 8
     conda:
         DEFAULT_ENV
@@ -69,14 +69,14 @@ rule hap_differences:
         bed=rules.fire_peaks.output.bed,
     output:
         fig1=report(
-            "results/{sm}/figures/{sm}-hap1-vs-hap2.pdf",
+            "results/{sm}/additional-outputs/figures/{sm}-hap1-vs-hap2.pdf",
             category="Haplotype selectivity",
         ),
         fig2=report(
-            "results/{sm}/figures/{sm}-hap1-vs-hap2-volcano.pdf",
+            "results/{sm}/additional-outputs/figures/{sm}-hap1-vs-hap2-volcano.pdf",
             category="Haplotype selectivity",
         ),
-        bed="results/{sm}/hap1-vs-hap2/{sm}-hap-differences.bed.gz",
+        bed="results/{sm}/additional-outputs/hap1-vs-hap2/{sm}-hap-differences.bed.gz",
         bed9=temp("temp/{sm}/hap1-vs-hap2/FIRE.hap.differences.bed9"),
     threads: 8
     conda:
