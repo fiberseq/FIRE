@@ -238,7 +238,7 @@ def generate_trackhub(
         else:
             viz = "hide"
         # add coverage tracks
-        if hap != "unk":
+        if hap == "all":
             acc = f"bw/{hap}.fire.coverage.bw"
             nuc = f"bw/{hap}.nucleosome.coverage.bw"
             link = f"bw/{hap}.linker.coverage.bw"
@@ -273,7 +273,7 @@ def generate_trackhub(
         elif hap == "hap2":
             color = "255,0,0"
 
-        if hap == "all":
+        if hap != "unk":
             viz = "full" if hap != "all" else "hide"
             trackDb.write(
                 PER_ACC_TEMPLATE.format(
