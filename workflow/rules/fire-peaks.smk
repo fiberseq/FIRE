@@ -348,7 +348,7 @@ rule peaks_vs_percent:
         bed=rules.fire_peaks.output.bed,
     output:
         fig1=report(
-            "results/{sm}/figures/{sm}-peaks-vs-percent.pdf",
+            "results/{sm}/additional-outputs/figures/{sm}-peaks-vs-percent.pdf",
             category="Peak calls",
         ),
     threads: 8
