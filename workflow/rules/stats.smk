@@ -54,7 +54,7 @@ rule ft_qc:
     input:
         cram=rules.merged_fire_bam.output.cram,
     output:
-        tbl="results/{sm}/{sm}.fire.qc.tbl.gz",
+        tbl="results/{sm}/{sm}-fire-qc.tbl.gz",
     conda:
         DEFAULT_ENV
     threads: 16
@@ -69,14 +69,14 @@ rule hap_differences:
         bed=rules.fire_peaks.output.bed,
     output:
         fig1=report(
-            "results/{sm}/hap1-vs-hap2/hap1-vs-hap2.pdf",
+            "results/{sm}/figures/{sm}-hap1-vs-hap2.pdf",
             category="Haplotype selectivity",
         ),
         fig2=report(
-            "results/{sm}/hap1-vs-hap2/hap1-vs-hap2-volcano.pdf",
+            "results/{sm}/figures/{sm}-hap1-vs-hap2-volcano.pdf",
             category="Haplotype selectivity",
         ),
-        bed="results/{sm}/hap1-vs-hap2/FIRE.hap.differences.bed.gz",
+        bed="results/{sm}/hap1-vs-hap2/{sm}-hap-differences.bed.gz",
         bed9=temp("temp/{sm}/hap1-vs-hap2/FIRE.hap.differences.bed9"),
     threads: 8
     conda:

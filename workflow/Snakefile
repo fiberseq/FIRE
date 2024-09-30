@@ -117,7 +117,6 @@ localrules:
 rule all:
     input:
         # coverage information
-        expand(rules.genome_bedgraph.output, sm=MANIFEST.index),
         expand(rules.coverage.output, sm=MANIFEST.index),
         expand(rules.exclude_from_shuffle.output, sm=MANIFEST.index),
         expand(rules.unreliable_coverage_regions.output, sm=MANIFEST.index),

@@ -8,15 +8,13 @@ rule genome_bedgraph:
         cram=rules.merged_fire_bam.output.cram,
         crai=rules.merged_fire_bam.output.crai,
     output:
-        bg="results/{sm}/coverage/{sm}.bed.gz",
-        tbi="results/{sm}/coverage/{sm}.bed.gz.tbi",
+        bg=temp("temp/{sm}/coverage/{sm}.bed.gz"),
+        tbi=temp("temp/{sm}/coverage/{sm}.bed.gz.tbi"),
     threads: 16
     shadow:
         "minimal"
     conda:
         DEFAULT_ENV
-    benchmark:
-        "results/{sm}/benchmarks/genome_bedgraph/{sm}.txt"
     shell:
         """ 
         mosdepth -f {input.ref} -t {threads} tmp {input.cram}
@@ -32,9 +30,9 @@ rule coverage:
     input:
         bg=rules.genome_bedgraph.output.bg,
     output:
-        cov="results/{sm}/coverage/{sm}.median.coverage.txt",
-        minimum="results/{sm}/coverage/{sm}.minimum.coverage.txt",
-        maximum="results/{sm}/coverage/{sm}.maximum.coverage.txt",
+        cov="results/{sm}/coverage/{sm}-median-coverage.txt",
+        minimum="results/{sm}/coverage/{sm}-minimum-coverage.txt",
+        maximum="results/{sm}/coverage/{sm}-maximum-coverage.txt",
     conda:
         "../envs/python.yaml"
     threads: 1
@@ -94,6 +92,8 @@ rule fiber_locations:
     threads: 4
     conda:
         DEFAULT_ENV
+    params:
+        max_frac_overlap=0.2,
     shell:
         """
         cat {input.fibers} > {output.bed}
@@ -102,7 +102,7 @@ rule fiber_locations:
         # get filtered fiber locations
         MIN=$(cat {input.minimum})
         MAX=$(cat {input.maximum})
-        bedtools intersect -header -sorted -v -f 0.2 \
+        bedtools intersect -header -sorted -v -f {params.max_frac_overlap} \
             -a {output.bed} \
             -b <(bgzip -cd {input.bg} | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX') \
         | bgzip -@ {threads} \
