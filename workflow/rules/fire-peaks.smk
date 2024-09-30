@@ -68,7 +68,7 @@ rule fdr_table:
     input:
         shuffled=rules.shuffled_pileup.output.bed,
     output:
-        tbl="results/{sm}/fire-peaks/{sm}-fire-score-to-fdr.tbl",
+        tbl="results/{sm}/additional-outputs/fire-peaks/{sm}-fire-score-to-fdr.tbl",
     conda:
         "../envs/python.yaml"
     params:
@@ -274,8 +274,8 @@ rule wide_fire_peaks:
         track=rules.pileup.output.bed,
         fai=ancient(FAI),
     output:
-        bed="results/{sm}/fire-peaks/{sm}-fire-wide-peaks.bed.gz",
-        tbi="results/{sm}/fire-peaks/{sm}-fire-wide-peaks.bed.gz.tbi",
+        bed="results/{sm}/additional-outputs/fire-peaks/{sm}-fire-wide-peaks.bed.gz",
+        tbi="results/{sm}/additional-outputs/fire-peaks/{sm}-fire-wide-peaks.bed.gz.tbi",
         bb="results/{sm}/trackHub/bb/fire-wide-peaks.bb",
     conda:
         DEFAULT_ENV
@@ -313,10 +313,10 @@ rule one_percent_fire_peaks:
         bed=rules.fire_peaks.output.bed,
         track=rules.pileup.output.bed,
     output:
-        bed="results/{sm}/fire-peaks/one-percent-FDR/{sm}-01-fire-peaks.bed.gz",
-        tbi="results/{sm}/fire-peaks/one-percent-FDR/{sm}-01-fire-peaks.bed.gz.tbi",
-        wide="results/{sm}/fire-peaks/one-percent-FDR/{sm}-01-fire-wide-peaks.bed.gz",
-        wtbi="results/{sm}/fire-peaks/one-percent-FDR/{sm}-01-fire-wide-peaks.bed.gz.tbi",
+        bed="results/{sm}/additional-outputs/fire-peaks/one-percent-FDR/{sm}-01-fire-peaks.bed.gz",
+        tbi="results/{sm}/additional-outputs/fire-peaks/one-percent-FDR/{sm}-01-fire-peaks.bed.gz.tbi",
+        wide="results/{sm}/additional-outputs/fire-peaks/one-percent-FDR/{sm}-01-fire-wide-peaks.bed.gz",
+        wtbi="results/{sm}/additional-outputs/fire-peaks/one-percent-FDR/{sm}-01-fire-wide-peaks.bed.gz.tbi",
     threads: 4
     conda:
         DEFAULT_ENV
