@@ -130,7 +130,8 @@ rule all:
         # Stats and Tables
         expand(rules.fires_in_peaks.output.txt, sm=MANIFEST.index),
         expand(rules.ft_qc.output.tbl, sm=MANIFEST.index),
-        # FDR results
+        # FIRE peaks
+        expand(rules.fdr_table.output.tbl, sm=MANIFEST.index),
         expand(rules.pileup.output.bed, sm=MANIFEST.index),
         expand(rules.fire_peaks.output.bed, sm=MANIFEST.index),
         expand(rules.wide_fire_peaks.output.bed, sm=MANIFEST.index),
