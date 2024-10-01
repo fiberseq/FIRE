@@ -65,8 +65,6 @@ rule leviosam2:
             -T {params.T} -G {params.G} {params.S} \
             -C {input.levio_index} -p $PRE -f {input.ref} -m -O bam
         """
-        # ^ bam is the only option, no CRAM.
-        #samtools view -@ {threads} -u {input.cram} \
 
 
 #
