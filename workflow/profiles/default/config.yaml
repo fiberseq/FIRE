@@ -5,8 +5,8 @@ restart-times: 0
 software-deployment-method:
   - apptainer
   - conda
-printshellcmds: True
 show-failed-logs: True
 cores: 32
 local-cores: 4
+# printshellcmds: True
 quiet: rules # all rules or progress, cannot use all because it hides the unlock error message (and others?)
