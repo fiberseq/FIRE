@@ -34,8 +34,8 @@ rule merged_fire_bam:
         fai=ancient(FAI),
         bams=expand(rules.fire.output.bam, chrom=get_chroms(), allow_missing=True),
     output:
-        cram="results/{sm}/{sm}-fire.cram",
-        crai="results/{sm}/{sm}-fire.cram.crai",
+        cram="results/{sm}/{sm}-no-seq-qual-fire.cram",
+        crai="results/{sm}/{sm}-no-seq-qual-fire.cram.crai",
     threads: 16
     resources:
         mem_mb=16 * 1024,
