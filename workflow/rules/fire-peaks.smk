@@ -1,6 +1,7 @@
 rule filtered_and_shuffled_fiber_locations_chromosome:
     input:
         filtered=rules.fiber_locations.output.filtered,
+        filtered_tbi=rules.fiber_locations.output.filtered_tbi,
         exclude=rules.exclude_from_shuffle.output.bed,
         fai=ancient(FAI),
     output:
