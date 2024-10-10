@@ -1,14 +1,9 @@
 #!/usr/bin/env python
-import os
 import defopt
 import logging
-from pathlib import Path
-import numpy as np
-from typing import Optional
 import polars as pl
 import io
 import sys
-from numba import njit
 
 
 def is_grouped_with_previous(
@@ -59,11 +54,11 @@ def group_peaks(df, min_frac_overlap=0.5, min_reciprocal_overlap=0.75):
             ),
         )
         .with_columns(
-            (~pl.col("shares_FIREs")).cumsum().alias("group"),
+            (~pl.col("shares_FIREs")).cum_sum().alias("group"),
         )
         .sort("group")
         .with_columns(
-            pl.col("score").max().over("group").suffix("_max"),
+            pl.col("score").max().over("group").name.suffix("_max"),
             peak_start=pl.col("peak_start").min().over("group").cast(pl.UInt32),
             peak_end=pl.col("peak_end").max().over("group").cast(pl.UInt32),
             local_max_count=pl.col("group").len().over("group"),

@@ -9,8 +9,8 @@ if [[ $# != 3 ]]; then
     exit 1
 fi
 
-oe=$(zcat $1 \
-     | awk '{ \
+oe=$(zcat $1 |
+    awk '{ \
              coverage[$4][$5]+=$3-$2; \
            } END { \
              real_bp = 0; \
@@ -26,7 +26,7 @@ n_tests=$(zcat $2 | wc -l)
 min_fdr=$(echo "-10.0*(l(0.01/${n_tests})/l(10.0))" | bc -lq)
 # n_peaks=$(zcat $2 | awk -v m="${min_fdr}" '$4 >= m' | wc -l)
 
-printf "percent-of-MSPs-preferentially-clustered-along-the-genome\tmin_fdr\n" > $3
-printf "%s%%\t%s\n" ${oe} ${min_fdr} >> $3
+printf "percent-of-MSPs-preferentially-clustered-along-the-genome\tmin_fdr\n" >$3
+printf "%s%%\t%s\n" ${oe} ${min_fdr} >>$3
 
 exit 0

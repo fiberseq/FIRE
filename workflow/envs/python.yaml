@@ -14,4 +14,4 @@ dependencies:
   - htslib==1.19.1
   - pip
   - pip:
-      - polars[pyarrow]==0.19
+      - polars-lts-cpu[pyarrow]==1.7.1
