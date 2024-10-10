@@ -25,6 +25,12 @@ def find_nearest(array, value):
 def read_pileup_file(infile, nrows):
     # get the header from the first line of the file
     header = pl.read_csv(infile, separator="\t", n_rows=1).columns
+    # add scema overrides for the score columns
+    schema_overrides={}
+    for n in ["score", "score_H1", "score_H2", "score_shuffled"]:
+        if n in header:
+            schema_overrides[n] = float
+    
     logging.info(f"Header of the pileup file:\n{header}")
     # read the file
     pileup = pl.read_csv(
@@ -35,7 +41,7 @@ def read_pileup_file(infile, nrows):
         comment_prefix="#",
         n_rows=nrows,
         infer_schema_length=100000,
-        schema_overrides={"score": float, "score_H1": float, "score_H2": float},
+        schema_overrides=schema_overrides,
     )
     logging.info(f"Done reading pileup file:\n{pileup}")
     return pileup
