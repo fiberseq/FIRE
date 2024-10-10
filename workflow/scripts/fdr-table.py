@@ -150,7 +150,7 @@ def make_fdr_table(infile, outfile, nrows, max_cov=None, min_cov=None):
     )
     
     # count bases in each category
-    sums = fire_scores.group_by("is_real").agg(pl.sum("bp").alias("bp")/1_000_000)
+    sums = fire_scores.group_by("is_real").agg(pl.sum("bp").alias("Mbp")/1_000_000)
     logging.info(f"Number of Mbp in each category:\n{sums}")
 
     logging.info(f"Done aggregating pileup file:\n{fire_scores}")
