@@ -32,6 +32,7 @@ def read_pileup_file(infile, nrows):
             schema_overrides[n] = float
     
     logging.info(f"Header of the pileup file:\n{header}")
+    logging.info(f"Schema overrides for the pileup file:\n{schema_overrides}")
     # read the file
     pileup = pl.read_csv(
         infile,
