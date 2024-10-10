@@ -18,8 +18,9 @@ def find_nearest(array, value):
     idx[idx >= len(array)] = len(array) - 1
     return idx
 
-# ['#chrom', 'start', 'end', 'coverage', 'fire_coverage', 'score', 'nuc_coverage', 'msp_coverage', 
-# 'coverage_H1', 'fire_coverage_H1', 'score_H1', 'nuc_coverage_H1', 'msp_coverage_H1', 
+
+# ['#chrom', 'start', 'end', 'coverage', 'fire_coverage', 'score', 'nuc_coverage', 'msp_coverage',
+# 'coverage_H1', 'fire_coverage_H1', 'score_H1', 'nuc_coverage_H1', 'msp_coverage_H1',
 # 'coverage_H2', 'fire_coverage_H2', 'score_H2', 'nuc_coverage_H2', 'msp_coverage_H2']
 def read_pileup_file(infile, nrows):
     # get the header from the first line of the file
@@ -34,7 +35,7 @@ def read_pileup_file(infile, nrows):
         comment_prefix="#",
         n_rows=nrows,
         infer_schema_length=100000,
-        schema_overrides={"score": float},
+        schema_overrides={"score": float, "score_H1": float, "score_H2": float},
     )
     logging.info(f"Done reading pileup file:\n{pileup}")
     return pileup
