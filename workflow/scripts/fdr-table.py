@@ -149,6 +149,9 @@ def make_fdr_table(infile, outfile, nrows, max_cov=None, min_cov=None):
         .sort("score", descending=True)
     )
     
+    # count bases in each category
+    sums = fire_scores.groupby("is_real").agg(pl.sum("bp").alias("bp")/1_000_000)
+    logging.info(f"Number of Mbp in each category:\n{sums}")
 
     logging.info(f"Done aggregating pileup file:\n{fire_scores}")
     fdr_table = fdr_table_from_scores(fire_scores)
