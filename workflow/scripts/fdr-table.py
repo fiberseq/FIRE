@@ -26,13 +26,14 @@ def read_pileup_file(infile, nrows):
     # get the header from the first line of the file
     header = pl.read_csv(infile, separator="\t", n_rows=1).columns
     # add scema overrides for the score columns
-    schema_overrides={}
+    schema_overrides = {}
     for n in ["score", "score_H1", "score_H2", "score_shuffled"]:
         if n in header:
             schema_overrides[n] = float
-    
+
     logging.info(f"Header of the pileup file:\n{header}")
     logging.info(f"Schema overrides for the pileup file:\n{schema_overrides}")
+
     # read the file
     pileup = pl.read_csv(
         infile,
@@ -115,9 +116,19 @@ def fdr_table_from_scores(fire_scores):
     return results
 
 
-def make_fdr_table(infile, outfile, nrows):
+def make_fdr_table(infile, outfile, nrows, max_cov=None, min_cov=None):
     # read the pileup file
     pileup = read_pileup_file(infile, nrows)
+    # filter on coverages if needed
+    if max_cov is not None:
+        pileup = pileup.filter(
+            pl.col("coverage") <= max_cov, pl.col("coverage_shuffled") <= max_cov
+        )
+    if min_cov is not None:
+        pileup = pileup.filter(
+            pl.col("coverage") >= min_cov, pl.col("coverage_shuffled") >= min_cov
+        )    
+    
     # aggregate by the score and weight the score by the number of bases
     fire_scores = (
         pileup.melt(
@@ -137,6 +148,8 @@ def make_fdr_table(infile, outfile, nrows):
         .agg(pl.sum("bp").alias("bp"))
         .sort("score", descending=True)
     )
+    
+
     logging.info(f"Done aggregating pileup file:\n{fire_scores}")
     fdr_table = fdr_table_from_scores(fire_scores)
     fdr_table.to_csv(outfile, sep="\t", index=False)
@@ -244,6 +257,8 @@ def main(
     *,
     fdr_table: Path = None,
     nrows: Optional[int] = None,
+    max_cov: Optional[int] = None,
+    min_cov: Optional[int] = None,
     verbose: int = 0,
 ):
     """
@@ -263,7 +278,7 @@ def main(
         fdr_table = read_fdr_table(fdr_table)
         apply_fdr_table(infile, outfile, fdr_table, nrows)
     else:
-        fdr_table = make_fdr_table(infile, outfile, nrows)
+        fdr_table = make_fdr_table(infile, outfile, nrows, min_cov=min_cov, max_cov=max_cov)
     return 0
 
 
