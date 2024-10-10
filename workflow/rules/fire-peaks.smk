@@ -68,6 +68,8 @@ rule shuffled_pileup:
 rule fdr_table:
     input:
         shuffled=rules.shuffled_pileup.output.bed,
+        minimum=rules.coverage.output.minimum,
+        maximum=rules.coverage.output.maximum,
     output:
         tbl="results/{sm}/additional-outputs/fire-peaks/{sm}-fire-score-to-fdr.tbl",
     conda:
@@ -78,7 +80,9 @@ rule fdr_table:
         mem_mb=get_mem_mb,
     shell:
         """
-        python {params.script} -v 1 {input.shuffled} {output.tbl}
+        MIN=$(cat {input.minimum})
+        MAX=$(cat {input.maximum})
+        python {params.script} -v 1 {input.shuffled} {output.tbl} --max-cov $MAX --min-cov $MIN
         """
 
 
