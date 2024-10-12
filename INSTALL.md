@@ -1,8 +1,8 @@
 # Install
 
-You will need **snakemake** which you can install using conda/mamba, e.g.:
+You will need **snakemake** which you can install using conda, e.g.:
 ```
-mamba create -c conda-forge -c bioconda -n snakemake 'snakemake>=8.4'
+conda create -c conda-forge -c bioconda -n snakemake 'snakemake>=8.21.0'
 ```
 
 Finally, if you wish to distribute jobs across a cluster you will need to install the appropriate [snakemake executor plugin](https://snakemake.github.io/snakemake-plugin-catalog/). For example, to use SLURM you can install the `snakemake-executor-slurm` plugin using pip:
