@@ -7,7 +7,7 @@ channels:
 dependencies:
   - tqdm
   - numpy
-  - pandas
+  - pandas==2.2.3
   - pip
   - pip:
       - pysam
