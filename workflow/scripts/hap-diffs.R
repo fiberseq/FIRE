@@ -163,6 +163,12 @@ if(nrow(pdf)== 0){
 
 #print(pdf[2446,])
 pdf = pdf %>%
+    filter(
+      hap1_acc >= 0,
+      hap1_nacc >= 0,
+      hap2_acc >= 0,
+      hap2_nacc >= 0,
+    ) %>%
     rowwise() %>%
     mutate(
         p_value=fisher.test(matrix(c(hap1_acc, hap1_nacc, hap2_acc, hap2_nacc),nrow=2))$p.value
