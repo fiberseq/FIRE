@@ -1,7 +1,8 @@
-# forces pandas pysam etc to be available in the environment
+# Adds pandas to the environment so I can use it in workflow functions
+# this must be the first line of the Snakefile
 conda: "envs/runner.yaml"
-# Force users to use the same underlying OS via singularity.
-# container: "docker://condaforge/mambaforge:23.3.1-1"
+
+# TODO get the container working
 # container: "docker://continuumio/miniconda3"
 
 import pandas as pd
