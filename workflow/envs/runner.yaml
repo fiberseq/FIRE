@@ -10,4 +10,4 @@ dependencies:
   - pandas==2.2.3
   - pip
   - pip:
-      - pysam
+      - pysam==0.22.1
