@@ -10,7 +10,7 @@ import sys
 import os
 from snakemake.utils import min_version
 
-min_version("8.20.4")
+min_version("8.21.0")
 
 # setup shared functions
 include: "rules/common.smk"
