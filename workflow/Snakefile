@@ -1,6 +1,6 @@
-# Adds pandas to the environment so I can use it in workflow functions
-# this must be the first line of the Snakefile
-conda: "envs/runner.yaml"
+# pandas is a dependency of snakemake so a runner environment is not needed
+# if I ever add this back because of new depedancies this must be the first line of the Snakefile
+# conda: "envs/runner.yaml"
 
 # TODO get the container working
 # container: "docker://continuumio/miniconda3"
