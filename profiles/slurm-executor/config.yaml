@@ -6,6 +6,7 @@ default-resources:
   - disk_mb=4096
   - mem_mb=16096
   - runtime=120
+  - slurm_partition=cpu-g2
   # you can change the default account or partition by them to the default-resources.
   # Without these options it will default to stergachislab and compute when using hyak.
 # - slurm_partition=ckpt

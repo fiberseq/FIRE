@@ -17,6 +17,11 @@ manifest: config/config.tbl
 
 
 ## Optional input options
+Specify that the input BAM file is an ONT Fiber-seq file. Default is `False`.
+```
+ont: True
+```
+
 Max number of threads to use in very distributed steps:
 ```
 max_t: 4

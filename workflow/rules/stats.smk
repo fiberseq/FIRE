@@ -29,10 +29,10 @@ rule fires_in_peaks:
     input:
         fire=rules.fire_sites.output.bed,
         exclude=rules.unreliable_coverage_regions.output.bed,
-        peaks=rules.fdr_peaks_by_fire_elements.output.bed,
+        peaks=rules.fire_peaks.output.bed,
     output:
         tmp=temp("temp/{sm}/tmp.FIREs-in-peaks.bed"),
-        txt="results/{sm}/tables/FIREs-in-peaks.txt",
+        txt="results/{sm}/additional-outputs/fire-peaks/{sm}-fires-in-peaks.txt",
     threads: 8
     conda:
         DEFAULT_ENV
@@ -50,20 +50,34 @@ rule fires_in_peaks:
         """
 
 
+rule ft_qc:
+    input:
+        cram=rules.merged_fire_bam.output.cram,
+    output:
+        tbl="results/{sm}/{sm}-fire-qc.tbl.gz",
+    conda:
+        DEFAULT_ENV
+    threads: 16
+    shell:
+        """
+        {FT_EXE} qc --acf -t {threads} {input.cram} {output.tbl}
+        """
+
+
 rule hap_differences:
     input:
-        bed=rules.fdr_peaks_by_fire_elements.output.bed,
+        bed=rules.fire_peaks.output.bed,
     output:
         fig1=report(
-            "results/{sm}/hap1-vs-hap2/hap1-vs-hap2.pdf",
+            "results/{sm}/additional-outputs/figures/{sm}-hap1-vs-hap2.pdf",
             category="Haplotype selectivity",
         ),
         fig2=report(
-            "results/{sm}/hap1-vs-hap2/hap1-vs-hap2-volcano.pdf",
+            "results/{sm}/additional-outputs/figures/{sm}-hap1-vs-hap2-volcano.pdf",
             category="Haplotype selectivity",
         ),
-        bed="results/{sm}/hap1-vs-hap2/FIRE.hap.differences.bed",
-        bed9="results/{sm}/hap1-vs-hap2/FIRE.hap.differences.bed9",
+        bed="results/{sm}/{sm}-hap-differences.bed.gz",
+        bed9=temp("temp/{sm}/hap1-vs-hap2/FIRE.hap.differences.bed9"),
     threads: 8
     conda:
         "../envs/R.yaml"
