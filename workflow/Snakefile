@@ -1,9 +1,9 @@
-# forces pandas pysam etc to be available in the environment
-conda: "envs/runner.yaml"
-# Force users to use the same underlying OS via singularity.
-# container: "docker://condaforge/mambaforge:23.3.1-1"
-# container: "docker://continuumio/miniconda3"
+# pandas is a dependency of snakemake so a runner environment is not needed
+# if I ever add this back because of new depedancies this must be the first line of the Snakefile
+# conda: "envs/runner.yaml"
 
+# TODO get the container working
+# container: "docker://continuumio/miniconda3"
 import pandas as pd
 import math
 import sys
