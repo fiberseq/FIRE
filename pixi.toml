@@ -1,0 +1,25 @@
+[project]
+authors = ["Mitchell Robert Vollger <mrvollger@gmail.com>"]
+channels = ["conda-forge", "bioconda"]
+description = "Add a short description here"
+name = "FIRE"
+platforms = ["osx-64", "linux-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+conda = "*"
+snakemake = "==8.21"
+snakefmt = "*"
+#fibertools-rs = "0.6"
+#samtools = "1.19"
+#htslib = "*"
+#pandas = "*"
+#defopt = "*"
+#pysam = "*"
+#bioawk = "*"
+#ripgrep = "*"
+#hck = "*"
+#bigtools = "0.5.3"
+#bedtools = "2.31"
