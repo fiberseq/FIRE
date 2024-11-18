@@ -35,7 +35,7 @@ rule decorate_fibers_1:
         ),
         fai=ancient(FAI),
     output:
-        bed=temp("temp/{sm}/fiber-calls/fire-fibers.bed.gz"),
+        #bed=temp("temp/{sm}/fiber-calls/fire-fibers.bed.gz"),
         bb="results/{sm}/trackHub/bb/fire-fibers.bb",
     benchmark:
         "results/{sm}/additional-outputs/benchmarks/decorate_fibers_1/{sm}.txt"
@@ -49,7 +49,21 @@ rule decorate_fibers_1:
         nzooms=NZOOMS,
         items_per_slot=ITEMS_PER_SLOT,
         block_size=BLOCK_SIZE,
-    shell:
+    shell: 
+        # bigtools version
+        """
+        cat {input.bed} \
+            | bgzip -cd -@ {threads} \
+            | bigtools bedtobigbed \
+                --inmemory \
+                --block-size {params.block_size} --items-per-slot {params.items_per_slot} \
+                --nzooms {params.nzooms} \
+                -s start -a {params.bed_as} \
+                - {input.fai} {output.bb}
+        """
+
+if False:
+        # UCSC version
         """
         cat {input.bed} > {output.bed}
         bedToBigBed \
@@ -57,17 +71,6 @@ rule decorate_fibers_1:
             {output.bed} {input.fai} {output.bb}
         """
 
-
-# bigtools version
-"""
-bgzip -cd -@ {threads} {output.bed} \
-    | bigtools bedtobigbed \
-        --inmemory \
-        --block-size {params.block_size} --items-per-slot {params.items_per_slot} \
-        --nzooms {params.nzooms} \
-        -s start -a {params.bed_as} \
-        - {input.fai} {output.bb}
-"""
 
 
 rule decorate_fibers_2:
@@ -80,7 +83,7 @@ rule decorate_fibers_2:
         fai=ancient(FAI),
     output:
         bb="results/{sm}/trackHub/bb/fire-fiber-decorators.bb",
-        bed=temp("temp/{sm}/trackHub/bb/fire-fiber-decorators.bed.gz"),
+        #bed=temp("temp/{sm}/trackHub/bb/fire-fiber-decorators.bed.gz"),
     benchmark:
         "results/{sm}/additional-outputs/benchmarks/decorate_fibers_2/{sm}.txt"
     threads: 8
@@ -93,7 +96,22 @@ rule decorate_fibers_2:
         nzooms=NZOOMS,
         items_per_slot=ITEMS_PER_SLOT,
         block_size=BLOCK_SIZE,
-    shell:
+    shell:        
+        # bigtools version
+        """
+        cat {input.decorated} \
+            | bgzip -cd -@ {threads} \
+            | rg -v '^#' \
+            | bigtools bedtobigbed \
+                --inmemory \
+                --block-size {params.block_size} --items-per-slot {params.items_per_slot} \
+                --nzooms {params.nzooms} \
+                -a {params.dec_as} -s start \
+                - {input.fai} {output.bb}
+        """
+
+if False:
+        # UCSC version
         """
         cat {input.decorated} > {output.bed}
         bedToBigBed \
@@ -101,16 +119,3 @@ rule decorate_fibers_2:
             {output.bed} {input.fai} {output.bb}
         """
 
-
-# bigtools version
-"""
-cat {input.decorated} \
-    | bgzip -cd -@ {threads} \
-    | rg -v '^#' \
-    | bigtools bedtobigbed \
-        --inmemory \
-        --block-size {params.block_size} --items-per-slot {params.items_per_slot} \
-        --nzooms {params.nzooms} \
-        -a {params.dec_as} -s start \
-        - {input.fai} {output.bb}
-"""

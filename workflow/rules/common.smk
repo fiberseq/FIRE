@@ -25,8 +25,8 @@ def get_excludes():
     excludes = config.get("excludes", [])
     if REF_NAME == "hg38" or REF_NAME == "GRCh38":
         files = [
-            "../annotations/hg38.blacklist.ENCFF356LFX.bed.gz",
             "../annotations/hg38.gap.bed.gz",
+            "../annotations/hg38.blacklist.ENCFF356LFX.bed.gz",
             "../annotations/SDs.merged.hg38.bed.gz",
         ]
         excludes += [workflow.source_path(file) for file in files]
