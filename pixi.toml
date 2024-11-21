@@ -7,11 +7,20 @@ platforms = ["osx-64", "linux-64"]
 version = "0.1.0"
 
 [tasks]
+fmt = "ruff format . && snakefmt ."
+test-data = "aws s3 --no-sign-request sync s3://stergachis-public1/FIRE/test-data test-data/"
+test = { cmd = [
+    "snakemake", 
+    "-s", "../workflow/Snakefile",
+    "--configfile", "test.yaml",
+    ], cwd = "test-data", depends_on = ["test-data"]}
 
 [dependencies]
 conda = "*"
 snakemake = "==8.21"
 snakefmt = "*"
+ruff = "*"
+awscli = "2.22"
 #fibertools-rs = "0.6"
 #samtools = "1.19"
 #htslib = "*"

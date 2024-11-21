@@ -127,8 +127,8 @@ def make_fdr_table(infile, outfile, nrows, max_cov=None, min_cov=None):
     if min_cov is not None:
         pileup = pileup.filter(
             pl.col("coverage") >= min_cov, pl.col("coverage_shuffled") >= min_cov
-        )    
-    
+        )
+
     # aggregate by the score and weight the score by the number of bases
     fire_scores = (
         pileup.melt(
@@ -148,9 +148,9 @@ def make_fdr_table(infile, outfile, nrows, max_cov=None, min_cov=None):
         .agg(pl.sum("bp").alias("bp"))
         .sort("score", descending=True)
     )
-    
+
     # count bases in each category
-    sums = fire_scores.group_by("is_real").agg(pl.sum("bp").alias("Mbp")/1_000_000)
+    sums = fire_scores.group_by("is_real").agg(pl.sum("bp").alias("Mbp") / 1_000_000)
     logging.info(f"Number of Mbp in each category:\n{sums}")
 
     logging.info(f"Done aggregating pileup file:\n{fire_scores}")
@@ -281,7 +281,9 @@ def main(
         fdr_table = read_fdr_table(fdr_table)
         apply_fdr_table(infile, outfile, fdr_table, nrows)
     else:
-        fdr_table = make_fdr_table(infile, outfile, nrows, min_cov=min_cov, max_cov=max_cov)
+        fdr_table = make_fdr_table(
+            infile, outfile, nrows, min_cov=min_cov, max_cov=max_cov
+        )
     return 0
 
 

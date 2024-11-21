@@ -49,7 +49,7 @@ rule decorate_fibers_1:
         nzooms=NZOOMS,
         items_per_slot=ITEMS_PER_SLOT,
         block_size=BLOCK_SIZE,
-    shell: 
+    shell:
         # bigtools version
         """
         cat {input.bed} \
@@ -61,6 +61,7 @@ rule decorate_fibers_1:
                 -s start -a {params.bed_as} \
                 - {input.fai} {output.bb}
         """
+
 
 rule decorate_fibers_2:
     input:
@@ -85,7 +86,7 @@ rule decorate_fibers_2:
         nzooms=NZOOMS,
         items_per_slot=ITEMS_PER_SLOT,
         block_size=BLOCK_SIZE,
-    shell:        
+    shell:
         # bigtools version
         # for some reason filtering out NUCs removes the display bug for bigtools
         # at least in my test cases
@@ -102,12 +103,12 @@ rule decorate_fibers_2:
                 - {input.fai} {output.bb}
         """
 
+
 if False:
-        # UCSC version
-        """
+    # UCSC version
+    """
         cat {input.decorated} > {output.bed}
         bedToBigBed \
             -allow1bpOverlap -type=bed12+ -as={params.dec_as} \
             {output.bed} {input.fai} {output.bb}
         """
-
