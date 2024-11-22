@@ -1,6 +1,7 @@
 # 🔥 **FIRE**: <ins>F</ins>iber-seq <ins>I</ins>nferred <ins>R</ins>egulatory <ins>E</ins>lements
 
 [![DOI](https://zenodo.org/badge/561430995.svg)](https://zenodo.org/doi/10.5281/zenodo.10023811)
+[![Actions Status](https://github.com/fiberseq/FIRE/workflows/CI/badge.svg)](https://github.com/fiberseq/FIRE/actions)
 
 A Snakemake workflow for calling Fiber-seq Inferred Regulatory Elements (FIREs) on single molecules. For a more detailed description and methods see the [docs](/docs/README.md), or [watch](https://youtu.be/RiZrMltAiWM?si=sSo64goaNQxgyfcc) my lab meeting on FIRE.
 
