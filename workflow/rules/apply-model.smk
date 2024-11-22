@@ -17,7 +17,7 @@ rule fire:
         DEFAULT_ENV
     shell:
         """
-        samtools view -u -@ {threads} {input.bam} {wildcards.chrom} \
+        samtools view -F 2308 -u -@ {threads} {input.bam} {wildcards.chrom} \
             | {FT_EXE} fire -t {threads} \
                 {params.use_ont} \
                 --min-msp {params.min_msp} \
