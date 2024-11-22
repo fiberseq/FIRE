@@ -18,6 +18,7 @@ test = { cmd = [
 ], cwd = "test-data", depends_on = [
   "test-data",
 ] }
+fire = { cmd = ["./fire"] }
 
 [dependencies]
 conda = "*"
@@ -26,14 +27,3 @@ snakefmt = "*"
 ruff = "*"
 awscli = "2.22"
 taplo = "*"
-#fibertools-rs = "0.6"
-#samtools = "1.19"
-#htslib = "*"
-#pandas = "*"
-#defopt = "*"
-#pysam = "*"
-#bioawk = "*"
-#ripgrep = "*"
-#hck = "*"
-#bigtools = "0.5.3"
-#bedtools = "2.31"
