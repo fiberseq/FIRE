@@ -29,25 +29,22 @@ See the [configuration README](/config/README.md), the example [configuration fi
 
 ## Run
 
-We have a run script that executes the FIRE snakemake called `fire`, and any extra parameters are passed directly to snakemake. For example:
+The `FIRE` workflow can be executed using the `pixi run fire` command. Under the hood this runs a `snakemake` workflow and any extra parameters are passed directly to snakemake. For example:
 
 ```bash
-pixi shell
-./fire --configfile config/config.yaml
+pixi run fire --configfile config/config.yaml
 ```
 
 If you want to do a dry run:
 
 ```bash
-pixi shell
-./fire --configfile config/config.yaml -n
+pixi run fire --configfile config/config.yaml -n
 ```
 
 If you want to execute across a cluster (modify `profiles/slurm-executor` as needed for distributed execution):
 
 ```bash
-pixi shell
-./fire --configfile config/config.yaml --profile profiles/slurm-executor
+pixi run fire --configfile config/config.yaml --profile profiles/slurm-executor
 ```
 
 You can also run snakemake directly, e.g.:
