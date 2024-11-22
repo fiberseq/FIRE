@@ -158,7 +158,6 @@ config/**
 .vscode/*
 .DS_Store
 
-
 # stats
 Rdata/
 Rplots.pdf
@@ -177,4 +176,4 @@ misc/
 new-agg-test/
 scATAC/
 test/
-
+test-data/
