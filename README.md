@@ -6,12 +6,26 @@ A Snakemake workflow for calling Fiber-seq Inferred Regulatory Elements (FIREs) 
 
 ## Install
 
-Please install `snakemake` and all the UCSC Kent utilities. For detailed instructions see the [installation README](/INSTALL.md).
+Please start by installing [pixi](https://pixi.sh/latest/) which handles the environment of the FIRE workflow.
+
+Then install FIRE using `git` and `pixi`:
+
+```bash
+git clone https://github.com/fiberseq/FIRE.git
+pixi install
+```
+
+We then recommend quickly testing your installation by running the test suite:
+
+```bash
+pixi run test
+```
+
+Further installation instructions can be found in the [INSTALL.md](/INSTALL.md) file.
 
 ## Configuring
 
 See the [configuration README](/config/README.md), the example [configuration file](/config/config.yaml), and the example [manifest file](/config/config.tbl) for configuration options.
-
 
 ## Run
 
