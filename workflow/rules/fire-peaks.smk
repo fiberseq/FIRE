@@ -5,7 +5,7 @@ rule filtered_and_shuffled_fiber_locations_chromosome:
         exclude=rules.exclude_from_shuffle.output.bed,
         fai=ancient(FAI),
     output:
-        shuffled=temp("temp/{sm}/shuffle/{chrom}.fiber-locations-shuffled.bed.gz"),
+        shuffled=temp("temp/{sm}/shuffle/{v}-{chrom}.fiber-locations-shuffled.bed.gz"),
     threads: 4
     conda:
         DEFAULT_ENV
@@ -28,7 +28,7 @@ rule shuffled_pileup_chromosome:
         cram=rules.merged_fire_bam.output.cram,
         shuffled=rules.filtered_and_shuffled_fiber_locations_chromosome.output.shuffled,
     output:
-        bed=temp("temp/{sm}/shuffle/{chrom}.pileup.bed.gz"),
+        bed=temp("temp/{sm}/shuffle/{v}-{chrom}.pileup.bed.gz"),
     threads: 4
     conda:
         DEFAULT_ENV
@@ -50,8 +50,8 @@ rule shuffled_pileup:
             allow_missing=True,
         ),
     output:
-        bed=temp("temp/{sm}/shuffle/shuffled-pileup.bed.gz"),
-        tbi=temp("temp/{sm}/shuffle/shuffled-pileup.bed.gz.tbi"),
+        bed=temp("temp/{sm}/shuffle/{v}-shuffled-pileup.bed.gz"),
+        tbi=temp("temp/{sm}/shuffle/{v}-shuffled-pileup.bed.gz.tbi"),
     threads: 4
     conda:
         DEFAULT_ENV
@@ -71,7 +71,7 @@ rule fdr_table:
         minimum=rules.coverage.output.minimum,
         maximum=rules.coverage.output.maximum,
     output:
-        tbl="results/{sm}/additional-outputs/fire-peaks/{sm}-fire-score-to-fdr.tbl",
+        tbl="results/{sm}/additional-outputs/fire-peaks/{sm}-{v}-fire-score-to-fdr.tbl",
     conda:
         "../envs/python.yaml"
     params:
@@ -95,7 +95,7 @@ rule pileup_chromosome:
     input:
         bam=rules.merged_fire_bam.output.cram,
     output:
-        bed=temp("temp/{sm}/{chrom}.pileup.bed.gz"),
+        bed=temp("temp/{sm}/{v}-{chrom}.pileup.bed.gz"),
     threads: 12
     conda:
         DEFAULT_ENV
@@ -114,7 +114,7 @@ rule fdr_track_chromosome:
         pileup=rules.pileup_chromosome.output.bed,
         fdr_tbl=rules.fdr_table.output.tbl,
     output:
-        bed=temp("temp/{sm}/fire-peaks/{chrom}-FDR.track.bed"),
+        bed=temp("temp/{sm}/fire-peaks/{v}-{chrom}-FDR.track.bed"),
     threads: 8
     conda:
         "../envs/python.yaml"
@@ -138,9 +138,9 @@ rule pileup:
             allow_missing=True,
         ),
     output:
-        fofn=temp("temp/{sm}/fire/fire-pileup.fofn"),
-        bed="results/{sm}/{sm}-fire-pileup.bed.gz",
-        tbi="results/{sm}/{sm}-fire-pileup.bed.gz.tbi",
+        fofn=temp("temp/{sm}/fire/fire-{v}-pileup.fofn"),
+        bed="results/{sm}/{sm}-fire-{v}-pileup.bed.gz",
+        tbi="results/{sm}/{sm}-fire-{v}-pileup.bed.gz.tbi",
     threads: 8
     conda:
         DEFAULT_ENV
@@ -172,7 +172,7 @@ rule helper_fdr_peaks_by_fire_elements:
         fire=rules.fire_sites.output.bed,
         fire_tbi=rules.fire_sites_index.output.tbi,
     output:
-        bed=temp("temp/{sm}/fire-peaks/{chrom}-fire-peaks.bed.gz"),
+        bed=temp("temp/{sm}/fire-peaks/{v}-{chrom}-fire-peaks.bed.gz"),
     threads: 2
     conda:
         DEFAULT_ENV
@@ -222,7 +222,7 @@ rule fdr_peaks_by_fire_elements_chromosome:
         minimum=rules.coverage.output.minimum,
         maximum=rules.coverage.output.maximum,
     output:
-        bed=temp("temp/{sm}/fire-peaks/grouped-{chrom}-fire-peaks.bed.gz"),
+        bed=temp("temp/{sm}/fire-peaks/{v}-grouped-{chrom}-fire-peaks.bed.gz"),
     threads: 8
     conda:
         "../envs/python.yaml"
@@ -249,9 +249,9 @@ rule fire_peaks:
             allow_missing=True,
         ),
     output:
-        fofn=temp("temp/{sm}/fire-peaks/{sm}-fire-peaks.fofn"),
-        bed="results/{sm}/{sm}-fire-peaks.bed.gz",
-        tbi="results/{sm}/{sm}-fire-peaks.bed.gz.tbi",
+        fofn=temp("temp/{sm}/fire-peaks/{sm}-fire-{v}-peaks.fofn"),
+        bed="results/{sm}/{sm}-fire-{v}-peaks.bed.gz",
+        tbi="results/{sm}/{sm}-fire-{v}-peaks.bed.gz.tbi",
     threads: 8
     conda:
         DEFAULT_ENV
@@ -279,9 +279,9 @@ rule wide_fire_peaks:
         track=rules.pileup.output.bed,
         fai=ancient(FAI),
     output:
-        bed="results/{sm}/additional-outputs/fire-peaks/{sm}-fire-wide-peaks.bed.gz",
-        tbi="results/{sm}/additional-outputs/fire-peaks/{sm}-fire-wide-peaks.bed.gz.tbi",
-        bb="results/{sm}/trackHub/bb/fire-wide-peaks.bb",
+        bed="results/{sm}/additional-outputs/fire-peaks/{sm}-fire-{v}-wide-peaks.bed.gz",
+        tbi="results/{sm}/additional-outputs/fire-peaks/{sm}-fire-{v}-wide-peaks.bed.gz.tbi",
+        bb="results/{sm}/trackHub-{v}/bb/fire-wide-peaks.bb",
     conda:
         DEFAULT_ENV
     threads: 4
@@ -318,10 +318,10 @@ rule one_percent_fire_peaks:
         bed=rules.fire_peaks.output.bed,
         track=rules.pileup.output.bed,
     output:
-        bed="results/{sm}/additional-outputs/fire-peaks/one-percent-FDR/{sm}-01-fire-peaks.bed.gz",
-        tbi="results/{sm}/additional-outputs/fire-peaks/one-percent-FDR/{sm}-01-fire-peaks.bed.gz.tbi",
-        wide="results/{sm}/additional-outputs/fire-peaks/one-percent-FDR/{sm}-01-fire-wide-peaks.bed.gz",
-        wtbi="results/{sm}/additional-outputs/fire-peaks/one-percent-FDR/{sm}-01-fire-wide-peaks.bed.gz.tbi",
+        bed="results/{sm}/additional-outputs/fire-peaks/one-percent-FDR/{sm}-fire-{v}-01-fire-peaks.bed.gz",
+        tbi="results/{sm}/additional-outputs/fire-peaks/one-percent-FDR/{sm}-fire-{v}-01-fire-peaks.bed.gz.tbi",
+        wide="results/{sm}/additional-outputs/fire-peaks/one-percent-FDR/{sm}-fire-{v}-01-fire-wide-peaks.bed.gz",
+        wtbi="results/{sm}/additional-outputs/fire-peaks/one-percent-FDR/{sm}-fire-{v}-01-fire-wide-peaks.bed.gz.tbi",
     threads: 4
     conda:
         DEFAULT_ENV
@@ -353,7 +353,7 @@ rule peaks_vs_percent:
         bed=rules.fire_peaks.output.bed,
     output:
         fig1=report(
-            "results/{sm}/additional-outputs/figures/{sm}-peaks-vs-percent.pdf",
+            "results/{sm}/additional-outputs/figures/{sm}-fire-{v}-peaks-vs-percent.pdf",
             category="Peak calls",
         ),
     threads: 8

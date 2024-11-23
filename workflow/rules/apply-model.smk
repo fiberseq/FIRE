@@ -34,8 +34,8 @@ rule merged_fire_bam:
         fai=ancient(FAI),
         bams=expand(rules.fire.output.bam, chrom=get_chroms(), allow_missing=True),
     output:
-        cram="results/{sm}/{sm}-no-seq-qual-fire.cram",
-        crai="results/{sm}/{sm}-no-seq-qual-fire.cram.crai",
+        cram="results/{sm}/{sm}-fire-{v}-no-seq-qual.cram",
+        crai="results/{sm}/{sm}-fire-{v}-no-seq-qual.cram.crai",
     threads: 16
     resources:
         mem_mb=16 * 1024,
@@ -43,7 +43,7 @@ rule merged_fire_bam:
     conda:
         DEFAULT_ENV
     benchmark:
-        "results/{sm}/additional-outputs/benchmarks/{sm}-merged-fire-bam.txt"
+        "results/{sm}/additional-outputs/benchmarks/{sm}-{v}-merged-fire-bam.txt"
     shell:
         """
         samtools merge -@ {threads} -u {input.bams} -o - \
@@ -62,7 +62,7 @@ rule fire_sites_chrom:
     input:
         cram=rules.merged_fire_bam.output.cram,
     output:
-        bed=temp("temp/{sm}/chrom/{chrom}.sorted.bed.gz"),
+        bed=temp("temp/{sm}/chrom/{v}-{chrom}.sorted.bed.gz"),
     threads: 4
     conda:
         DEFAULT_ENV
@@ -90,7 +90,7 @@ rule fire_sites:
             rules.fire_sites_chrom.output.bed, chrom=get_chroms(), allow_missing=True
         ),
     output:
-        bed="results/{sm}/additional-outputs/fire-peaks/{sm}-fire-elements.bed.gz",
+        bed="results/{sm}/additional-outputs/fire-peaks/{sm}-{v}-fire-elements.bed.gz",
     threads: 8
     conda:
         DEFAULT_ENV

@@ -9,27 +9,34 @@ version = "0.1.0"
 [tasks]
 fmt = "ruff format . && taplo format pixi.toml && snakefmt workflow/"
 test-data = { cmd = [
+  "cd",
+  "$INIT_CWD",
+  "&&",
   "mkdir",
   "-p",
-  "test-data",
+  "fire-test-data",
   "&&",
   "aws",
   "s3",
   "--no-sign-request",
   "sync",
   "s3://stergachis-public1/FIRE/test-data",
-  "test-data/",
+  "fire-test-data/",
 ] }
 test = { cmd = [
+  "cd",
+  "$INIT_CWD/fire-test-data",
+  "&&",
   "snakemake",
   "-s",
-  "../workflow/Snakefile",
+  "$PIXI_PROJECT_ROOT/workflow/Snakefile",
   "--configfile",
   "test.yaml",
-], cwd = "test-data", depends_on = [
+], depends_on = [
   "test-data",
-] }
-fire = { cmd = ["./fire"] }
+], clean-env = true }
+
+fire = { cmd = "cd $INIT_CWD && snakemake -s $PIXI_PROJECT_ROOT/workflow/Snakefile" }
 
 [dependencies]
 conda = "*"

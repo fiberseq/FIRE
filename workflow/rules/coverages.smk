@@ -8,8 +8,8 @@ rule genome_bedgraph:
         cram=rules.merged_fire_bam.output.cram,
         crai=rules.merged_fire_bam.output.crai,
     output:
-        bg=temp("temp/{sm}/coverage/{sm}.bed.gz"),
-        tbi=temp("temp/{sm}/coverage/{sm}.bed.gz.tbi"),
+        bg=temp("temp/{sm}/coverage/{sm}-{v}.bed.gz"),
+        tbi=temp("temp/{sm}/coverage/{sm}-{v}.bed.gz.tbi"),
     threads: 16
     shadow:
         "minimal"
@@ -30,16 +30,16 @@ rule coverage:
     input:
         bg=rules.genome_bedgraph.output.bg,
     output:
-        cov="results/{sm}/additional-outputs/coverage/{sm}-median-coverage.txt",
-        minimum="results/{sm}/additional-outputs/coverage/{sm}-minimum-coverage.txt",
-        maximum="results/{sm}/additional-outputs/coverage/{sm}-maximum-coverage.txt",
+        cov="results/{sm}/additional-outputs/coverage/{sm}-{v}-median-coverage.txt",
+        minimum="results/{sm}/additional-outputs/coverage/{sm}-{v}-minimum-coverage.txt",
+        maximum="results/{sm}/additional-outputs/coverage/{sm}-{v}-maximum-coverage.txt",
     conda:
         "../envs/python.yaml"
     threads: 1
     resources:
         mem_mb=64 * 1024,
     benchmark:
-        "results/{sm}/additional-outputs/benchmarks/coverage/{sm}.txt"
+        "results/{sm}/additional-outputs/benchmarks/coverage/{sm}-{v}.txt"
     params:
         coverage_within_n_sd=COVERAGE_WITHIN_N_SD,
         min_coverage=MIN_COVERAGE,
@@ -56,7 +56,7 @@ rule fiber_locations_chromosome:
         cram=rules.merged_fire_bam.output.cram,
         crai=rules.merged_fire_bam.output.crai,
     output:
-        bed=temp("temp/{sm}/coverage/{chrom}.fiber-locations.bed.gz"),
+        bed=temp("temp/{sm}/coverage/{v}-{chrom}.fiber-locations.bed.gz"),
     threads: 8
     conda:
         DEFAULT_ENV
@@ -83,11 +83,13 @@ rule fiber_locations:
         minimum=rules.coverage.output.minimum,
         maximum=rules.coverage.output.maximum,
     output:
-        bed=temp("temp/{sm}/coverage/fiber-locations.bed.gz"),
-        bed_tbi=temp("temp/{sm}/coverage/fiber-locations.bed.gz.tbi"),
-        filtered=temp("temp/{sm}/coverage/filtered-for-coverage/fiber-locations.bed.gz"),
+        bed=temp("temp/{sm}/coverage/{v}-fiber-locations.bed.gz"),
+        bed_tbi=temp("temp/{sm}/coverage/{v}-fiber-locations.bed.gz.tbi"),
+        filtered=temp(
+            "temp/{sm}/coverage/filtered-for-coverage/{v}-fiber-locations.bed.gz"
+        ),
         filtered_tbi=temp(
-            "temp/{sm}/coverage/filtered-for-coverage/fiber-locations.bed.gz.tbi"
+            "temp/{sm}/coverage/filtered-for-coverage/{v}-fiber-locations.bed.gz.tbi"
         ),
     threads: 4
     conda:
@@ -119,7 +121,7 @@ rule exclude_from_shuffle:
         filtered=rules.fiber_locations.output.filtered,
         fai=ancient(FAI),
     output:
-        bed="results/{sm}/additional-outputs/coverage/exclude-from-shuffles.bed.gz",
+        bed="results/{sm}/additional-outputs/coverage/{v}-exclude-from-shuffles.bed.gz",
     threads: 4
     conda:
         DEFAULT_ENV
@@ -147,9 +149,9 @@ rule unreliable_coverage_regions:
         maximum=rules.coverage.output.maximum,
         fai=ancient(FAI),
     output:
-        bed="results/{sm}/additional-outputs/coverage/unreliable-coverage-regions.bed.gz",
-        bed_tbi="results/{sm}/additional-outputs/coverage/unreliable-coverage-regions.bed.gz.tbi",
-        bb="results/{sm}/trackHub/bb/unreliable-coverage-regions.bb",
+        bed="results/{sm}/additional-outputs/coverage/{v}-unreliable-coverage-regions.bed.gz",
+        bed_tbi="results/{sm}/additional-outputs/coverage/{v}-unreliable-coverage-regions.bed.gz.tbi",
+        bb="results/{sm}/trackHub-{v}/bb/unreliable-coverage-regions.bb",
     threads: 4
     params:
         min_len=MIN_UNRELIABLE_COVERAGE_LEN,

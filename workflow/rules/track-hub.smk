@@ -3,8 +3,8 @@ rule percent_accessible:
         bed=rules.pileup.output.bed,
         fai=ancient(FAI),
     output:
-        tmp=temp("temp/{sm}/{hp}/percent.accessible.bed"),
-        bw="results/{sm}/trackHub/bw/{hp}.percent.accessible.bw",
+        tmp=temp("temp/{sm}/{hp}/{v}-percent.accessible.bed"),
+        bw="results/{sm}/trackHub-{v}/bw/{hp}.percent.accessible.bw",
     threads: 4
     conda:
         DEFAULT_ENV
@@ -42,7 +42,7 @@ rule element_coverages_bw:
         bed=rules.pileup.output.bed,
         fai=ancient(FAI),
     output:
-        bw="results/{sm}/trackHub/bw/{hp}.{el_type}.coverage.bw",
+        bw="results/{sm}/trackHub-{v}/bw/{hp}.{el_type}.coverage.bw",
     conda:
         DEFAULT_ENV
     params:
@@ -64,7 +64,7 @@ rule fdr_track_to_bw:
         bed=rules.pileup.output.bed,
         fai=ancient(FAI),
     output:
-        bw="results/{sm}/trackHub/bw/{col}.bw",
+        bw="results/{sm}/trackHub-{v}/bw/{col}.bw",
     threads: 4
     conda:
         DEFAULT_ENV
@@ -85,7 +85,7 @@ rule fire_peaks_bb:
         bed=rules.fire_peaks.output.bed,
         fai=ancient(FAI),
     output:
-        bb="results/{sm}/trackHub/bb/fire-peaks.bb",
+        bb="results/{sm}/trackHub-{v}/bb/fire-peaks.bb",
     threads: 4
     conda:
         DEFAULT_ENV
@@ -108,7 +108,7 @@ rule hap_differences_track:
         bed9=rules.hap_differences.output.bed9,
         fai=ancient(FAI),
     output:
-        bb="results/{sm}/trackHub/bb/hap_differences.bb",
+        bb="results/{sm}/trackHub-{v}/bb/hap_differences.bb",
     threads: 4
     resources:
         mem_mb=get_mem_mb,
@@ -133,8 +133,8 @@ rule trackhub:
     input:
         cov=rules.coverage.output.cov,
     output:
-        hub="results/{sm}/trackHub/hub.txt",
-        description="results/{sm}/trackHub/fire-description.html",
+        hub="results/{sm}/trackHub-{v}/hub.txt",
+        description="results/{sm}/trackHub-{v}/fire-description.html",
     resources:
         load=get_load,
     threads: 4
@@ -147,7 +147,7 @@ rule trackhub:
     shell:
         """
         python {params.script} -v 2 \
-          --trackhub-dir results/{wildcards.sm}/trackHub \
+          --trackhub-dir results/{wildcards.sm}/trackHub-{wildcards.v} \
           --reference {params.ref} \
           --sample {wildcards.sm} \
           --average-coverage $(cat {input.cov}) 

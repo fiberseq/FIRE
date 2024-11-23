@@ -9,8 +9,8 @@ rule decorate_fibers_chromosome:
         cram=rules.merged_fire_bam.output.cram,
         crai=rules.merged_fire_bam.output.crai,
     output:
-        bed=temp("temp/{sm}/decorate/{chrom}.bed.gz"),
-        decorated=temp("temp/{sm}/decorate/{chrom}.dec.bed.gz"),
+        bed=temp("temp/{sm}/decorate/{v}-{chrom}.bed.gz"),
+        decorated=temp("temp/{sm}/decorate/{v}-{chrom}.dec.bed.gz"),
     threads: 8
     resources:
         mem_mb=get_large_mem_mb,
@@ -36,9 +36,9 @@ rule decorate_fibers_1:
         fai=ancient(FAI),
     output:
         #bed=temp("temp/{sm}/fiber-calls/fire-fibers.bed.gz"),
-        bb="results/{sm}/trackHub/bb/fire-fibers.bb",
+        bb="results/{sm}/trackHub-{v}/bb/fire-fibers.bb",
     benchmark:
-        "results/{sm}/additional-outputs/benchmarks/decorate_fibers_1/{sm}.txt"
+        "results/{sm}/additional-outputs/benchmarks/decorate_fibers_1/{sm}-{v}.txt"
     threads: 8
     resources:
         runtime=240,
@@ -72,10 +72,10 @@ rule decorate_fibers_2:
         ),
         fai=ancient(FAI),
     output:
-        bb="results/{sm}/trackHub/bb/fire-fiber-decorators.bb",
-        #bed=temp("temp/{sm}/trackHub/bb/fire-fiber-decorators.bed.gz"),
+        bb="results/{sm}/trackHub-{v}/bb/fire-fiber-decorators.bb",
+        #bed=temp("temp/{sm}/trackHub-{v}/bb/fire-fiber-decorators.bed.gz"),
     benchmark:
-        "results/{sm}/additional-outputs/benchmarks/decorate_fibers_2/{sm}.txt"
+        "results/{sm}/additional-outputs/benchmarks/decorate_fibers_2/{sm}-{v}.txt"
     threads: 8
     resources:
         runtime=60 * 16,
