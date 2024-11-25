@@ -7,4 +7,4 @@ A Snakemake workflow for calling Fiber-seq Inferred Regulatory Elements (FIREs) 
 
 ## Installation and Usage
 
-See the [docs](https://fiberseq.github.io/fire/fire.html) for detailed installation and usage instructions.ß
+See the [docs](https://fiberseq.github.io/fire/fire.html) for detailed installation and usage instructions.
