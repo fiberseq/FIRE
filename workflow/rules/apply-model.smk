@@ -43,7 +43,7 @@ rule merged_fire_bam:
     conda:
         DEFAULT_ENV
     benchmark:
-        "results/{sm}/additional-outputs/benchmarks/{sm}-{v}-merged-fire-bam.txt"
+        "results/{sm}/additional-outputs-{v}/benchmarks/{sm}-merged-fire-bam.txt"
     shell:
         """
         samtools merge -@ {threads} -u {input.bams} -o - \
@@ -90,7 +90,7 @@ rule fire_sites:
             rules.fire_sites_chrom.output.bed, chrom=get_chroms(), allow_missing=True
         ),
     output:
-        bed="results/{sm}/additional-outputs/fire-peaks/{sm}-{v}-fire-elements.bed.gz",
+        bed="results/{sm}/additional-outputs-{v}/fire-peaks/{sm}-{v}-fire-elements.bed.gz",
     threads: 8
     conda:
         DEFAULT_ENV

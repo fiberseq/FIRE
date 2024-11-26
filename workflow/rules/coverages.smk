@@ -30,16 +30,16 @@ rule coverage:
     input:
         bg=rules.genome_bedgraph.output.bg,
     output:
-        cov="results/{sm}/additional-outputs/coverage/{sm}-{v}-median-coverage.txt",
-        minimum="results/{sm}/additional-outputs/coverage/{sm}-{v}-minimum-coverage.txt",
-        maximum="results/{sm}/additional-outputs/coverage/{sm}-{v}-maximum-coverage.txt",
+        cov="results/{sm}/additional-outputs-{v}/coverage/{sm}-{v}-median-coverage.txt",
+        minimum="results/{sm}/additional-outputs-{v}/coverage/{sm}-{v}-minimum-coverage.txt",
+        maximum="results/{sm}/additional-outputs-{v}/coverage/{sm}-{v}-maximum-coverage.txt",
     conda:
         "../envs/python.yaml"
     threads: 1
     resources:
         mem_mb=64 * 1024,
     benchmark:
-        "results/{sm}/additional-outputs/benchmarks/coverage/{sm}-{v}.txt"
+        "results/{sm}/additional-outputs-{v}/benchmarks/coverage/{sm}.txt"
     params:
         coverage_within_n_sd=COVERAGE_WITHIN_N_SD,
         min_coverage=MIN_COVERAGE,
@@ -121,7 +121,7 @@ rule exclude_from_shuffle:
         filtered=rules.fiber_locations.output.filtered,
         fai=ancient(FAI),
     output:
-        bed="results/{sm}/additional-outputs/coverage/{v}-exclude-from-shuffles.bed.gz",
+        bed="results/{sm}/additional-outputs-{v}/coverage/exclude-from-shuffles.bed.gz",
     threads: 4
     conda:
         DEFAULT_ENV
@@ -149,8 +149,8 @@ rule unreliable_coverage_regions:
         maximum=rules.coverage.output.maximum,
         fai=ancient(FAI),
     output:
-        bed="results/{sm}/additional-outputs/coverage/{v}-unreliable-coverage-regions.bed.gz",
-        bed_tbi="results/{sm}/additional-outputs/coverage/{v}-unreliable-coverage-regions.bed.gz.tbi",
+        bed="results/{sm}/additional-outputs-{v}/coverage/unreliable-coverage-regions.bed.gz",
+        bed_tbi="results/{sm}/additional-outputs-{v}/coverage/unreliable-coverage-regions.bed.gz.tbi",
         bb="results/{sm}/trackHub-{v}/bb/unreliable-coverage-regions.bb",
     threads: 4
     params:

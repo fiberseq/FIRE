@@ -71,7 +71,7 @@ rule fdr_table:
         minimum=rules.coverage.output.minimum,
         maximum=rules.coverage.output.maximum,
     output:
-        tbl="results/{sm}/additional-outputs/fire-peaks/{sm}-{v}-fire-score-to-fdr.tbl",
+        tbl="results/{sm}/additional-outputs-{v}/fire-peaks/{sm}-{v}-fire-score-to-fdr.tbl",
     conda:
         "../envs/python.yaml"
     params:
@@ -279,8 +279,8 @@ rule wide_fire_peaks:
         track=rules.pileup.output.bed,
         fai=ancient(FAI),
     output:
-        bed="results/{sm}/additional-outputs/fire-peaks/{sm}-fire-{v}-wide-peaks.bed.gz",
-        tbi="results/{sm}/additional-outputs/fire-peaks/{sm}-fire-{v}-wide-peaks.bed.gz.tbi",
+        bed="results/{sm}/additional-outputs-{v}/fire-peaks/{sm}-fire-{v}-wide-peaks.bed.gz",
+        tbi="results/{sm}/additional-outputs-{v}/fire-peaks/{sm}-fire-{v}-wide-peaks.bed.gz.tbi",
         bb="results/{sm}/trackHub-{v}/bb/fire-wide-peaks.bb",
     conda:
         DEFAULT_ENV
@@ -318,10 +318,10 @@ rule one_percent_fire_peaks:
         bed=rules.fire_peaks.output.bed,
         track=rules.pileup.output.bed,
     output:
-        bed="results/{sm}/additional-outputs/fire-peaks/one-percent-FDR/{sm}-fire-{v}-01-fire-peaks.bed.gz",
-        tbi="results/{sm}/additional-outputs/fire-peaks/one-percent-FDR/{sm}-fire-{v}-01-fire-peaks.bed.gz.tbi",
-        wide="results/{sm}/additional-outputs/fire-peaks/one-percent-FDR/{sm}-fire-{v}-01-fire-wide-peaks.bed.gz",
-        wtbi="results/{sm}/additional-outputs/fire-peaks/one-percent-FDR/{sm}-fire-{v}-01-fire-wide-peaks.bed.gz.tbi",
+        bed="results/{sm}/additional-outputs-{v}/fire-peaks/one-percent-FDR/{sm}-fire-{v}-01-fire-peaks.bed.gz",
+        tbi="results/{sm}/additional-outputs-{v}/fire-peaks/one-percent-FDR/{sm}-fire-{v}-01-fire-peaks.bed.gz.tbi",
+        wide="results/{sm}/additional-outputs-{v}/fire-peaks/one-percent-FDR/{sm}-fire-{v}-01-fire-wide-peaks.bed.gz",
+        wtbi="results/{sm}/additional-outputs-{v}/fire-peaks/one-percent-FDR/{sm}-fire-{v}-01-fire-wide-peaks.bed.gz.tbi",
     threads: 4
     conda:
         DEFAULT_ENV
@@ -353,7 +353,7 @@ rule peaks_vs_percent:
         bed=rules.fire_peaks.output.bed,
     output:
         fig1=report(
-            "results/{sm}/additional-outputs/figures/{sm}-fire-{v}-peaks-vs-percent.pdf",
+            "results/{sm}/additional-outputs-{v}/figures/{sm}-fire-{v}-peaks-vs-percent.pdf",
             category="Peak calls",
         ),
     threads: 8
