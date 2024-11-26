@@ -42,10 +42,10 @@ fire = { cmd = "cd $INIT_CWD && snakemake -s $PIXI_PROJECT_ROOT/workflow/Snakefi
 [dependencies]
 conda = "*"
 snakemake = "==8.21"
+snakemake-executor-plugin-slurm = ">=0.11.2"
 snakefmt = "*"
 ruff = "*"
 awscli = "2.22"
 taplo = "*"
 
 [pypi-dependencies]
-snakemake-executor-plugin-slurm = "*"
