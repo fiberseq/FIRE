@@ -96,7 +96,7 @@ rule pileup_chromosome:
         bam=rules.merged_fire_bam.output.cram,
     output:
         bed=temp("temp/{sm}/{v}-{chrom}.pileup.bed.gz"),
-    threads: 12
+    threads: 4
     conda:
         DEFAULT_ENV
     shell:
@@ -115,7 +115,7 @@ rule fdr_track_chromosome:
         fdr_tbl=rules.fdr_table.output.tbl,
     output:
         bed=temp("temp/{sm}/fire-peaks/{v}-{chrom}-FDR.track.bed"),
-    threads: 8
+    threads: 4
     conda:
         "../envs/python.yaml"
     params:
@@ -223,7 +223,7 @@ rule fdr_peaks_by_fire_elements_chromosome:
         maximum=rules.coverage.output.maximum,
     output:
         bed=temp("temp/{sm}/fire-peaks/{v}-grouped-{chrom}-fire-peaks.bed.gz"),
-    threads: 8
+    threads: 4
     conda:
         "../envs/python.yaml"
     params:
