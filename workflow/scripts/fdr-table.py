@@ -35,7 +35,7 @@ def read_pileup_file(infile, nrows):
     # check that there is at least two lines
     open_infile = gzip.open if is_gzipped(infile) else open
     with open_infile(infile) as f:
-        for i in enumerate(f):
+        for i, _ in enumerate(f):
             if i > 1:
                 break
         if i < 2:
