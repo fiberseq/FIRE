@@ -11,7 +11,7 @@ rule decorate_fibers_chromosome:
     output:
         bed=temp("temp/{sm}/decorate/{v}-{chrom}.bed.gz"),
         decorated=temp("temp/{sm}/decorate/{v}-{chrom}.dec.bed.gz"),
-    threads: 8
+    threads: 4
     resources:
         mem_mb=get_large_mem_mb,
     conda:
