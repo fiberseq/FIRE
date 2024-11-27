@@ -13,7 +13,7 @@ rule decorate_fibers_chromosome:
         decorated=temp("temp/{sm}/decorate/{v}-{chrom}.dec.bed.gz"),
     threads: 4
     resources:
-        mem_mb=get_large_mem_mb,
+        mem_mb=get_mem_mb,
     conda:
         DEFAULT_ENV
     shell:
