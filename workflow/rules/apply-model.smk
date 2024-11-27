@@ -6,7 +6,7 @@ rule fire:
         bam=ancient(get_input_bam),
     output:
         bam=temp("temp/{sm}/fire/{chrom}.fire.bam"),
-    threads: 8
+    threads: 6
     resources:
         mem_mb=8 * 1024,
     params:
@@ -44,6 +44,7 @@ rule merged_fire_bam:
         DEFAULT_ENV
     benchmark:
         "results/{sm}/additional-outputs-{v}/benchmarks/{sm}-merged-fire-bam.txt"
+    priority: 100
     shell:
         """
         samtools merge -@ {threads} -u {input.bams} -o - \
