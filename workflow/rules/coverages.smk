@@ -57,7 +57,7 @@ rule fiber_locations_chromosome:
         crai=rules.merged_fire_bam.output.crai,
     output:
         bed=temp("temp/{sm}/coverage/{v}-{chrom}.fiber-locations.bed.gz"),
-    threads: 8
+    threads: 4
     conda:
         DEFAULT_ENV
     shell:
