@@ -37,7 +37,24 @@ test = { cmd = [
   "test-data",
 ], clean-env = true }
 
-fire = { cmd = "cd $INIT_CWD && snakemake -s $PIXI_PROJECT_ROOT/workflow/Snakefile" }
+fire = { cmd = [
+  "cd",
+  "$INIT_CWD",
+  "&&",
+  "snakemake",
+  "-s",
+  "$PIXI_PROJECT_ROOT/workflow/Snakefile",
+] }
+slurm = { cmd = [
+  "cd",
+  "$INIT_CWD",
+  "&&",
+  "snakemake",
+  "-s",
+  "$PIXI_PROJECT_ROOT/workflow/Snakefile",
+  "--profile",
+  "$PIXI_PROJECT_ROOT/profiles/slurm-executor",
+] }
 
 [dependencies]
 conda = "*"
