@@ -7,9 +7,15 @@ import pandas as pd
 import polars as pl
 import numpy as np
 import polars.selectors as cs
+import gzip
 
 # from numba import njit
 ROLLING_FIRE_SCORE_WINDOW_SIZE = 200
+
+
+def is_gzipped(path):
+    with open(path, "rb") as f:
+        return f.read(2) == b"\x1f\x8b"
 
 
 def find_nearest(array, value):
@@ -25,6 +31,16 @@ def find_nearest(array, value):
 def read_pileup_file(infile, nrows):
     # get the header from the first line of the file
     header = pl.read_csv(infile, separator="\t", n_rows=1).columns
+
+    # check that there is at least two lines
+    open_infile = gzip.open if is_gzipped(infile) else open
+    with open_infile(infile) as f:
+        for i in enumerate(f):
+            if i > 1:
+                break
+        if i < 2:
+            return None
+
     # add scema overrides for the score columns
     schema_overrides = {}
     for n in ["score", "score_H1", "score_H2", "score_shuffled"]:
@@ -167,6 +183,11 @@ def read_fdr_table(infile):
 
 def apply_fdr_table(infile, outfile, fdr_table, nrows):
     pileup = read_pileup_file(infile, nrows)
+    # there is no input data
+    if pileup is None:
+        Path(outfile).touch()
+        return
+
     logging.info(f"Applying FDR table to pileup file:\n{pileup}")
     # add a new column that reports the largest score in a centered window of with ROLLING_FIRE_SCORE_WINDOW_SIZE number of bases
     rolling_max_score = (
