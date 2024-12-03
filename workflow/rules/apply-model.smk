@@ -6,7 +6,7 @@ rule fire:
         bam=ancient(get_input_bam),
     output:
         bam=temp("temp/{sm}/fire/{chrom}.fire.bam"),
-    threads: 6
+    threads: 4
     resources:
         mem_mb=8 * 1024,
     params:
@@ -92,7 +92,7 @@ rule fire_sites:
         ),
     output:
         bed="results/{sm}/additional-outputs-{v}/fire-peaks/{sm}-{v}-fire-elements.bed.gz",
-    threads: 8
+    threads: 1
     conda:
         DEFAULT_ENV
     shell:

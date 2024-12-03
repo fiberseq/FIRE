@@ -9,7 +9,7 @@ rule clustering_vs_null:
         tmp=temp("temp/{sm}/tmp.pre.calls.bed"),
         null=temp("temp/{sm}/null.calls.bed"),
         bed="results/{sm}/clustering-vs-null.bed.gz",
-    threads: 8
+    threads: 4
     conda:
         DEFAULT_ENV
     shell:
@@ -33,7 +33,7 @@ rule fires_in_peaks:
     output:
         tmp=temp("temp/{sm}/tmp.FIREs-{v}-in-peaks.bed"),
         txt="results/{sm}/additional-outputs-{v}/fire-peaks/{sm}-{v}-fires-in-peaks.txt",
-    threads: 8
+    threads: 4
     conda:
         DEFAULT_ENV
     params:
@@ -78,7 +78,7 @@ rule hap_differences:
         ),
         bed="results/{sm}/{sm}-fire-{v}-hap-differences.bed.gz",
         bed9=temp("temp/{sm}/hap1-vs-hap2/FIRE-{v}.hap.differences.bed9"),
-    threads: 8
+    threads: 4
     conda:
         "../envs/R.yaml"
     script:

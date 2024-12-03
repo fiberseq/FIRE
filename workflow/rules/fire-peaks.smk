@@ -141,7 +141,7 @@ rule pileup:
         fofn=temp("temp/{sm}/fire/fire-{v}-pileup.fofn"),
         bed="results/{sm}/{sm}-fire-{v}-pileup.bed.gz",
         tbi="results/{sm}/{sm}-fire-{v}-pileup.bed.gz.tbi",
-    threads: 8
+    threads: 4
     conda:
         DEFAULT_ENV
     shell:
@@ -252,7 +252,7 @@ rule fire_peaks:
         fofn=temp("temp/{sm}/fire-peaks/{sm}-fire-{v}-peaks.fofn"),
         bed="results/{sm}/{sm}-fire-{v}-peaks.bed.gz",
         tbi="results/{sm}/{sm}-fire-{v}-peaks.bed.gz.tbi",
-    threads: 8
+    threads: 4
     conda:
         DEFAULT_ENV
     shell:
@@ -356,7 +356,7 @@ rule peaks_vs_percent:
             "results/{sm}/additional-outputs-{v}/figures/{sm}-fire-{v}-peaks-vs-percent.pdf",
             category="Peak calls",
         ),
-    threads: 8
+    threads: 4
     conda:
         "../envs/R.yaml"
     script:
