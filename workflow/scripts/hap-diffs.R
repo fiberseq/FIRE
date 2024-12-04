@@ -179,6 +179,7 @@ pdf = pdf %>%
     ) %>%
     # group_by(sample) %>%
     ungroup() %>%
+    group_by(autosome) %>%
     mutate(
         p_adjust = p.adjust(p_value, method="BH"),
     ) %>%
