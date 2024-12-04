@@ -118,9 +118,8 @@ df=fread(in_file) %>%
     ) %>%
     data.table()
 
-print(df[fire_coverage_H1 > coverage_H1])
-print(df[fire_coverage_H2 > coverage_H2])
-
+print("Before coverage filter")
+print(nrow(df))
 
 # continue 
 df$hap1_frac_acc = df$fire_coverage_H1/df$coverage_H1
@@ -134,8 +133,10 @@ sd = 3
 cov = median(df$coverage)
 my_min_cov = max(cov*0.5 - sd * sqrt(cov*0.5), 10)
 my_max_cov = cov*0.5 + sd * sqrt(cov*0.5)
+#my_min_cov = 10
+#my_max_cov = median(df$coverage)
 
-print(glue("min_cov={my_min_cov} max_cov={my_max_cov} cov={cov}"))
+#print(glue("min_cov={my_min_cov} max_cov={my_max_cov} cov={cov}"))
 
 pdf = df %>%
     filter(coverage_H1 > 0 & coverage_H2 > 0) %>%
@@ -152,6 +153,9 @@ pdf = df %>%
         hap1_nacc = coverage_H1 - fire_coverage_H1,
         hap2_nacc = coverage_H2 - fire_coverage_H2,
     )
+
+print("After coverage filter")
+print(nrow(pdf))
 
 if(nrow(pdf)== 0){
     system(glue("touch {out_file_1}"))
@@ -184,6 +188,8 @@ pdf = pdf %>%
     ) %>%
     data.table()
 
+print("After fisher test")
+print(nrow(pdf))
 
 # make the plots
 tdf = pdf 
