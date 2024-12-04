@@ -191,6 +191,9 @@ pdf = pdf %>%
 print("After fisher test")
 print(nrow(pdf))
 
+print("After p-value adjustment")
+print(nrow(pdf %>% filter(p_adjust <= p_threshold)))
+
 # make the plots
 tdf = pdf 
 
