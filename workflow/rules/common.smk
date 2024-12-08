@@ -11,7 +11,7 @@ def get_ref():
     ref = config["ref"]
     if not os.path.exists(ref):
         raise ValueError(f"FIRE: reference file {ref} does not exist")
-    return ref
+    return os.path.abspath(ref)
 
 
 def get_fai():
@@ -25,8 +25,8 @@ def get_excludes():
     excludes = config.get("excludes", [])
     if REF_NAME == "hg38" or REF_NAME == "GRCh38":
         files = [
-            "../annotations/hg38.blacklist.ENCFF356LFX.bed.gz",
             "../annotations/hg38.gap.bed.gz",
+            "../annotations/hg38.blacklist.ENCFF356LFX.bed.gz",
             "../annotations/SDs.merged.hg38.bed.gz",
         ]
         excludes += [workflow.source_path(file) for file in files]
@@ -105,34 +105,32 @@ def get_load(wc):
     return 50
 
 
-def grep_command_for_el_type(wc):
+def get_hap_col_suffix(wc):
+    if wc.hp == "all":
+        return ""
+    elif wc.hp == "hap1":
+        return "_H1"
+    elif wc.hp == "hap2":
+        return "_H2"
+    else:
+        raise ValueError(f"Unknown haplotype {wc.hp}")
+
+
+def pileup_cut_cmd(wc):
+    if wc.hp == "all":
+        tail = ""
+    elif wc.hp == "hap1":
+        tail = "_H1"
+    elif wc.hp == "hap2":
+        tail = "_H2"
+    else:
+        raise ValueError(f"Unknown haplotype {wc.hp}")
     if wc.el_type == "nucleosome":
-        return "awk '$10>1.0'"
+        col = f"$nuc_coverage{tail}"
     elif wc.el_type == "linker":
-        return f"awk '$10<=1.0 && $10>{MIN_FIRE_FDR}'"
+        col = f"$msp_coverage{tail}-$fire_coverage{tail}"
     elif wc.el_type == "fire":
-        return f"awk '$10<={MIN_FIRE_FDR}'"
+        col = f"$fire_coverage{tail}"
     else:
         raise ValueError(f"Unknown element type {wc.el_type}")
-
-
-def hap_grep_term(wc):
-    if wc.hp == "all":
-        return '""'
-    elif wc.hp == "hap1":
-        return "H1"
-    elif wc.hp == "hap2":
-        return "H2"
-    else:
-        raise ValueError(f"Unknown haplotype {wc.hp}")
-
-
-def hap_hck_columns(wc):
-    if wc.hp == "all":
-        return "-F fire_coverage -F coverage"
-    elif wc.hp == "hap1":
-        return "-F fire_coverage_H1 -F coverage_H1"
-    elif wc.hp == "hap2":
-        return "-F fire_coverage_H2 -F coverage_H2"
-    else:
-        raise ValueError(f"Unknown haplotype {wc.hp}")
+    return f"bioawk -tc hdr '{{print $1,$2,$3,{col}}}'"
