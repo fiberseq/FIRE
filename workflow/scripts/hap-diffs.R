@@ -118,9 +118,8 @@ df=fread(in_file) %>%
     ) %>%
     data.table()
 
-print(df[fire_coverage_H1 > coverage_H1])
-print(df[fire_coverage_H2 > coverage_H2])
-
+print("Before coverage filter")
+print(nrow(df))
 
 # continue 
 df$hap1_frac_acc = df$fire_coverage_H1/df$coverage_H1
@@ -134,8 +133,10 @@ sd = 3
 cov = median(df$coverage)
 my_min_cov = max(cov*0.5 - sd * sqrt(cov*0.5), 10)
 my_max_cov = cov*0.5 + sd * sqrt(cov*0.5)
+#my_min_cov = 10
+#my_max_cov = median(df$coverage)
 
-print(glue("min_cov={my_min_cov} max_cov={my_max_cov} cov={cov}"))
+#print(glue("min_cov={my_min_cov} max_cov={my_max_cov} cov={cov}"))
 
 pdf = df %>%
     filter(coverage_H1 > 0 & coverage_H2 > 0) %>%
@@ -153,6 +154,9 @@ pdf = df %>%
         hap2_nacc = coverage_H2 - fire_coverage_H2,
     )
 
+print("After coverage filter")
+print(nrow(pdf))
+
 if(nrow(pdf)== 0){
     system(glue("touch {out_file_1}"))
     system(glue("touch {out_file_2}"))
@@ -161,7 +165,6 @@ if(nrow(pdf)== 0){
     quit()
 }
 
-#print(pdf[2446,])
 pdf = pdf %>%
     filter(
       hap1_acc >= 0,
@@ -173,8 +176,8 @@ pdf = pdf %>%
     mutate(
         p_value=fisher.test(matrix(c(hap1_acc, hap1_nacc, hap2_acc, hap2_nacc),nrow=2))$p.value
     ) %>%
-    # group_by(sample) %>%
     ungroup() %>%
+    group_by(autosome) %>%
     mutate(
         p_adjust = p.adjust(p_value, method="BH"),
     ) %>%
@@ -184,6 +187,11 @@ pdf = pdf %>%
     ) %>%
     data.table()
 
+print("After fisher test")
+print(nrow(pdf))
+
+print("After p-value adjustment")
+print(nrow(pdf %>% filter(p_adjust <= p_threshold)))
 
 # make the plots
 tdf = pdf 
