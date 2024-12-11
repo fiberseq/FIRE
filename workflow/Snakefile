@@ -130,7 +130,7 @@ rule all:
             v=VERSION,
         ),
         # model results
-        expand(rules.merged_fire_bam.output.cram, sm=MANIFEST.index, v=VERSION),
+        expand(rules.fire.output.cram, sm=MANIFEST.index, v=VERSION),
         expand(rules.fire_sites.output, sm=MANIFEST.index, v=VERSION),
         # Stats and Tables
         expand(rules.fires_in_peaks.output.txt, sm=MANIFEST.index, v=VERSION),

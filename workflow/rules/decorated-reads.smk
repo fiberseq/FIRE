@@ -6,8 +6,8 @@ ITEMS_PER_SLOT = 1024 * 8
 
 rule decorate_fibers_chromosome:
     input:
-        cram=rules.merged_fire_bam.output.cram,
-        crai=rules.merged_fire_bam.output.crai,
+        cram=rules.fire.output.cram,
+        crai=rules.fire.output.crai,
     output:
         bed=temp("temp/{sm}/decorate/{v}-{chrom}.bed.gz"),
         decorated=temp("temp/{sm}/decorate/{v}-{chrom}.dec.bed.gz"),

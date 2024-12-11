@@ -52,7 +52,7 @@ rule fires_in_peaks:
 
 rule ft_qc:
     input:
-        cram=rules.merged_fire_bam.output.cram,
+        cram=rules.fire.output.cram,
     output:
         tbl="results/{sm}/{sm}-fire-{v}-qc.tbl.gz",
     conda:

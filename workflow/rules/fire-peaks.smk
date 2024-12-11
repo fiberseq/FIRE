@@ -25,7 +25,7 @@ rule filtered_and_shuffled_fiber_locations_chromosome:
 
 rule shuffled_pileup_chromosome:
     input:
-        cram=rules.merged_fire_bam.output.cram,
+        cram=rules.fire.output.cram,
         shuffled=rules.filtered_and_shuffled_fiber_locations_chromosome.output.shuffled,
     output:
         bed=temp("temp/{sm}/shuffle/{v}-{chrom}.pileup.bed.gz"),
@@ -93,7 +93,7 @@ rule fdr_table:
 # coverage_H2  fire_coverage_H2  score_H2   nuc_coverage_H2 msp_coverage_H2
 rule pileup_chromosome:
     input:
-        bam=rules.merged_fire_bam.output.cram,
+        bam=rules.fire.output.cram,
     output:
         bed=temp("temp/{sm}/{v}-{chrom}.pileup.bed.gz"),
     threads: 4

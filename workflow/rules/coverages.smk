@@ -5,8 +5,8 @@ rule genome_bedgraph:
     input:
         ref=ancient(REF),
         fai=ancient(FAI),
-        cram=rules.merged_fire_bam.output.cram,
-        crai=rules.merged_fire_bam.output.crai,
+        cram=rules.fire.output.cram,
+        crai=rules.fire.output.crai,
     output:
         bg=temp("temp/{sm}/coverage/{sm}-{v}.bed.gz"),
         tbi=temp("temp/{sm}/coverage/{sm}-{v}.bed.gz.tbi"),
@@ -53,8 +53,8 @@ rule coverage:
 #
 rule fiber_locations_chromosome:
     input:
-        cram=rules.merged_fire_bam.output.cram,
-        crai=rules.merged_fire_bam.output.crai,
+        cram=rules.fire.output.cram,
+        crai=rules.fire.output.crai,
     output:
         bed=temp("temp/{sm}/coverage/{v}-{chrom}.fiber-locations.bed.gz"),
     threads: 4
