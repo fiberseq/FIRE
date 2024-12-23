@@ -4,17 +4,26 @@
 
 # TODO get the container working
 # container: "docker://continuumio/miniconda3"
+
 import pandas as pd
 import math
 import sys
 import os
 from snakemake.utils import min_version
 
-min_version("8.12.0")
+min_version("8.21.0")
+
 
 # setup shared functions
 include: "rules/common.smk"
 
+
+# load the version from the environment
+VERSION = f"v{os.environ.get("PIXI_PROJECT_VERSION", "UNK")}"
+
+# thread options
+MAX_THREADS = config.get("max_threads", 4)
+SORT_THREADS = config.get("sort_threads", 8)
 
 # reference genome and reference regions
 REF = get_ref()
@@ -42,30 +51,55 @@ else:
     MAX_PEAK_FDR = 1.0
 MIN_FRAC_ACCESSIBLE = config.get("min_frac_accessible", 0)
 
+# data filtering
+FILTER_FLAG = config.get("samtools-filter-flag", "260")  # 2308
+
+# Misc options
+NZOOMS = config.get("nzooms", 10)
+
 # Misc sets of wildcards
 haps = ["all", "hap1", "hap2", "unk"]
 not_unk = ["all", "hap1", "hap2"]
+all_only = ["all"]
 types = ["fdr", "acc", "link", "nuc"]
 types_to_col = {"fdr": 4, "acc": 5, "link": 6, "nuc": 7}
 bw_types = ["log_FDR"]  # "score", "FDR",
-bw_types = bw_types + [f"{t}_H1" for t in bw_types] + [f"{t}_H2" for t in bw_types]
 el_types = ["fire", "linker", "nucleosome"]
+
+
+# DSA options
+DSA_CHAIN = config.get("chain", None)
+DSA = DSA_CHAIN is not None
+LEVIO_EXE = config.get("levio_exe", "leviosam2")
 
 # developer options
 FT_EXE = config.get("ft_exe", "ft")
+if FT_EXE != "ft":
+    print(f"INFO: Using FT_EXE: {FT_EXE}", file=sys.stderr)
+
 ONT = config.get("ont", False)
-USE_ONT = ""
 if ONT:
-    USE_ONT = " --ont --ml 225 "
+    ont_ml = config.get("ont_ml", 0)
+    if ont_ml != 0:
+        USE_ONT = f" --ont --ml {ont_ml} "
+    else:
+        USE_ONT = " --ont "
+else:
+    USE_ONT = ""
 MIN_UNRELIABLE_COVERAGE_LEN = config.get("min_unreliable_coverage_len", 50)
 
 
 include: "rules/apply-model.smk"
 include: "rules/coverages.smk"
-include: "rules/FDR-peaks.smk"
-include: "rules/peak-stats.smk"
+include: "rules/fire-peaks.smk"
+include: "rules/stats.smk"
 include: "rules/decorated-reads.smk"
 include: "rules/track-hub.smk"
+
+
+if DSA:
+
+    include: "rules/levio.smk"
 
 
 wildcard_constraints:
@@ -77,6 +111,7 @@ wildcard_constraints:
     hp="|".join(haps),
     col="|".join(bw_types),
     el_type="|".join(el_types),
+    v=VERSION,
 
 
 localrules:
@@ -86,37 +121,51 @@ localrules:
 rule all:
     input:
         # coverage information
-        expand(rules.genome_bedgraph.output, sm=MANIFEST.index),
-        expand(rules.coverage.output, sm=MANIFEST.index),
-        expand(rules.exclude_from_shuffle.output, sm=MANIFEST.index),
-        expand(rules.unreliable_coverage_regions.output, sm=MANIFEST.index),
-        # model results
-        expand(rules.fire_sites.output, sm=MANIFEST.index),
-        # fiber locations
-        expand(rules.fiber_locations.output, sm=MANIFEST.index),
-        expand(rules.filtered_and_shuffled_fiber_locations.output, sm=MANIFEST.index),
-        # coverage of elements
+        expand(rules.coverage.output, sm=MANIFEST.index, v=VERSION),
+        expand(rules.exclude_from_shuffle.output, sm=MANIFEST.index, v=VERSION),
+        expand(rules.unreliable_coverage_regions.output, sm=MANIFEST.index, v=VERSION),
         expand(
-            rules.element_coverages.output,
+            rules.pileup.output.bed,
             sm=MANIFEST.index,
-            hp=not_unk,
-            el_type=el_types,
+            v=VERSION,
         ),
-        # FDR results
-        expand(rules.fdr_track.output, sm=MANIFEST.index),
-        expand(rules.fdr_peaks_by_fire_elements.output, sm=MANIFEST.index),
-        expand(rules.wide_fdr_peaks.output, sm=MANIFEST.index),
-        expand(rules.peaks_vs_percent.output, sm=MANIFEST.index),
-        expand(rules.one_percent_fdr_peaks.output, sm=MANIFEST.index),
-        expand(rules.fires_in_peaks.output.txt, sm=MANIFEST.index),
+        # model results
+        expand(rules.fire.output.cram, sm=MANIFEST.index, v=VERSION),
+        expand(rules.fire_sites.output, sm=MANIFEST.index, v=VERSION),
+        # Stats and Tables
+        expand(rules.fires_in_peaks.output.txt, sm=MANIFEST.index, v=VERSION),
+        expand(rules.ft_qc.output.tbl, sm=MANIFEST.index, v=VERSION),
+        # FIRE peaks
+        expand(rules.fdr_table.output.tbl, sm=MANIFEST.index, v=VERSION),
+        expand(rules.pileup.output.bed, sm=MANIFEST.index, v=VERSION),
+        expand(rules.fire_peaks.output.bed, sm=MANIFEST.index, v=VERSION),
+        expand(rules.wide_fire_peaks.output.bed, sm=MANIFEST.index, v=VERSION),
+        expand(rules.one_percent_fire_peaks.output.bed, sm=MANIFEST.index, v=VERSION),
+        expand(rules.peaks_vs_percent.output.fig1, sm=MANIFEST.index, v=VERSION),
+        # haplotype differences
+        expand(rules.hap_differences.output.fig1, sm=MANIFEST.index, v=VERSION),
+        expand(rules.hap_differences.output.fig2, sm=MANIFEST.index, v=VERSION),
+        expand(rules.hap_differences.output.bed, sm=MANIFEST.index, v=VERSION),
         # trackhub
-        expand(rules.fdr_track_to_bw.output.bw, sm=MANIFEST.index, col=bw_types),
-        expand(rules.fdr_peaks_by_fire_elements_to_bb.output.bb, sm=MANIFEST.index),
-        expand(rules.percent_accessible.output.bw, hp=not_unk, sm=MANIFEST.index),
+        expand(rules.fire_peaks_bb.output.bb, sm=MANIFEST.index, v=VERSION),
+        expand(
+            rules.percent_accessible.output.bw,
+            hp=not_unk,
+            sm=MANIFEST.index,
+            v=VERSION,
+        ),
+        expand(rules.decorate_fibers_1.output.bb, sm=MANIFEST.index, v=VERSION),
+        expand(rules.decorate_fibers_2.output.bb, sm=MANIFEST.index, v=VERSION),
+        expand(rules.hap_differences_track.output.bb, sm=MANIFEST.index, v=VERSION),
         expand(
             rules.element_coverages_bw.output.bw,
             sm=MANIFEST.index,
-            hp=not_unk,
+            hp=all_only,
             el_type=el_types,
+            v=VERSION,
         ),
-        expand(rules.trackhub.output, sm=MANIFEST.index),
+        expand(rules.trackhub.output.hub, sm=MANIFEST.index, v=VERSION),
+
+
+# UNUSED
+# expand(rules.fdr_track_to_bw.output.bw, sm=MANIFEST.index, col=bw_types),

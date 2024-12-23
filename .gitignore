@@ -142,7 +142,7 @@ figures/
 old/
 phasing/
 run_scripts/
-trackHub/
+trackHub-{v}/
 trackHub_altius/
 XCI/
 altius/
@@ -157,7 +157,6 @@ config/**
 *code-workspace*
 .vscode/*
 .DS_Store
-
 
 # stats
 Rdata/
@@ -177,4 +176,6 @@ misc/
 new-agg-test/
 scATAC/
 test/
-
+test-data/
+bigtools-test/
+fire-test-data/
