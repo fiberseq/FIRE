@@ -175,7 +175,7 @@ def make_fdr_table(infile, outfile, nrows, max_cov=None, min_cov=None, max_fdr=0
     # raise an error if no threshold below 0.05 is found
     if fdr_table["FDR"].min() > max_fdr:
         raise ValueError(
-            f"No threshold with FDR < {max_fdr} found. Check the input Fiber-seq data with the QC pipeline and make sure you are using WGS Fiber-seq data."
+            f"No FIRE score threshold has an FDR < {max_fdr}. Check the input Fiber-seq data with the QC pipeline and make sure you are using WGS Fiber-seq data."
         )
     return fdr_table
 
