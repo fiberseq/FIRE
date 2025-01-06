@@ -8,6 +8,7 @@ import polars as pl
 import numpy as np
 import polars.selectors as cs
 import gzip
+import sys
 
 # from numba import njit
 ROLLING_FIRE_SCORE_WINDOW_SIZE = 200
@@ -25,12 +26,26 @@ def find_nearest(array, value):
     return idx
 
 
+def my_read_csv(*args, **kwargs):
+    try:
+        result = pl.read_csv(*args, **kwargs)
+    # do some transformation with the dataframe
+    except pl.exceptions.NoDataError as e:
+        print(
+            "No data is found in the input file. Check the input file and make sure it is not empty. It is likely that the input data was not generated correctly or that it was impossible to find peaks at the specified FDR value.",
+            file=sys.stderr,
+        )
+        print(e, file=sys.stderr)
+        sys.exit(1)
+    return result
+
+
 # ['#chrom', 'start', 'end', 'coverage', 'fire_coverage', 'score', 'nuc_coverage', 'msp_coverage',
 # 'coverage_H1', 'fire_coverage_H1', 'score_H1', 'nuc_coverage_H1', 'msp_coverage_H1',
 # 'coverage_H2', 'fire_coverage_H2', 'score_H2', 'nuc_coverage_H2', 'msp_coverage_H2']
 def read_pileup_file(infile, nrows):
     # get the header from the first line of the file
-    header = pl.read_csv(infile, separator="\t", n_rows=1).columns
+    header = my_read_csv(infile, separator="\t", n_rows=1).columns
 
     # check that there is at least two lines
     open_infile = gzip.open if is_gzipped(infile) else open
@@ -51,7 +66,7 @@ def read_pileup_file(infile, nrows):
     logging.info(f"Schema overrides for the pileup file:\n{schema_overrides}")
 
     # read the file
-    pileup = pl.read_csv(
+    pileup = my_read_csv(
         infile,
         separator="\t",
         has_header=False,
@@ -132,7 +147,7 @@ def fdr_table_from_scores(fire_scores):
     return results
 
 
-def make_fdr_table(infile, outfile, nrows, max_cov=None, min_cov=None):
+def make_fdr_table(infile, outfile, nrows, max_cov=None, min_cov=None, max_fdr=0.05):
     # read the pileup file
     pileup = read_pileup_file(infile, nrows)
     # filter on coverages if needed
@@ -172,11 +187,16 @@ def make_fdr_table(infile, outfile, nrows, max_cov=None, min_cov=None):
     logging.info(f"Done aggregating pileup file:\n{fire_scores}")
     fdr_table = fdr_table_from_scores(fire_scores)
     fdr_table.to_csv(outfile, sep="\t", index=False)
+    # raise an error if no threshold below 0.05 is found
+    if fdr_table["FDR"].min() > max_fdr:
+        raise ValueError(
+            f"No FIRE score threshold has an FDR < {max_fdr}. Check the input Fiber-seq data with the QC pipeline and make sure you are using WGS Fiber-seq data."
+        )
     return fdr_table
 
 
 def read_fdr_table(infile):
-    fdr_table = pl.read_csv(infile, separator="\t").to_pandas()
+    fdr_table = my_read_csv(infile, separator="\t").to_pandas()
     logging.info(f"Read FDR table:\n{fdr_table}")
     return fdr_table
 
@@ -283,6 +303,7 @@ def main(
     nrows: Optional[int] = None,
     max_cov: Optional[int] = None,
     min_cov: Optional[int] = None,
+    max_fdr: float = 0.05,
     verbose: int = 0,
 ):
     """
@@ -303,7 +324,7 @@ def main(
         apply_fdr_table(infile, outfile, fdr_table, nrows)
     else:
         fdr_table = make_fdr_table(
-            infile, outfile, nrows, min_cov=min_cov, max_cov=max_cov
+            infile, outfile, nrows, min_cov=min_cov, max_cov=max_cov, max_fdr=max_fdr
         )
     return 0
 
