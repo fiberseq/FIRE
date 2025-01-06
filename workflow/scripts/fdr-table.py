@@ -132,7 +132,7 @@ def fdr_table_from_scores(fire_scores):
     return results
 
 
-def make_fdr_table(infile, outfile, nrows, max_cov=None, min_cov=None):
+def make_fdr_table(infile, outfile, nrows, max_cov=None, min_cov=None, max_fdr=0.05):
     # read the pileup file
     pileup = read_pileup_file(infile, nrows)
     # filter on coverages if needed
@@ -172,6 +172,11 @@ def make_fdr_table(infile, outfile, nrows, max_cov=None, min_cov=None):
     logging.info(f"Done aggregating pileup file:\n{fire_scores}")
     fdr_table = fdr_table_from_scores(fire_scores)
     fdr_table.to_csv(outfile, sep="\t", index=False)
+    # raise an error if no threshold below 0.05 is found
+    if fdr_table["FDR"].min() > max_fdr:
+        raise ValueError(
+            f"No threshold with FDR < {max_fdr} found. Check the input Fiber-seq data with the QC pipeline and make sure you are using WGS Fiber-seq data."
+        )
     return fdr_table
 
 
@@ -283,6 +288,7 @@ def main(
     nrows: Optional[int] = None,
     max_cov: Optional[int] = None,
     min_cov: Optional[int] = None,
+    max_fdr: float = 0.05,
     verbose: int = 0,
 ):
     """
@@ -303,7 +309,7 @@ def main(
         apply_fdr_table(infile, outfile, fdr_table, nrows)
     else:
         fdr_table = make_fdr_table(
-            infile, outfile, nrows, min_cov=min_cov, max_cov=max_cov
+            infile, outfile, nrows, min_cov=min_cov, max_cov=max_cov, max_fdr=max_fdr
         )
     return 0
 
