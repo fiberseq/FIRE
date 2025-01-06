@@ -32,7 +32,7 @@ def my_read_csv(*args, **kwargs):
     # do some transformation with the dataframe
     except pl.exceptions.NoDataError as e:
         print(
-            "No data is found in the input file. Check the input file and make sure it is not empty.",
+            "No data is found in the input file. Check the input file and make sure it is not empty. It is likely that the input data was not generated correctly or that it was impossible to find peaks at the specified FDR value.",
             file=sys.stderr,
         )
         print(e, file=sys.stderr)
