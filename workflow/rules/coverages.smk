@@ -151,6 +151,7 @@ rule unreliable_coverage_regions:
     output:
         bed="results/{sm}/additional-outputs-{v}/coverage/unreliable-coverage-regions.bed.gz",
         bed_tbi="results/{sm}/additional-outputs-{v}/coverage/unreliable-coverage-regions.bed.gz.tbi",
+        tmp=temp("temp/{sm}/additional-outputs-{v}/unreliable-coverage-regions.bed"),
         bb="results/{sm}/trackHub-{v}/bb/unreliable-coverage-regions.bb",
     threads: 4
     params:
@@ -171,10 +172,11 @@ rule unreliable_coverage_regions:
         > {output.bed}
 
         # bigbed
-        bgzip -cd {output.bed} -@ {threads} \
-            | bigtools bedtobigbed \
+        # for some reason bigtools gives a too many files open error when reading from stdin
+        bedtools merge -i {output.bed} > {output.tmp}
+        bigtools bedtobigbed \
                 -s start -a {params.bed3_as} \
-                - {input.fai} {output.bb}
+                {output.tmp} {input.fai} {output.bb}
 
         # index 
         tabix -f -p bed {output.bed}
