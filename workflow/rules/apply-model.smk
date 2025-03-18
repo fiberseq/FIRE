@@ -36,6 +36,13 @@ rule fire:
                 --output-fmt-option embed_ref=1 \
                 --input-fmt-option required_fields=0x1bff \
                 --write-index -o {output.cram}
+
+        # check if the cram file has zero reads 
+        reads_in_header=$(samtools view {output.cram} | head | wc -l || true)
+        if [ $reads_in_header -eq 0 ]; then
+            printf "\nNo reads passed filters exiting...\n\nPlease review https://fiberseq.github.io/quick-start.html to make sure the input BAM has been correctly processed.\n\n"
+            exit 1
+        fi
         """
 
 

@@ -35,7 +35,7 @@ test = { cmd = [
   "--configfile",
   "test.yaml",
   "-k",
-], depends_on = [
+], depends-on = [
   "test-data",
 ], clean-env = true }
 
@@ -64,7 +64,7 @@ snakemake = "==8.21"
 snakemake-executor-plugin-slurm = ">=0.11.2"
 snakefmt = "*"
 ruff = "*"
-awscli = "2.22"
+awscli = "2.22.*"
 taplo = "*"
 
 [pypi-dependencies]
