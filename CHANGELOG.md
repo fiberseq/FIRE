@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.2
+
+- fix #34
+- fix #33
+- Update to pull test data from a new s3 bucket
+
 ## v0.1.1
 
 Added more informative error messages if an FDR distribution cannot be made or there is not enough coverage.
