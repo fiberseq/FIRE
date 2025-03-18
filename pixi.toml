@@ -20,7 +20,9 @@ test-data = { cmd = [
   "s3",
   "--no-sign-request",
   "sync",
-  "s3://stergachis-public1/FIRE/test-data",
+  "--endpoint-url",
+  "https://s3.kopah.orci.washington.edu",
+  "s3://stergachis/public/FIRE/test-data",
   "fire-test-data/",
 ] }
 test = { cmd = [
