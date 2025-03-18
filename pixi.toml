@@ -4,56 +4,58 @@ channels = ["conda-forge", "bioconda"]
 description = "Add a short description here"
 name = "FIRE"
 platforms = ["osx-64", "linux-64"]
-version = "0.1.1"
+version = "0.1.2"
 
 [tasks]
 fmt = "ruff format . && taplo format pixi.toml && snakefmt workflow/"
 test-data = { cmd = [
-  "cd",
-  "$INIT_CWD",
-  "&&",
-  "mkdir",
-  "-p",
-  "fire-test-data",
-  "&&",
-  "aws",
-  "s3",
-  "--no-sign-request",
-  "sync",
-  "s3://stergachis-public1/FIRE/test-data",
-  "fire-test-data/",
+    "cd",
+    "$INIT_CWD",
+    "&&",
+    "mkdir",
+    "-p",
+    "fire-test-data",
+    "&&",
+    "aws",
+    "s3",
+    "--no-sign-request",
+    "sync",
+    "--endpoint-url",
+    "https://s3.kopah.orci.washington.edu",
+    "s3://stergachis/public/FIRE/test-data",
+    "fire-test-data/",
 ] }
 test = { cmd = [
-  "cd",
-  "$INIT_CWD/fire-test-data",
-  "&&",
-  "snakemake",
-  "-s",
-  "$PIXI_PROJECT_ROOT/workflow/Snakefile",
-  "--configfile",
-  "test.yaml",
-  "-k",
-], depends_on = [
-  "test-data",
+    "cd",
+    "$INIT_CWD/fire-test-data",
+    "&&",
+    "snakemake",
+    "-s",
+    "$PIXI_PROJECT_ROOT/workflow/Snakefile",
+    "--configfile",
+    "test.yaml",
+    "-k",
+], depends-on = [
+    "test-data",
 ], clean-env = true }
 
 fire = { cmd = [
-  "cd",
-  "$INIT_CWD",
-  "&&",
-  "snakemake",
-  "-s",
-  "$PIXI_PROJECT_ROOT/workflow/Snakefile",
+    "cd",
+    "$INIT_CWD",
+    "&&",
+    "snakemake",
+    "-s",
+    "$PIXI_PROJECT_ROOT/workflow/Snakefile",
 ] }
 slurm = { cmd = [
-  "cd",
-  "$INIT_CWD",
-  "&&",
-  "snakemake",
-  "-s",
-  "$PIXI_PROJECT_ROOT/workflow/Snakefile",
-  "--profile",
-  "$PIXI_PROJECT_ROOT/profiles/slurm-executor",
+    "cd",
+    "$INIT_CWD",
+    "&&",
+    "snakemake",
+    "-s",
+    "$PIXI_PROJECT_ROOT/workflow/Snakefile",
+    "--profile",
+    "$PIXI_PROJECT_ROOT/profiles/slurm-executor",
 ] }
 
 [dependencies]
@@ -62,7 +64,7 @@ snakemake = "==8.21"
 snakemake-executor-plugin-slurm = ">=0.11.2"
 snakefmt = "*"
 ruff = "*"
-awscli = "2.22"
+awscli = "2.22.*"
 taplo = "*"
 
 [pypi-dependencies]
