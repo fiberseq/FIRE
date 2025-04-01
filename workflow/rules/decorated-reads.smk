@@ -99,7 +99,7 @@ rule decorate_fibers_2:
                 --inmemory \
                 --block-size {params.block_size} --items-per-slot {params.items_per_slot} \
                 --nzooms {params.nzooms} \
-                -a {params.dec_as} -s start \
+                -s start -a {params.dec_as} \
                 - {input.fai} {output.bb}
         """
 
