@@ -14,6 +14,8 @@ rule decorate_fibers_chromosome:
     threads: 4
     resources:
         mem_mb=get_mem_mb,
+    # the following steps can take a while so this helps the pipeline start this earlier.
+    priority: 10
     conda:
         DEFAULT_ENV
     shell:
@@ -42,6 +44,7 @@ rule decorate_fibers_1:
     threads: 8
     resources:
         runtime=240,
+    priority: 10
     conda:
         DEFAULT_ENV
     params:
@@ -79,6 +82,7 @@ rule decorate_fibers_2:
     threads: 8
     resources:
         runtime=60 * 16,
+    priority: 10
     conda:
         DEFAULT_ENV
     params:
