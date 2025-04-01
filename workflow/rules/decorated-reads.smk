@@ -55,7 +55,7 @@ rule decorate_fibers_1:
         cat {input.bed} \
             | bgzip -cd -@ {threads} \
             | bigtools bedtobigbed \
-                --inmemory \
+                --inmemory -t {threads} \
                 --block-size {params.block_size} --items-per-slot {params.items_per_slot} \
                 --nzooms {params.nzooms} \
                 -s start -a {params.bed_as} \
@@ -96,7 +96,7 @@ rule decorate_fibers_2:
             | rg -v '^#' \
             | rg -vw 'NUC' \
             | bigtools bedtobigbed \
-                --inmemory \
+                --inmemory -t {threads} \
                 --block-size {params.block_size} --items-per-slot {params.items_per_slot} \
                 --nzooms {params.nzooms} \
                 -s start -a {params.dec_as} \
