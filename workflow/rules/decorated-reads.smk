@@ -26,6 +26,7 @@ rule decorate_fibers_chromosome:
         """
 
 
+
 rule decorate_fibers_1:
     input:
         bed=expand(
@@ -35,7 +36,7 @@ rule decorate_fibers_1:
         ),
         fai=ancient(FAI),
     output:
-        #bed=temp("temp/{sm}/fiber-calls/fire-fibers.bed.gz"),
+        bed=temp("temp/{sm}/{v}/fiber-calls/fire-fibers.bed.gz"),
         bb="results/{sm}/trackHub-{v}/bb/fire-fibers.bb",
     benchmark:
         "results/{sm}/additional-outputs-{v}/benchmarks/decorate_fibers_1/{sm}.txt"
@@ -50,16 +51,10 @@ rule decorate_fibers_1:
         items_per_slot=ITEMS_PER_SLOT,
         block_size=BLOCK_SIZE,
     shell:
-        # bigtools version
         """
-        cat {input.bed} \
-            | bgzip -cd -@ {threads} \
-            | bigtools bedtobigbed \
-                --inmemory \
-                --block-size {params.block_size} --items-per-slot {params.items_per_slot} \
-                --nzooms {params.nzooms} \
-                -s start -a {params.bed_as} \
-                - {input.fai} {output.bb}
+        cat {input.bed} > {output.bed}
+        bedToBigBed -allow1bpOverlap -type=bed12+ -as={params.bed_as} \
+            {output.bed} {input.fai} {output.bb}
         """
 
 
@@ -73,7 +68,7 @@ rule decorate_fibers_2:
         fai=ancient(FAI),
     output:
         bb="results/{sm}/trackHub-{v}/bb/fire-fiber-decorators.bb",
-        #bed=temp("temp/{sm}/trackHub-{v}/bb/fire-fiber-decorators.bed.gz"),
+        bed=temp("temp/{sm}/trackHub-{v}/bb/fire-fiber-decorators.bed.gz"),
     benchmark:
         "results/{sm}/additional-outputs-{v}/benchmarks/decorate_fibers_2/{sm}.txt"
     threads: 8
@@ -87,21 +82,12 @@ rule decorate_fibers_2:
         items_per_slot=ITEMS_PER_SLOT,
         block_size=BLOCK_SIZE,
     shell:
-        # bigtools version
-        # for some reason filtering out NUCs removes the display bug for bigtools
-        # at least in my test cases
         """
-        cat {input.decorated} \
-            | bgzip -cd -@ {threads} \
-            | rg -v '^#' \
-            | rg -vw 'NUC' \
-            | bigtools bedtobigbed \
-                --inmemory \
-                --block-size {params.block_size} --items-per-slot {params.items_per_slot} \
-                --nzooms {params.nzooms} \
-                -a {params.dec_as} -s start \
-                - {input.fai} {output.bb}
+        cat {input.decorated} > {output.bed}
+        bedToBigBed -allow1bpOverlap -type=bed12+ -as={params.dec_as} \
+            {output.bed} {input.fai} {output.bb}
         """
+
 
 
 if False:

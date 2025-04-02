@@ -154,6 +154,8 @@ rule unreliable_coverage_regions:
         tmp=temp("temp/{sm}/additional-outputs-{v}/unreliable-coverage-regions.bed"),
         bb="results/{sm}/trackHub-{v}/bb/unreliable-coverage-regions.bb",
     threads: 4
+    resources:
+        runtime=240 * 10,
     params:
         min_len=MIN_UNRELIABLE_COVERAGE_LEN,
         bed3_as=workflow.source_path("../templates/bed3.as"),
@@ -174,9 +176,9 @@ rule unreliable_coverage_regions:
         # bigbed
         # for some reason bigtools gives a too many files open error when reading from stdin
         bedtools merge -i {output.bed} > {output.tmp}
-        bigtools bedtobigbed \
+        cat {output.tmp} | bigtools bedtobigbed \
                 -s start -a {params.bed3_as} \
-                {output.tmp} {input.fai} {output.bb}
+                - {input.fai} {output.bb}
 
         # index 
         tabix -f -p bed {output.bed}
