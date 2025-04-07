@@ -94,7 +94,7 @@ rule fire_peaks_bb:
     shell:
         """
         bgzip -cd {input.bed} \
-            | bioawk -tc hdr '{{print $1,$2,$3,"peak-"NR,int($score*10),".",$score,"-1",$log_FDR,int($start/2+$end/2)-$peak_start}}' \
+            | bioawk -tc hdr '{{if($0!=""){{print $1,$2,$3,"peak-"NR,int($score*10),".",$score,"-1",$log_FDR,int($start/2+$end/2)-$peak_start}}}}' \
             | bioawk -tc hdr '$5<=1000' \
             | rg -v '^#' \
             | bigtools bedtobigbed \
