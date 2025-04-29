@@ -38,7 +38,6 @@ test = { cmd = [
 ], depends-on = [
     "test-data",
 ], clean-env = true }
-
 fire = { cmd = [
     "cd",
     "$INIT_CWD",

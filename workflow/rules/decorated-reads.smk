@@ -14,6 +14,8 @@ rule decorate_fibers_chromosome:
     threads: 4
     resources:
         mem_mb=get_mem_mb,
+    # the following steps can take a while so this helps the pipeline start this earlier.
+    priority: 10
     conda:
         DEFAULT_ENV
     shell:
@@ -42,6 +44,7 @@ rule decorate_fibers_1:
     threads: 8
     resources:
         runtime=240,
+    priority: 10
     conda:
         DEFAULT_ENV
     params:
@@ -55,7 +58,7 @@ rule decorate_fibers_1:
         cat {input.bed} \
             | bgzip -cd -@ {threads} \
             | bigtools bedtobigbed \
-                --inmemory \
+                --inmemory -t {threads} \
                 --block-size {params.block_size} --items-per-slot {params.items_per_slot} \
                 --nzooms {params.nzooms} \
                 -s start -a {params.bed_as} \
@@ -79,6 +82,7 @@ rule decorate_fibers_2:
     threads: 8
     resources:
         runtime=60 * 16,
+    priority: 10
     conda:
         DEFAULT_ENV
     params:
@@ -96,10 +100,10 @@ rule decorate_fibers_2:
             | rg -v '^#' \
             | rg -vw 'NUC' \
             | bigtools bedtobigbed \
-                --inmemory \
+                --inmemory -t {threads} \
                 --block-size {params.block_size} --items-per-slot {params.items_per_slot} \
                 --nzooms {params.nzooms} \
-                -a {params.dec_as} -s start \
+                -s start -a {params.dec_as} \
                 - {input.fai} {output.bb}
         """
 

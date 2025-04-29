@@ -19,7 +19,14 @@ include: "rules/common.smk"
 
 
 # load the version from the environment
-VERSION = f"v{os.environ.get("PIXI_PROJECT_VERSION", "UNK")}"
+FULL_VERSION = f"v{os.environ.get("PIXI_PROJECT_VERSION", "UNK")}"
+# trim the FULL_VERSION to just the just the major and minor version
+VERSION = ".".join(FULL_VERSION.split(".")[:2])
+
+# use the full version if requested 
+if config.get("full-version", False):
+    VERSION = FULL_VERSION
+
 
 # thread options
 MAX_THREADS = config.get("max_threads", 4)
