@@ -77,7 +77,7 @@ rule fdr_table:
     params:
         script=workflow.source_path("../scripts/fdr-table.py"),
     resources:
-        mem_mb=get_mem_mb,
+        mem_mb=get_mem_mb_xl,
     shell:
         """
         MIN=$(cat {input.minimum})
