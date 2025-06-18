@@ -17,7 +17,7 @@ rule genome_bedgraph:
         DEFAULT_ENV
     shell:
         """ 
-        mosdepth -f {input.ref} -t {threads} tmp {input.cram}
+        mosdepth -F 4 -f {input.ref} -t {threads} tmp {input.cram}
         bgzip -cd tmp.per-base.bed.gz \
             | LC_ALL=C sort --parallel={threads} -k1,1 -k2,2n -k3,3n -k4,4  \
             | bgzip -@ {threads} \
