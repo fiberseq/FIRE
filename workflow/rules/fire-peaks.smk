@@ -141,7 +141,7 @@ rule pileup:
         fofn=temp("temp/{sm}/fire/fire-{v}-pileup.fofn"),
         bed="results/{sm}/{sm}-fire-{v}-pileup.bed.gz",
         tbi="results/{sm}/{sm}-fire-{v}-pileup.bed.gz.tbi",
-    threads: 4
+    threads: 8
     conda:
         DEFAULT_ENV
     shell:
