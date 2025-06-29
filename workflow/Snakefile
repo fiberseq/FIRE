@@ -130,12 +130,7 @@ rule all:
         # coverage information
         expand(rules.coverage.output, sm=MANIFEST.index, v=VERSION),
         expand(rules.exclude_from_shuffle.output, sm=MANIFEST.index, v=VERSION),
-        expand(rules.unreliable_coverage_regions.output, sm=MANIFEST.index, v=VERSION),
-        expand(
-            rules.pileup.output.bed,
-            sm=MANIFEST.index,
-            v=VERSION,
-        ),
+        expand(rules.unreliable_coverage_regions.output.bed, sm=MANIFEST.index, v=VERSION),
         # model results
         expand(rules.fire.output.cram, sm=MANIFEST.index, v=VERSION),
         expand(rules.fire_sites.output, sm=MANIFEST.index, v=VERSION),
