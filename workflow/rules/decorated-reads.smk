@@ -32,10 +32,10 @@ rule decorate_fibers_1:
     input:
         bed=expand(
             rules.decorate_fibers_chromosome.output.bed,
-            chrom=get_chroms(),
+            chrom=get_chroms,
             allow_missing=True,
         ),
-        fai=ancient(FAI),
+        fai=ancient(get_fai),
     output:
         #bed=temp("temp/{sm}/fiber-calls/fire-fibers.bed.gz"),
         bb="results/{sm}/trackHub-{v}/bb/fire-fibers.bb",
@@ -70,10 +70,10 @@ rule decorate_fibers_2:
     input:
         decorated=expand(
             rules.decorate_fibers_chromosome.output.decorated,
-            chrom=get_chroms(),
+            chrom=get_chroms,
             allow_missing=True,
         ),
-        fai=ancient(FAI),
+        fai=ancient(get_fai),
     output:
         bb="results/{sm}/trackHub-{v}/bb/fire-fiber-decorators.bb",
         #bed=temp("temp/{sm}/trackHub-{v}/bb/fire-fiber-decorators.bed.gz"),

@@ -12,6 +12,6 @@ dependencies:
   - pip
   - pip:
       - polars-lts-cpu[pyarrow]==1.7.1
+#- pysam==0.22
 #- tqdm
 #- numba::numba==0.60
-#- pysam==0.21

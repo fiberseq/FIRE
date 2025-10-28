@@ -4,7 +4,7 @@
 rule clustering_vs_null:
     input:
         bed=rules.fire_sites.output.bed,
-        fai=ancient(FAI),
+        fai=ancient(get_fai),
     output:
         tmp=temp("temp/{sm}/tmp.pre.calls.bed"),
         null=temp("temp/{sm}/null.calls.bed"),

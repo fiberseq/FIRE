@@ -32,22 +32,30 @@ if config.get("full-version", False):
 MAX_THREADS = config.get("max_threads", 4)
 SORT_THREADS = config.get("sort_threads", 8)
 
+# sample, haplotype, and chromosome wildcard building
+#FAI_DF = get_fai_df()
+DEFAULT_ENV = config.get("env", "../envs/env.yaml")
+MANIFEST = get_manifest()
+MIN_FIRE_FDR = config.get("min_fire_fdr", 0.10)
+
 # reference genome and reference regions
-REF = get_ref()
-FAI = get_fai()
-REF_NAME = config["ref_name"]
-EXCLUDES = get_excludes()
+#REF = get_ref()
+#FAI = get_fai()
+#REF_NAME = config["ref_name"]
+#REF_NAME = get_ref_name()
+#EXCLUDES = get_excludes()
 KEEP_CHRS = config.get("keep_chromosomes", ".*")
+#FAI_DF = get_fai_df()
 
 # coverage requirements
 MIN_COVERAGE = config.get("min_coverage", 4)
 COVERAGE_WITHIN_N_SD = config.get("coverage_within_n_sd", 5)
 
 # sample, haplotype, and chromosome wildcard building
-FAI_DF = get_fai_df()
-DEFAULT_ENV = config.get("env", "../envs/env.yaml")
-MANIFEST = get_manifest()
-MIN_FIRE_FDR = config.get("min_fire_fdr", 0.10)
+#FAI_DF = get_fai_df()
+#DEFAULT_ENV = config.get("env", "../envs/env.yaml")
+#MANIFEST = get_manifest()
+#MIN_FIRE_FDR = config.get("min_fire_fdr", 0.10)
 
 # FDR / peak calling thresholds
 MAX_PEAK_FDR = config.get("max_peak_fdr", 0.05)
@@ -109,8 +117,62 @@ if DSA:
     include: "rules/levio.smk"
 
 
+## mod manifest to include reference
+if "ref" not in MANIFEST.columns:
+    if "ref" not in config or str(config.get("ref")) == "None":
+        raise ValueError("FIRE: ref parameter is missing in config.yaml")
+    else:
+        temp_ref = config.get("ref")
+        MANIFEST["ref"] = temp_ref
+    if "ref_name" not in config or str(config.get("ref_name")) == "None":
+        raise ValueError("FIRE: ref_name parameter is missing in config.yaml")
+    else:
+        temp_ref_name = config.get("ref_name")
+        MANIFEST["ref_name"] = temp_ref_name
+    
+# make list of all chrs for 
+chroms_list_joined = ""
+
+for index, row in MANIFEST.iterrows():
+    first_report_var = True
+    min_contig_length = config.get("min_contig_length", 0)
+    fai = row['ref'] + ".fai"
+    fai_df = pd.read_csv(fai, sep="\t", names=["chr", "length", "x", "y", "z"])
+
+    skipped_contigs = fai_df["chr"][fai_df["length"] < min_contig_length]
+    if len(skipped_contigs) > 0 and first_report_var:
+        print(
+            f"WARNING: Skipping contigs with length < {min_contig_length:,}: {skipped_contigs}",
+            file=sys.stderr,
+        )
+
+    chroms = fai_df["chr"][fai_df["length"] >= min_contig_length]
+    chroms = sorted([chrom for chrom in chroms if "chrUn_" not in chrom])
+    chroms = [chrom for chrom in chroms if "_random" not in chrom]
+    chroms = [chrom for chrom in chroms if re.fullmatch(KEEP_CHRS, chrom)]
+
+    if first_report_var:
+        first_report_var = False
+        print(f"INFO: Using N chromosomes: {len(chroms)}", file=sys.stderr)
+
+    if len(chroms) == 0:
+        raise ValueError(
+            f"No chromosomes left after filtering. Check your keep_chromosomes parameter in config.yaml. "
+            f"Your fai file contains the following chromosomes: {fai_df['chr']}"
+        )
+    temp_chroms_list="|".join(chroms)
+    if chroms_list_joined == "":
+        chroms_list_joined = temp_chroms_list
+    else:
+        chroms_list_joined = chroms_list_joined + "|" + temp_chroms_list
+
+unique_chroms_list_joined = "|".join(set(chroms_list_joined.split("|")))
+
+#print(unique_chroms_list_joined)
+
 wildcard_constraints:
-    chrom="|".join(get_chroms()),
+    #chrom="|".join(get_chroms()),
+    chrom=unique_chroms_list_joined,
     call="|".join(["msp", "m6a"]),
     sm="|".join(MANIFEST.index),
     types="|".join(types),
