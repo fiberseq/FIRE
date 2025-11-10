@@ -13,11 +13,6 @@ rule percent_accessible:
     params:
         suffix=get_hap_col_suffix,
         nzooms=NZOOMS,
-        #chroms=get_chroms,
-        #chrom=get_chroms[0],
-        #chrom=lambda wc: get_chroms(get_fai(wc))[0],
-        #chrom=lambda wc: get_chroms(get_fai(wc))[0],
-        #chrom=lambda wc, input: get_chroms(input.fai)[0]
         chrom=get_chroms_first_element
     shell:
         """
