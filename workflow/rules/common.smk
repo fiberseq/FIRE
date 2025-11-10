@@ -29,6 +29,8 @@ def get_excludes(wc):
 def get_fai(wc):
     ref = get_ref(wc)
     fai = f"{ref}.fai"
+    if not os.path.exists(fai):
+        raise ValueError(f"FIRE: reference index file {fai} does not exist")
     return fai
 
 def get_fai_df(wc):
