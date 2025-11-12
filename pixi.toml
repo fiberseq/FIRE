@@ -16,13 +16,9 @@ test-data = { cmd = [
     "-p",
     "fire-test-data",
     "&&",
-    "aws",
-    "s3",
-    "--no-sign-request",
+    "rclone",
     "sync",
-    "--endpoint-url",
-    "https://s3.kopah.orci.washington.edu",
-    "s3://stergachis/public/FIRE/test-data",
+    ":s3,env_auth=false,provider=Other,endpoint=s3.kopah.orci.washington.edu:stergachis/public/FIRE/test-data",
     "fire-test-data/",
 ] }
 test = { cmd = [
@@ -63,7 +59,7 @@ snakemake = "==8.21"
 snakemake-executor-plugin-slurm = ">=0.11.2"
 snakefmt = "*"
 ruff = "*"
-awscli = "2.22.*"
+rclone = "*"
 taplo = "*"
 
 [pypi-dependencies]
