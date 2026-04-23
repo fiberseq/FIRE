@@ -1,7 +1,7 @@
 rule percent_accessible:
     input:
         bed=rules.pileup.output.bed,
-        fai=ancient(FAI),
+        fai=ancient(get_fai),
     output:
         tmp=temp("temp/{sm}/{hp}/{v}-percent.accessible.bed"),
         bw="results/{sm}/trackHub-{v}/bw/{hp}.percent.accessible.bw",
@@ -13,9 +13,10 @@ rule percent_accessible:
     params:
         suffix=get_hap_col_suffix,
         nzooms=NZOOMS,
-        chrom=get_chroms()[0],
+        chrom=get_chroms_first_element
     shell:
         """
+
         bgzip -cd {input.bed} \
             | bioawk -tc hdr '$coverage{params.suffix}>0' \
             | bioawk -tc hdr \
@@ -40,7 +41,7 @@ rule percent_accessible:
 rule element_coverages_bw:
     input:
         bed=rules.pileup.output.bed,
-        fai=ancient(FAI),
+        fai=ancient(get_fai),
     output:
         bw="results/{sm}/trackHub-{v}/bw/{hp}.{el_type}.coverage.bw",
     conda:
@@ -62,7 +63,7 @@ rule element_coverages_bw:
 rule fdr_track_to_bw:
     input:
         bed=rules.pileup.output.bed,
-        fai=ancient(FAI),
+        fai=ancient(get_fai),
     output:
         bw="results/{sm}/trackHub-{v}/bw/{col}.bw",
     threads: 4
@@ -83,7 +84,7 @@ rule fdr_track_to_bw:
 rule fire_peaks_bb:
     input:
         bed=rules.fire_peaks.output.bed,
-        fai=ancient(FAI),
+        fai=ancient(get_fai),
     output:
         bb="results/{sm}/trackHub-{v}/bb/fire-peaks.bb",
     threads: 4
@@ -106,7 +107,7 @@ rule fire_peaks_bb:
 rule hap_differences_track:
     input:
         bed9=rules.hap_differences.output.bed9,
-        fai=ancient(FAI),
+        fai=ancient(get_fai),
     output:
         bb="results/{sm}/trackHub-{v}/bb/hap_differences.bb",
     threads: 4
@@ -115,7 +116,7 @@ rule hap_differences_track:
     conda:
         DEFAULT_ENV
     params:
-        chrom=get_chroms()[0],
+        chrom=get_chroms_first_element,
         bed9_as=workflow.source_path("../templates/bed9.as"),
     shell:
         """
@@ -141,7 +142,7 @@ rule trackhub:
     conda:
         "../envs/python.yaml"
     params:
-        ref=REF_NAME,
+        ref=get_ref,
         script=workflow.source_path("../scripts/trackhub.py"),
         description=workflow.source_path("../templates/fire-description.html"),
     shell:

@@ -3,8 +3,8 @@
 #
 rule genome_bedgraph:
     input:
-        ref=ancient(REF),
-        fai=ancient(FAI),
+        ref=ancient(get_ref),
+        fai=ancient(get_fai),
         cram=rules.fire.output.cram,
         crai=rules.fire.output.crai,
     output:
@@ -17,7 +17,7 @@ rule genome_bedgraph:
         DEFAULT_ENV
     shell:
         """ 
-        mosdepth -f {input.ref} -t {threads} tmp {input.cram}
+        mosdepth -F 4 -f {input.ref} -t {threads} tmp {input.cram}
         bgzip -cd tmp.per-base.bed.gz \
             | LC_ALL=C sort --parallel={threads} -k1,1 -k2,2n -k3,3n -k4,4  \
             | bgzip -@ {threads} \
@@ -43,7 +43,7 @@ rule coverage:
     params:
         coverage_within_n_sd=COVERAGE_WITHIN_N_SD,
         min_coverage=MIN_COVERAGE,
-        chroms=get_chroms(),
+        chroms=get_chroms,
     script:
         "../scripts/cov.py"
 
@@ -76,7 +76,7 @@ rule fiber_locations:
     input:
         fibers=expand(
             rules.fiber_locations_chromosome.output.bed,
-            chrom=get_chroms(),
+            chrom=get_chroms,
             allow_missing=True,
         ),
         bg=rules.genome_bedgraph.output.bg,
@@ -119,14 +119,14 @@ rule fiber_locations:
 rule exclude_from_shuffle:
     input:
         filtered=rules.fiber_locations.output.filtered,
-        fai=ancient(FAI),
+        fai=ancient(get_fai),
     output:
         bed="results/{sm}/additional-outputs-{v}/coverage/exclude-from-shuffles.bed.gz",
     threads: 4
     conda:
         DEFAULT_ENV
     params:
-        exclude=EXCLUDES,
+        exclude=get_excludes,
     shell:
         """
 
@@ -147,7 +147,7 @@ rule unreliable_coverage_regions:
         bg=rules.genome_bedgraph.output.bg,
         minimum=rules.coverage.output.minimum,
         maximum=rules.coverage.output.maximum,
-        fai=ancient(FAI),
+        fai=ancient(get_fai),
     output:
         bed="results/{sm}/additional-outputs-{v}/coverage/unreliable-coverage-regions.bed.gz",
         bed_tbi="results/{sm}/additional-outputs-{v}/coverage/unreliable-coverage-regions.bed.gz.tbi",

@@ -3,7 +3,7 @@ rule filtered_and_shuffled_fiber_locations_chromosome:
         filtered=rules.fiber_locations.output.filtered,
         filtered_tbi=rules.fiber_locations.output.filtered_tbi,
         exclude=rules.exclude_from_shuffle.output.bed,
-        fai=ancient(FAI),
+        fai=ancient(get_fai),
     output:
         shuffled=temp("temp/{sm}/shuffle/{v}-{chrom}.fiber-locations-shuffled.bed.gz"),
     threads: 4
@@ -46,7 +46,7 @@ rule shuffled_pileup:
     input:
         beds=expand(
             rules.shuffled_pileup_chromosome.output.bed,
-            chrom=get_chroms(),
+            chrom=get_chroms,
             allow_missing=True,
         ),
     output:
@@ -134,7 +134,7 @@ rule pileup:
     input:
         beds=expand(
             rules.fdr_track_chromosome.output.bed,
-            chrom=get_chroms(),
+            chrom=get_chroms,
             allow_missing=True,
         ),
     output:
@@ -245,7 +245,7 @@ rule fire_peaks:
     input:
         beds=expand(
             rules.fdr_peaks_by_fire_elements_chromosome.output.bed,
-            chrom=get_chroms(),
+            chrom=get_chroms,
             allow_missing=True,
         ),
     output:
@@ -277,7 +277,7 @@ rule wide_fire_peaks:
     input:
         bed=rules.fire_peaks.output.bed,
         track=rules.pileup.output.bed,
-        fai=ancient(FAI),
+        fai=ancient(get_fai),
     output:
         bed="results/{sm}/additional-outputs-{v}/fire-peaks/{sm}-fire-{v}-wide-peaks.bed.gz",
         tbi="results/{sm}/additional-outputs-{v}/fire-peaks/{sm}-fire-{v}-wide-peaks.bed.gz.tbi",

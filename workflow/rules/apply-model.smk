@@ -4,7 +4,8 @@
 rule fire:
     input:
         bam=ancient(get_input_bam),
-        ref=ancient(REF),
+        ref=ancient(get_ref)
+        #ref=ancient(REF),
     output:
         cram="results/{sm}/{sm}-fire-{v}-filtered.cram",
         crai="results/{sm}/{sm}-fire-{v}-filtered.cram.crai",
@@ -75,7 +76,7 @@ rule fire_sites_chrom:
 rule fire_sites:
     input:
         beds=expand(
-            rules.fire_sites_chrom.output.bed, chrom=get_chroms(), allow_missing=True
+            rules.fire_sites_chrom.output.bed, chrom=get_chroms, allow_missing=True
         ),
     output:
         bed="results/{sm}/additional-outputs-{v}/fire-peaks/{sm}-{v}-fire-elements.bed.gz",

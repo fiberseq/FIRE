@@ -1,29 +1,23 @@
 import re
 import logging
 import sys
+import pysam
 
 FIRST_REPORT = True
 
-
-def get_ref():
-    if "ref" not in config:
-        raise ValueError("FIRE: ref parameter is missing in config.yaml")
-    ref = config["ref"]
+def get_ref(wc):
+    ref = MANIFEST.loc[wc.sm, "ref"]
     if not os.path.exists(ref):
         raise ValueError(f"FIRE: reference file {ref} does not exist")
     return os.path.abspath(ref)
 
+def get_ref_name(wc):
+    return MANIFEST.loc[wc.sm, "ref_name"]
 
-def get_fai():
-    fai = f"{get_ref()}.fai"
-    if not os.path.exists(fai):
-        raise ValueError(f"FIRE: reference index file {fai} does not exist")
-    return fai
-
-
-def get_excludes():
+def get_excludes(wc):
     excludes = config.get("excludes", [])
-    if REF_NAME == "hg38" or REF_NAME == "GRCh38":
+    ref_name = get_ref_name(wc)
+    if ref_name == "hg38" or ref_name == "GRCh38":
         files = [
             "../annotations/hg38.gap.bed.gz",
             "../annotations/hg38.blacklist.ENCFF356LFX.bed.gz",
@@ -32,26 +26,44 @@ def get_excludes():
         excludes += [workflow.source_path(file) for file in files]
     return excludes
 
+def get_fai(wc):
+    ref = get_ref(wc)
+    fai = f"{ref}.fai"
+    if not os.path.exists(fai):
+        raise ValueError(f"FIRE: reference index file {fai} does not exist")
+    return fai
 
-def get_fai_df():
-    fai = get_fai()
+def get_fai_df(wc):
+    fai = get_fai(wc)
     return pd.read_csv(fai, sep="\t", names=["chr", "length", "x", "y", "z"])
 
-
-def get_chroms():
+def get_chroms(wc):
     global FIRST_REPORT
     min_contig_length = config.get("min_contig_length", 0)
-    skipped_contigs = FAI_DF["chr"][FAI_DF["length"] < min_contig_length]
+
+    chroms=[]
+    skipped_contigs=[]
+    input_bam_path=get_input_bam(wc)
+    input_bam = pysam.AlignmentFile(input_bam_path)
+    name_length=zip(input_bam.references, input_bam.lengths)
+
+    for chrom_name, chrom_length in name_length:
+        if chrom_length >=min_contig_length:
+            chroms.append(chrom_name)
+        else:
+            skipped_contigs.append(chrom_name)
+
+    input_bam.close()
+
+    chroms = sorted([chrom for chrom in chroms if "chrUn_" not in chrom])
+    chroms = [chrom for chrom in chroms if "_random" not in chrom]
+    chroms = [chrom for chrom in chroms if re.fullmatch(KEEP_CHRS, chrom)]
+
     if len(skipped_contigs) > 0 and FIRST_REPORT:
         print(
             f"WARNING: Skipping contigs with length < {min_contig_length:,}: {skipped_contigs}",
             file=sys.stderr,
         )
-
-    chroms = FAI_DF["chr"][FAI_DF["length"] >= min_contig_length]
-    chroms = sorted([chrom for chrom in chroms if "chrUn_" not in chrom])
-    chroms = [chrom for chrom in chroms if "_random" not in chrom]
-    chroms = [chrom for chrom in chroms if re.fullmatch(KEEP_CHRS, chrom)]
 
     if FIRST_REPORT:
         FIRST_REPORT = False
@@ -60,9 +72,49 @@ def get_chroms():
     if len(chroms) == 0:
         raise ValueError(
             f"No chromosomes left after filtering. Check your keep_chromosomes parameter in config.yaml. "
-            f"Your fai file contains the following chromosomes: {FAI_DF['chr']}"
+            f"Your bam file contains the following chromosomes: {skipped_contigs}"
         )
     return chroms
+
+def get_chroms_first_element(wc):
+    global FIRST_REPORT
+    min_contig_length = config.get("min_contig_length", 0)
+
+    chroms=[]
+    skipped_contigs=[]
+    input_bam_path=get_input_bam(wc)
+    input_bam = pysam.AlignmentFile(input_bam_path)
+    name_length=zip(input_bam.references, input_bam.lengths)
+
+    for chrom_name, chrom_length in name_length:
+        if chrom_length >=min_contig_length:
+            chroms.append(chrom_name)
+        else:
+            skipped_contigs.append(chrom_name)
+
+
+    input_bam.close()
+
+    chroms = sorted([chrom for chrom in chroms if "chrUn_" not in chrom])
+    chroms = [chrom for chrom in chroms if "_random" not in chrom]
+    chroms = [chrom for chrom in chroms if re.fullmatch(KEEP_CHRS, chrom)]
+
+    if len(skipped_contigs) > 0 and FIRST_REPORT:
+        print(
+            f"WARNING: Skipping contigs with length < {min_contig_length:,}: {skipped_contigs}",
+            file=sys.stderr,
+        )
+
+    if FIRST_REPORT:
+        FIRST_REPORT = False
+        print(f"INFO: Using N chromosomes: {len(chroms)}", file=sys.stderr)
+
+    if len(chroms) == 0:
+        raise ValueError(
+            f"No chromosomes left after filtering. Check your keep_chromosomes parameter in config.yaml. "
+            f"Your bam file contains the following chromosomes: {skipped_contigs}"
+        )
+    return chroms[0]
 
 
 def get_manifest():
@@ -80,6 +132,11 @@ def get_manifest():
 def get_input_bam(wc):
     return MANIFEST.loc[wc.sm, "bam"]
 
+def get_input_ref(wc):
+    return MANIFEST.loc[wc.sm, "ref"]
+
+def get_input_ref_name(wc):
+    return MANIFEST.loc[wc.sm, "ref_name"]
 
 def get_mem_mb(wildcards, attempt):
     if attempt < 3:
