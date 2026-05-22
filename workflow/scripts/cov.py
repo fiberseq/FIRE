@@ -53,6 +53,7 @@ def polars_read():
             has_header=False,
             new_columns=["chr", "start", "end", "coverage"],
             low_memory=True,
+            schema_overrides=[pl.Utf8, pl.Int64, pl.Int64, pl.Int64],
         )
         .lazy()
         .filter(pl.col("coverage") > 0)
