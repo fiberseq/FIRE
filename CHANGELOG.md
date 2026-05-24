@@ -1,6 +1,10 @@
 # Change Log
 
 All notable changes to this project will be documented in this file.
+## v0.2.0
+- Update fibertools-rs version (also samtools, htslib, and bedtools) in `workflow/envs/env.yaml`
+- Fix Polars issue in #52
+
 
 ## v0.1.2
 
