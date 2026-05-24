@@ -34,7 +34,7 @@ rule shuffled_pileup_chromosome:
         DEFAULT_ENV
     shell:
         """
-        {FT_EXE} pileup {input.cram} {wildcards.chrom} -t {threads} \
+        {FT_EXE} pileup {input.cram} -r {wildcards.chrom} -t {threads} \
             --fiber-coverage --shuffle {input.shuffled} \
             --no-msp --no-nuc \
             | bgzip -@ {threads} \
@@ -103,7 +103,7 @@ rule pileup_chromosome:
         """
         {FT_EXE} pileup -t {threads} \
             --haps --fiber-coverage \
-            {input.bam} {wildcards.chrom} \
+            {input.bam} -r {wildcards.chrom} \
             | bgzip -@ {threads} \
             > {output.bed}
         """
