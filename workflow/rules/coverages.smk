@@ -126,13 +126,14 @@ rule exclude_from_shuffle:
     conda:
         DEFAULT_ENV
     params:
-        exclude=EXCLUDES,
+        exclude=lambda wc: " ".join(EXCLUDES) if EXCLUDES else "",
     shell:
         """
-
-        ( \
-            bedtools genomecov -bga -i {input.filtered} -g {input.fai} | awk '$4 == 0'; \
-            less {params.exclude} \
+        (
+            bedtools genomecov -bga -i {input.filtered} -g {input.fai} | awk '$4 == 0'
+            if [ -n "{params.exclude}" ]; then
+                zcat -f {params.exclude}
+            fi
         ) \
             | cut -f 1-3 \
             | bedtools sort \
