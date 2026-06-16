@@ -76,10 +76,12 @@ rule fdr_table:
         "../envs/python.yaml"
     params:
         script=workflow.source_path("../scripts/fdr-table.py"),
+    threads: 16
     resources:
         mem_mb=get_mem_mb_xl,
     shell:
         """
+        export POLARS_MAX_THREADS={threads}
         MIN=$(cat {input.minimum})
         MAX=$(cat {input.maximum})
         python {params.script} -v 1 {input.shuffled} {output.tbl} --max-cov $MAX --min-cov $MIN
@@ -124,6 +126,7 @@ rule fdr_track_chromosome:
         mem_mb=get_mem_mb_xl,
     shell:
         """
+        export POLARS_MAX_THREADS={threads}
         python {params.script} -v 1 \
             --fdr-table {input.fdr_tbl} \
             {input.pileup} {output.bed}
@@ -231,6 +234,7 @@ rule fdr_peaks_by_fire_elements_chromosome:
         min_frac_accessible=MIN_FRAC_ACCESSIBLE,
     shell:
         """
+        export POLARS_MAX_THREADS={threads}
         bgzip -cd {input.bed} \
             | python {params.script} -v 1 \
                 --max-cov $(cat {input.maximum}) \

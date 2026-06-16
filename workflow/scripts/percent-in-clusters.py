@@ -16,7 +16,7 @@ df["length"] = df.en - df.st
 real_bp = (df[df.case == "Real"]["length"] * df[df.case == "Real"]["cov"]).sum()
 df = df.groupby("cov").apply(my_groupby).reset_index()
 over_expected = df[0][df[0] > 0].sum()
-print(f"{over_expected/real_bp:%}\n")
+print(f"{over_expected / real_bp:%}\n")
 
 # chr1    0       1       12      1       1       1
 cov = sys.argv[2]
@@ -28,7 +28,7 @@ n_peaks = cov[cov.fdr >= min_fdr].shape[0]
 
 
 rtn = f"""percent-of-MSPs-preferentially-clustered-along-the-genome\tmin_fdr
-{over_expected/real_bp:%}\t{min_fdr}
+{over_expected / real_bp:%}\t{min_fdr}
 """
 out = sys.argv[3]
 open(out, "w").write(rtn)

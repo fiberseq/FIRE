@@ -1,3 +1,7 @@
+import os
+
+os.environ["POLARS_MAX_THREADS"] = str(snakemake.threads)
+
 import pandas as pd
 import sys
 import math
