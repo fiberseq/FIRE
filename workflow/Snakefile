@@ -56,7 +56,7 @@ if MIN_PER_ACC_PEAK is None:
     MIN_PER_ACC_PEAK = 0.0
 else:
     MAX_PEAK_FDR = 1.0
-MIN_FRAC_ACCESSIBLE = config.get("min_frac_accessible", 0)
+MIN_FRAC_ACCESSIBLE = config.get("min_frac_accessible", 0.10)
 
 # data filtering
 FILTER_FLAG = config.get("samtools-filter-flag", "260")  # 2308
