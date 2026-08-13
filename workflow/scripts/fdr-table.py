@@ -57,11 +57,16 @@ def read_pileup_file(infile, nrows):
             return None
 
     # add scema overrides for the score columns
+    # Build schema overrides keyed by positional column names (column_1, column_2, ...)
+    # because polars infers schema BEFORE new_columns is applied when has_header=False.
+    # Keying on '#chrom' / 'score' here would be silently ignored. 
     schema_overrides = {}
-    for n in ["score", "score_H1", "score_H2", "score_shuffled"]:
-        if n in header:
-            schema_overrides[n] = float
-
+    for col_idx, col_name in enumerate(header, start=1):
+        positional = f"column_{col_idx}"
+        if col_name in ("score", "score_H1", "score_H2", "score_shuffled"):
+            schema_overrides[positional] = pl.Float64
+        elif col_name == "#chrom":
+            schema_overrides[positional] = pl.Utf8
     logging.info(f"Header of the pileup file:\n{header}")
     logging.info(f"Schema overrides for the pileup file:\n{schema_overrides}")
 
