@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.2.0
+
+- Update fibertools-rs to 0.12.x (requires `ft pileup --rgn`; also updates samtools,
+  htslib, and bedtools pins in `workflow/envs/env.yaml`)
+- Polars fixes: explicit schemas for chrom/score columns (#48, #52, #53, #56)
+- `exclude_from_shuffle` now works when no `excludes` are configured (non-hg38 refs)
+- Test data now downloaded via rclone; test runs start from a clean state
+  (`test-clean` task added)
+
 ## v0.1.2
 
 - fix #34

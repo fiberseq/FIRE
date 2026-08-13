@@ -59,7 +59,7 @@ def read_pileup_file(infile, nrows):
     # add scema overrides for the score columns
     # Build schema overrides keyed by positional column names (column_1, column_2, ...)
     # because polars infers schema BEFORE new_columns is applied when has_header=False.
-    # Keying on '#chrom' / 'score' here would be silently ignored. 
+    # Keying on '#chrom' / 'score' here would be silently ignored.
     schema_overrides = {}
     for col_idx, col_name in enumerate(header, start=1):
         positional = f"column_{col_idx}"
