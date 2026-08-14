@@ -120,7 +120,7 @@ rule hap_differences_track:
         """
         (
             printf "{params.chrom}\t0\t1\tfake\t100\t+\t0\t1\t230,230,230\\n"
-            bedtools sort -i {input.bed9}
+            bedtools sort -g {input.genome} -i {input.bed9}
         ) \
             | bigtools bedtobigbed \
                 -s start -a {params.bed9_as} \
