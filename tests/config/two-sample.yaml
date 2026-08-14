@@ -1,0 +1,3 @@
+manifest: ../tests/config/two-sample.tbl
+excludes:
+  - ../tests/config/extra-exclude.bed

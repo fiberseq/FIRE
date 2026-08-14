@@ -1,0 +1,3 @@
+manifest: ../tests/config/err-dup-sample.tbl
+ref: test.fa.gz
+ref_name: hg38

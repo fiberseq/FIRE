@@ -1,11 +1,20 @@
 # Contributing to FIRE
 
-PRs are welcome! Please run the test suite and the formatters before
-submitting:
+PRs are welcome! Please run the validation checks, the test suite, and the
+formatters before submitting:
 
 ```bash
+pixi run test-dry
 pixi run test
+pixi run test-verify
 pixi run fmt
+```
+
+If your change touches manifest or reference handling, also run the
+multi-sample test:
+
+```bash
+pixi run test-multi
 ```
 
 ## Conventional commits and releases
