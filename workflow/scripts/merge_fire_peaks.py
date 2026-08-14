@@ -124,7 +124,12 @@ def main(
     logger.setLevel(log_level)
 
     inf = io.StringIO(sys.stdin.read())
-    df = pl.read_csv(inf, separator="\t", null_values=".", schema_overrides={"#chrom": pl.Utf8},)
+    df = pl.read_csv(
+        inf,
+        separator="\t",
+        null_values=".",
+        schema_overrides={"#chrom": pl.Utf8},
+    )
     if df.shape[0] == 0:
         logging.info("No peaks to merge")
         return 0
