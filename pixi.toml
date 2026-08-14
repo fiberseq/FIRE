@@ -3,8 +3,8 @@ authors = ["Mitchell Robert Vollger <mrvollger@gmail.com>"]
 channels = ["conda-forge", "bioconda"]
 description = "A Snakemake pipeline for calling FIRE peaks using fibertools-rs."
 name = "FIRE"
-platforms = ["osx-64", "linux-64"]
-version = "0.1.2"
+platforms = ["osx-arm64", "linux-64"]
+version = "0.2.0"
 
 [tasks]
 fmt = "ruff format . && taplo format pixi.toml && snakefmt workflow/"
