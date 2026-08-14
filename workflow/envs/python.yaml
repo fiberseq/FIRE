@@ -8,7 +8,7 @@ dependencies:
   - defopt
   - numpy==1.24 # use this version to avoid cxx errors
   - pandas==1.4 # pandas versions later than this have cxx errors
-  - htslib==1.19.1
+  - htslib==1.20
   - pip
   - pip:
       - polars-lts-cpu[pyarrow]==1.7.1

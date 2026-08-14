@@ -13,6 +13,9 @@ All notable changes to this project will be documented in this file.
 - `exclude_from_shuffle` now works when no `excludes` are configured (non-hg38 refs)
 - Test data now downloaded via rclone; test runs start from a clean state
   (`test-clean` task added)
+- Mac support moved from Intel (osx-64) to Apple Silicon (osx-arm64), following
+  bioconda's fibertools-rs builds; samtools/htslib 1.24, mosdepth 0.3.14,
+  bigtools 0.5.8
 
 ## v0.1.2
 
