@@ -1,0 +1,4 @@
+ref: test.fa.gz
+ref_name: hg38
+manifest: test.tbl
+keep_chromosomes: "chrX"

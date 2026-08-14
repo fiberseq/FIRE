@@ -32,10 +32,10 @@ rule decorate_fibers_1:
     input:
         bed=expand(
             rules.decorate_fibers_chromosome.output.bed,
-            chrom=get_chroms(),
+            chrom=get_chroms,
             allow_missing=True,
         ),
-        fai=ancient(FAI),
+        genome=rules.genome_file.output.genome,
     output:
         #bed=temp("temp/{sm}/fiber-calls/fire-fibers.bed.gz"),
         bb="results/{sm}/trackHub-{v}/bb/fire-fibers.bb",
@@ -62,7 +62,7 @@ rule decorate_fibers_1:
                 --block-size {params.block_size} --items-per-slot {params.items_per_slot} \
                 --nzooms {params.nzooms} \
                 -s start -a {params.bed_as} \
-                - {input.fai} {output.bb}
+                - {input.genome} {output.bb}
         """
 
 
@@ -70,10 +70,10 @@ rule decorate_fibers_2:
     input:
         decorated=expand(
             rules.decorate_fibers_chromosome.output.decorated,
-            chrom=get_chroms(),
+            chrom=get_chroms,
             allow_missing=True,
         ),
-        fai=ancient(FAI),
+        genome=rules.genome_file.output.genome,
     output:
         bb="results/{sm}/trackHub-{v}/bb/fire-fiber-decorators.bb",
         #bed=temp("temp/{sm}/trackHub-{v}/bb/fire-fiber-decorators.bed.gz"),
@@ -104,7 +104,7 @@ rule decorate_fibers_2:
                 --block-size {params.block_size} --items-per-slot {params.items_per_slot} \
                 --nzooms {params.nzooms} \
                 -s start -a {params.dec_as} \
-                - {input.fai} {output.bb}
+                - {input.genome} {output.bb}
         """
 
 
@@ -114,5 +114,5 @@ if False:
         cat {input.decorated} > {output.bed}
         bedToBigBed \
             -allow1bpOverlap -type=bed12+ -as={params.dec_as} \
-            {output.bed} {input.fai} {output.bb}
+            {output.bed} {input.genome} {output.bb}
         """
