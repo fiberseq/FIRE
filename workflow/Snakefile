@@ -74,11 +74,6 @@ bw_types = ["log_FDR"]  # "score", "FDR",
 el_types = ["fire", "linker", "nucleosome"]
 
 
-# DSA options
-DSA_CHAIN = config.get("chain", None)
-DSA = DSA_CHAIN is not None
-LEVIO_EXE = config.get("levio_exe", "leviosam2")
-
 # developer options
 FT_EXE = config.get("ft_exe", "ft")
 if FT_EXE != "ft":
@@ -102,11 +97,6 @@ include: "rules/fire-peaks.smk"
 include: "rules/stats.smk"
 include: "rules/decorated-reads.smk"
 include: "rules/track-hub.smk"
-
-
-if DSA:
-
-    include: "rules/levio.smk"
 
 
 wildcard_constraints:
