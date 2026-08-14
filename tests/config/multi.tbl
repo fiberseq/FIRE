@@ -1,0 +1,5 @@
+sample	bam	ref	ref_name
+test	test.cram	test.fa.gz	hg38
+test2	test.cram	test.fa.gz	testref
+test20	generated/test-chr20.bam	test.fa.gz	.
+test-rev	generated/test-rev.bam	test.fa.gz	hg38

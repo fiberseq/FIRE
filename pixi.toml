@@ -8,9 +8,16 @@ version = "0.2.0"
 
 [tasks]
 fmt = "ruff format . && taplo format pixi.toml && snakefmt workflow/"
-test-data = { cmd = '''bash -c 'if [ -f "$INIT_CWD/fire-test-data/test.cram" ]; then echo "test data already present, skipping download"; else mkdir -p "$INIT_CWD/fire-test-data" && rclone sync ":s3,env_auth=false,provider=Other,endpoint=s3.kopah.orci.washington.edu:stergachis/public/FIRE/test-data" "$INIT_CWD/fire-test-data/"; fi' ''' }
-test-clean = { cmd = '''bash -c 'cd "$INIT_CWD/fire-test-data" && rm -rf results temp .snakemake' ''' }
-test = { cmd = '''bash -c 'cd "$INIT_CWD/fire-test-data" && rm -rf results temp && snakemake -s "$PIXI_PROJECT_ROOT/workflow/Snakefile" --configfile test.yaml -k' ''', depends-on = [
+test-data = { cmd = '''bash -c 'if [ -f "$PIXI_PROJECT_ROOT/fire-test-data/test.cram" ]; then echo "test data already present, skipping download"; else mkdir -p "$PIXI_PROJECT_ROOT/fire-test-data" && rclone sync ":s3,env_auth=false,provider=Other,endpoint=s3.kopah.orci.washington.edu:stergachis/public/FIRE/test-data" "$PIXI_PROJECT_ROOT/fire-test-data/"; fi' ''' }
+test-clean = { cmd = '''bash -c 'cd "$PIXI_PROJECT_ROOT/fire-test-data" && rm -rf results temp .snakemake' ''' }
+test = { cmd = '''bash -c 'cd "$PIXI_PROJECT_ROOT/fire-test-data" && rm -rf results temp && snakemake -s "$PIXI_PROJECT_ROOT/workflow/Snakefile" --configfile test.yaml -k' ''', depends-on = [
+  "test-data",
+], clean-env = true }
+test-dry = { cmd = '''bash -c 'cd "$PIXI_PROJECT_ROOT/fire-test-data" && bash "$PIXI_PROJECT_ROOT/tests/dry-run-checks.sh"' ''', depends-on = [
+  "test-data",
+], clean-env = true }
+test-verify = { cmd = '''bash -c 'cd "$PIXI_PROJECT_ROOT/fire-test-data" && bash "$PIXI_PROJECT_ROOT/tests/verify-results.sh"' ''' }
+test-multi = { cmd = '''bash -c 'cd "$PIXI_PROJECT_ROOT/fire-test-data" && rm -rf results temp && python "$PIXI_PROJECT_ROOT/tests/generate-test-bams.py" && snakemake -s "$PIXI_PROJECT_ROOT/workflow/Snakefile" --configfile "$PIXI_PROJECT_ROOT/tests/config/multi.yaml" -k && bash "$PIXI_PROJECT_ROOT/tests/verify-multi.sh"' ''', depends-on = [
   "test-data",
 ], clean-env = true }
 fire = { cmd = [
@@ -34,6 +41,7 @@ slurm = { cmd = [
 
 [dependencies]
 conda = "*"
+pysam = "*"
 snakemake = "==8.21"
 snakemake-executor-plugin-slurm = ">=0.11.2"
 snakefmt = "*"

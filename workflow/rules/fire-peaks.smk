@@ -3,7 +3,7 @@ rule filtered_and_shuffled_fiber_locations_chromosome:
         filtered=rules.fiber_locations.output.filtered,
         filtered_tbi=rules.fiber_locations.output.filtered_tbi,
         exclude=rules.exclude_from_shuffle.output.bed,
-        fai=ancient(FAI),
+        genome=rules.genome_file.output.genome,
     output:
         shuffled=temp("temp/{sm}/shuffle/{v}-{chrom}.fiber-locations-shuffled.bed.gz"),
     conda:
@@ -16,7 +16,7 @@ rule filtered_and_shuffled_fiber_locations_chromosome:
             | bedtools shuffle -chrom -seed 42 \
                 -excl {input.exclude} \
                 -i - \
-                -g {input.fai} \
+                -g {input.genome} \
             | sort -k1,1 -k2,2n -k3,3n -k4,4 \
             | bgzip -@ {threads} \
                 >{output.shuffled}
@@ -46,7 +46,7 @@ rule shuffled_pileup:
     input:
         beds=expand(
             rules.shuffled_pileup_chromosome.output.bed,
-            chrom=get_chroms(),
+            chrom=get_chroms,
             allow_missing=True,
         ),
     output:
@@ -137,7 +137,7 @@ rule pileup:
     input:
         beds=expand(
             rules.fdr_track_chromosome.output.bed,
-            chrom=get_chroms(),
+            chrom=get_chroms,
             allow_missing=True,
         ),
     output:
@@ -250,7 +250,7 @@ rule fire_peaks:
     input:
         beds=expand(
             rules.fdr_peaks_by_fire_elements_chromosome.output.bed,
-            chrom=get_chroms(),
+            chrom=get_chroms,
             allow_missing=True,
         ),
     output:
@@ -282,7 +282,7 @@ rule wide_fire_peaks:
     input:
         bed=rules.fire_peaks.output.bed,
         track=rules.pileup.output.bed,
-        fai=ancient(FAI),
+        genome=rules.genome_file.output.genome,
     output:
         bed="results/{sm}/additional-outputs-{v}/fire-peaks/{sm}-fire-{v}-wide-peaks.bed.gz",
         tbi="results/{sm}/additional-outputs-{v}/fire-peaks/{sm}-fire-{v}-wide-peaks.bed.gz.tbi",
@@ -311,7 +311,7 @@ rule wide_fire_peaks:
         bgzip -cd -@ 16 {output.bed} \
             | bigtools bedtobigbed \
                 -s start -a {params.bed3_as} \
-                - {input.fai} {output.bb}
+                - {input.genome} {output.bb}
 
         tabix -p bed {output.bed}
         """
