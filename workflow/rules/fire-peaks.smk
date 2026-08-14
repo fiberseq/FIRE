@@ -6,9 +6,9 @@ rule filtered_and_shuffled_fiber_locations_chromosome:
         fai=ancient(FAI),
     output:
         shuffled=temp("temp/{sm}/shuffle/{v}-{chrom}.fiber-locations-shuffled.bed.gz"),
-    threads: 4
     conda:
         DEFAULT_ENV
+    threads: 4
     shell:
         """
         tabix {input.filtered} {wildcards.chrom} \
@@ -17,9 +17,9 @@ rule filtered_and_shuffled_fiber_locations_chromosome:
                 -excl {input.exclude} \
                 -i - \
                 -g {input.fai} \
-            |  sort -k1,1 -k2,2n -k3,3n -k4,4 \
+            | sort -k1,1 -k2,2n -k3,3n -k4,4 \
             | bgzip -@ {threads} \
-        > {output.shuffled}
+                >{output.shuffled}
         """
 
 
@@ -29,16 +29,16 @@ rule shuffled_pileup_chromosome:
         shuffled=rules.filtered_and_shuffled_fiber_locations_chromosome.output.shuffled,
     output:
         bed=temp("temp/{sm}/shuffle/{v}-{chrom}.pileup.bed.gz"),
-    threads: 4
     conda:
         DEFAULT_ENV
+    threads: 4
     shell:
         """
         {FT_EXE} pileup {input.cram} --rgn {wildcards.chrom} -t {threads} \
             --fiber-coverage --shuffle {input.shuffled} \
             --no-msp --no-nuc \
             | bgzip -@ {threads} \
-        > {output.bed}    
+                >{output.bed}
         """
 
 
@@ -52,12 +52,12 @@ rule shuffled_pileup:
     output:
         bed=temp("temp/{sm}/shuffle/{v}-shuffled-pileup.bed.gz"),
         tbi=temp("temp/{sm}/shuffle/{v}-shuffled-pileup.bed.gz.tbi"),
-    threads: 4
     conda:
         DEFAULT_ENV
+    threads: 4
     shell:
         """
-        cat {input.beds} > {output.bed}
+        cat {input.beds} >{output.bed}
         tabix -p bed {output.bed}
         """
 
@@ -74,11 +74,11 @@ rule fdr_table:
         tbl="results/{sm}/additional-outputs-{v}/fire-peaks/{sm}-{v}-fire-score-to-fdr.tbl",
     conda:
         "../envs/python.yaml"
-    params:
-        script=workflow.source_path("../scripts/fdr-table.py"),
     threads: 16
     resources:
         mem_mb=get_mem_mb_xl,
+    params:
+        script=workflow.source_path("../scripts/fdr-table.py"),
     shell:
         """
         export POLARS_MAX_THREADS={threads}
@@ -98,16 +98,16 @@ rule pileup_chromosome:
         bam=rules.fire.output.cram,
     output:
         bed=temp("temp/{sm}/{v}-{chrom}.pileup.bed.gz"),
-    threads: 4
     conda:
         DEFAULT_ENV
+    threads: 4
     shell:
         """
         {FT_EXE} pileup -t {threads} \
             --haps --fiber-coverage \
             {input.bam} --rgn {wildcards.chrom} \
             | bgzip -@ {threads} \
-            > {output.bed}
+                >{output.bed}
         """
 
 
@@ -117,13 +117,13 @@ rule fdr_track_chromosome:
         fdr_tbl=rules.fdr_table.output.tbl,
     output:
         bed=temp("temp/{sm}/fire-peaks/{v}-{chrom}-FDR.track.bed"),
-    threads: 4
     conda:
         "../envs/python.yaml"
-    params:
-        script=workflow.source_path("../scripts/fdr-table.py"),
+    threads: 4
     resources:
         mem_mb=get_mem_mb_xl,
+    params:
+        script=workflow.source_path("../scripts/fdr-table.py"),
     shell:
         """
         export POLARS_MAX_THREADS={threads}
@@ -144,24 +144,24 @@ rule pileup:
         fofn=temp("temp/{sm}/fire/fire-{v}-pileup.fofn"),
         bed="results/{sm}/{sm}-fire-{v}-pileup.bed.gz",
         tbi="results/{sm}/{sm}-fire-{v}-pileup.bed.gz.tbi",
-    threads: 8
     conda:
         DEFAULT_ENV
+    threads: 8
     shell:
         """
         printf '\nMaking FOFN\n'
-        echo {input.beds} > {output.fofn}
-        
+        echo {input.beds} >{output.fofn}
+
         printf '\nMake header\n'
-        ((cat $(cat {output.fofn}) | grep "^#" | head -n 1) || true) \
+        ( (cat $(cat {output.fofn}) | grep "^#" | head -n 1) || true) \
             | bgzip -@ {threads} \
-            > {output.bed}
+                >{output.bed}
 
         printf '\nConcatenating\n'
         cat $(cat {output.fofn}) \
             | grep -v "^#" \
             | bgzip -@ {threads} \
-        >> {output.bed}
+                >>{output.bed}
 
         printf '\nIndexing\n'
         tabix -f -p bed {output.bed}
@@ -176,9 +176,9 @@ rule helper_fdr_peaks_by_fire_elements:
         fire_tbi=rules.fire_sites_index.output.tbi,
     output:
         bed=temp("temp/{sm}/fire-peaks/{v}-{chrom}-fire-peaks.bed.gz"),
-    threads: 2
     conda:
         DEFAULT_ENV
+    threads: 2
     params:
         max_peak_fdr=MAX_PEAK_FDR,
         min_per_acc_peak=MIN_PER_ACC_PEAK,
@@ -186,36 +186,37 @@ rule helper_fdr_peaks_by_fire_elements:
         """
         HEADER=$(bgzip -cd {input.bed} | head -n 1 || true)
         NC=$(echo $HEADER | awk '{{print NF}}' || true)
-        FIRE_CT=$((NC+1))
-        FIRE_ST=$((NC+2))
-        FIRE_EN=$((NC+3))
-        FIRE_SIZE=$((NC+4))
-        FIRE_ID=$((NC+5))
+        FIRE_CT=$((NC + 1))
+        FIRE_ST=$((NC + 2))
+        FIRE_EN=$((NC + 3))
+        FIRE_SIZE=$((NC + 4))
+        FIRE_ID=$((NC + 5))
 
         OUT_HEADER=$(printf "$HEADER\\tpeak_chrom\\tpeak_start\\tpeak_end\\tFIRE_IDs\\tFIRE_size_mean\\tFIRE_size_ssd\\tFIRE_start_ssd\\tFIRE_end_ssd")
         echo $OUT_HEADER
-        
-        ( \
-            printf "$OUT_HEADER\\n"; \
+
+        (
+            printf "$OUT_HEADER\\n"
             tabix -h {input.bed} {wildcards.chrom} \
                 | bioawk -tc hdr '(NR==1)||($is_local_max=="true")' \
                 | csvtk filter -tT -C '$' -f "FDR<={params.max_peak_fdr}" \
                 | csvtk filter -tT -C '$' -f "fire_coverage>1" \
                 | bioawk -tc hdr '(NR==1)||(NF>0 && $fire_coverage/$coverage>={params.min_per_acc_peak})' \
                 | bedtools intersect -wa -wb -sorted -a - \
-                    -b <(tabix {input.fire} {wildcards.chrom} \
+                    -b <(
+                        tabix {input.fire} {wildcards.chrom} \
                             | cut -f 1-3 \
-                            | awk -v OFMT="%f" '{{print $0"\t"$3-$2"\t"NR}}' \
-                        ) \
+                            | awk -v OFMT="%f" '{{print $0"\t"$3-$2"\t"NR}}'
+                    ) \
                 | bedtools groupby -g 1-$NC \
                     -o first,median,median,collapse,mean,sstdev,sstdev,sstdev \
-                    -c $FIRE_CT,$FIRE_ST,$FIRE_EN,$FIRE_ID,$FIRE_SIZE,$FIRE_SIZE,$FIRE_ST,$FIRE_EN \
+                    -c $FIRE_CT,$FIRE_ST,$FIRE_EN,$FIRE_ID,$FIRE_SIZE,$FIRE_SIZE,$FIRE_ST,$FIRE_EN
         ) \
             | hck -f 1,$FIRE_ST,$FIRE_EN,2-$NC,$FIRE_SIZE- \
             | csvtk round -tT -C '$' -n 0 -f 2,3 \
             | bedtools sort -header -i - \
             | bgzip -@ {threads} \
-            > {output.bed}
+                >{output.bed}
         """
 
 
@@ -226,9 +227,9 @@ rule fdr_peaks_by_fire_elements_chromosome:
         maximum=rules.coverage.output.maximum,
     output:
         bed=temp("temp/{sm}/fire-peaks/{v}-grouped-{chrom}-fire-peaks.bed.gz"),
-    threads: 4
     conda:
         "../envs/python.yaml"
+    threads: 4
     params:
         script=workflow.source_path("../scripts/merge_fire_peaks.py"),
         min_frac_accessible=MIN_FRAC_ACCESSIBLE,
@@ -241,7 +242,7 @@ rule fdr_peaks_by_fire_elements_chromosome:
                 --min-cov $(cat {input.minimum}) \
                 --min-frac-accessible {params.min_frac_accessible} \
             | bgzip -@ {threads} \
-        > {output.bed}
+                >{output.bed}
         """
 
 
@@ -256,22 +257,22 @@ rule fire_peaks:
         fofn=temp("temp/{sm}/fire-peaks/{sm}-fire-{v}-peaks.fofn"),
         bed="results/{sm}/{sm}-fire-{v}-peaks.bed.gz",
         tbi="results/{sm}/{sm}-fire-{v}-peaks.bed.gz.tbi",
-    threads: 4
     conda:
         DEFAULT_ENV
+    threads: 4
     shell:
         """
         printf "\nMaking FOFN\n"
-        echo {input.beds} > {output.fofn}
+        echo {input.beds} >{output.fofn}
 
-        printf "\nMaking header\n"        
-        ((cat $(cat {output.fofn}) | bgzip -cd | grep "^#" | head -n 1) || true) \
-            | bgzip -@ {threads} > {output.bed}
+        printf "\nMaking header\n"
+        ( (cat $(cat {output.fofn}) | bgzip -cd | grep "^#" | head -n 1) || true) \
+            | bgzip -@ {threads} >{output.bed}
 
         printf "\nConcatenating\n"
         cat $(cat {output.fofn}) | bgzip -cd -@ {threads} | grep -v "^#" \
-            | bgzip -@ {threads} >> {output.bed}
-        
+            | bgzip -@ {threads} >>{output.bed}
+
         printf "\nIndexing\n"
         tabix -f -p bed {output.bed}
         """
@@ -296,22 +297,22 @@ rule wide_fire_peaks:
         bed3_as=workflow.source_path("../templates/bed3.as"),
     shell:
         """
-        ( \
-            bgzip -cd {input.bed}; \
+        (
+            bgzip -cd {input.bed}
             bioawk -tc hdr 'NR==1 || $FDR<={params.max_peak_fdr}' {input.track} \
-                | bioawk -tc hdr 'NR==1 || (NF>0 && $coverage>0 && $fire_coverage/$coverage>={params.min_frac_acc})' \
+                | bioawk -tc hdr 'NR==1 || (NF>0 && $coverage>0 && $fire_coverage/$coverage>={params.min_frac_acc})'
         ) \
             | cut -f 1-3 \
             | bedtools sort \
             | bedtools merge -d {params.nuc_size} \
             | bgzip -@ {threads} \
-        > {output.bed}
-        
+                >{output.bed}
+
         bgzip -cd -@ 16 {output.bed} \
             | bigtools bedtobigbed \
                 -s start -a {params.bed3_as} \
-                - {input.fai} {output.bb}        
-        
+                - {input.fai} {output.bb}
+
         tabix -p bed {output.bed}
         """
 
@@ -325,9 +326,9 @@ rule one_percent_fire_peaks:
         tbi="results/{sm}/additional-outputs-{v}/fire-peaks/one-percent-FDR/{sm}-fire-{v}-01-fire-peaks.bed.gz.tbi",
         wide="results/{sm}/additional-outputs-{v}/fire-peaks/one-percent-FDR/{sm}-fire-{v}-01-fire-wide-peaks.bed.gz",
         wtbi="results/{sm}/additional-outputs-{v}/fire-peaks/one-percent-FDR/{sm}-fire-{v}-01-fire-wide-peaks.bed.gz.tbi",
-    threads: 4
     conda:
         DEFAULT_ENV
+    threads: 4
     params:
         nuc_size=config.get("nucleosome_size", 147),
     shell:
@@ -335,18 +336,18 @@ rule one_percent_fire_peaks:
         bgzip -cd {input.bed} \
             | csvtk filter -tT -C '$' -f "FDR<=0.01" \
             | bgzip -@ {threads} \
-            > {output.bed}
+                >{output.bed}
         tabix -f -p bed {output.bed}
 
-        ( \
-            bgzip -cd {output.bed}; \
-            bioawk -tc hdr '$FDR<=0.01' {input.track} \
+        (
+            bgzip -cd {output.bed}
+            bioawk -tc hdr '$FDR<=0.01' {input.track}
         ) \
             | cut -f 1-3 \
             | bedtools sort \
             | bedtools merge -d {params.nuc_size} \
             | bgzip -@ {threads} \
-        > {output.wide}
+                >{output.wide}
         tabix -f -p bed {output.wide}
         """
 
@@ -359,8 +360,8 @@ rule peaks_vs_percent:
             "results/{sm}/additional-outputs-{v}/figures/{sm}-fire-{v}-peaks-vs-percent.pdf",
             category="Peak calls",
         ),
-    threads: 4
     conda:
         "../envs/R.yaml"
+    threads: 4
     script:
         "../scripts/peaks-vs-percent.R"

@@ -8,6 +8,10 @@ rule fire:
     output:
         cram="results/{sm}/{sm}-fire-{v}-filtered.cram",
         crai="results/{sm}/{sm}-fire-{v}-filtered.cram.crai",
+    benchmark:
+        "results/{sm}/additional-outputs-{v}/benchmarks/{sm}-fire-bam.txt"
+    conda:
+        DEFAULT_ENV
     threads: 32
     resources:
         mem_mb=32 * 1024,
@@ -17,10 +21,6 @@ rule fire:
         min_ave_msp_size=config.get("min_ave_msp_size", 10),
         use_ont=USE_ONT,
         flag=FILTER_FLAG,
-    benchmark:
-        "results/{sm}/additional-outputs-{v}/benchmarks/{sm}-fire-bam.txt"
-    conda:
-        DEFAULT_ENV
     shell:
         """
         samtools view -@ {threads} -u -F {params.flag} {input.bam} \
@@ -37,7 +37,7 @@ rule fire:
                 --input-fmt-option required_fields=0x1bff \
                 --write-index -o {output.cram}
 
-        # check if the cram file has zero reads 
+        # check if the cram file has zero reads
         reads_in_header=$(samtools view {output.cram} | head | wc -l || true)
         if [ $reads_in_header -eq 0 ]; then
             printf "\nNo reads passed filters exiting...\n\nPlease review https://fiberseq.github.io/quick-start.html to make sure the input BAM has been correctly processed.\n\n"
@@ -51,9 +51,9 @@ rule fire_sites_chrom:
         cram=rules.fire.output.cram,
     output:
         bed=temp("temp/{sm}/chrom/{v}-{chrom}.sorted.bed.gz"),
-    threads: 4
     conda:
         DEFAULT_ENV
+    threads: 4
     resources:
         mem_mb=16 * 1024,
     params:
@@ -62,13 +62,13 @@ rule fire_sites_chrom:
         """
         samtools view -@ {threads} -u {input.cram} {wildcards.chrom} \
             | {FT_EXE} fire -t {threads} --extract - \
-                | LC_ALL=C sort --parallel={threads} \
-                    -k1,1 -k2,2n -k3,3n -k4,4 \
-                | bioawk -tc hdr '$10<={params.min_fdr}' \
-                | (grep '\\S' || true) \
-                | (grep -v '^#' || true) \
-                | bgzip -@ {threads} \
-            > {output.bed}
+            | LC_ALL=C sort --parallel={threads} \
+                -k1,1 -k2,2n -k3,3n -k4,4 \
+            | bioawk -tc hdr '$10<={params.min_fdr}' \
+            | (grep '\\S' || true) \
+            | (grep -v '^#' || true) \
+            | bgzip -@ {threads} \
+                >{output.bed}
         """
 
 
@@ -79,12 +79,12 @@ rule fire_sites:
         ),
     output:
         bed="results/{sm}/additional-outputs-{v}/fire-peaks/{sm}-{v}-fire-elements.bed.gz",
-    threads: 1
     conda:
         DEFAULT_ENV
+    threads: 1
     shell:
         """
-        cat {input.beds} > {output.bed}
+        cat {input.beds} >{output.bed}
         """
 
 
@@ -93,9 +93,9 @@ rule fire_sites_index:
         bed=rules.fire_sites.output.bed,
     output:
         tbi=rules.fire_sites.output.bed + ".tbi",
-    threads: 1
     conda:
         DEFAULT_ENV
+    threads: 1
     shell:
         """
         tabix -p bed {input.bed}

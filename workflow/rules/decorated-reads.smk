@@ -11,20 +11,20 @@ rule decorate_fibers_chromosome:
     output:
         bed=temp("temp/{sm}/decorate/{v}-{chrom}.bed.gz"),
         decorated=temp("temp/{sm}/decorate/{v}-{chrom}.dec.bed.gz"),
-    threads: 4
-    resources:
-        mem_mb=get_mem_mb,
     # the following steps can take a while so this helps the pipeline start this earlier.
     priority: 10
     conda:
         DEFAULT_ENV
+    threads: 4
+    resources:
+        mem_mb=get_mem_mb,
     shell:
         """
         samtools view -@ {threads} -u {input.cram} {wildcards.chrom} \
             | {FT_EXE} track-decorators -t {threads} --bed12 {output.bed} \
             | sort -k1,1 -k2,2n -k3,3n -k4,4 \
             | bgzip -@ {threads} \
-        > {output.decorated}
+                >{output.decorated}
         """
 
 
@@ -41,12 +41,12 @@ rule decorate_fibers_1:
         bb="results/{sm}/trackHub-{v}/bb/fire-fibers.bb",
     benchmark:
         "results/{sm}/additional-outputs-{v}/benchmarks/decorate_fibers_1/{sm}.txt"
-    threads: 8
-    resources:
-        runtime=240,
     priority: 10
     conda:
         DEFAULT_ENV
+    threads: 8
+    resources:
+        runtime=240,
     params:
         bed_as=workflow.source_path("../templates/bed12_filter.as"),
         nzooms=NZOOMS,
@@ -79,12 +79,12 @@ rule decorate_fibers_2:
         #bed=temp("temp/{sm}/trackHub-{v}/bb/fire-fiber-decorators.bed.gz"),
     benchmark:
         "results/{sm}/additional-outputs-{v}/benchmarks/decorate_fibers_2/{sm}.txt"
-    threads: 8
-    resources:
-        runtime=60 * 16,
     priority: 10
     conda:
         DEFAULT_ENV
+    threads: 8
+    resources:
+        runtime=60 * 16,
     params:
         dec_as=workflow.source_path("../templates/decoration.as"),
         nzooms=NZOOMS,
