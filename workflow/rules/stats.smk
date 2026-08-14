@@ -9,19 +9,21 @@ rule clustering_vs_null:
         tmp=temp("temp/{sm}/tmp.pre.calls.bed"),
         null=temp("temp/{sm}/null.calls.bed"),
         bed="results/{sm}/clustering-vs-null.bed.gz",
-    threads: 4
     conda:
         DEFAULT_ENV
+    threads: 4
     shell:
         """
-        bgzip -cd -@{threads} {input.bed} | cut -f 1-3 > {output.tmp}
-        bedtools shuffle -chrom -i {output.tmp} -g {input.fai} > {output.null}
+        bgzip -cd -@{threads} {input.bed} | cut -f 1-3 >{output.tmp}
+        bedtools shuffle -chrom -i {output.tmp} -g {input.fai} >{output.null}
 
-        ( bedtools genomecov -bg -i {output.tmp} -g {input.fai} | sed 's/$/\\tReal/g' ; \
-          bedtools genomecov -bg -i {output.null} -g {input.fai} | sed 's/$/\\tNull/g' ) \
+        (
+            bedtools genomecov -bg -i {output.tmp} -g {input.fai} | sed 's/$/\\tReal/g'
+            bedtools genomecov -bg -i {output.null} -g {input.fai} | sed 's/$/\\tNull/g'
+        ) \
             | bedtools sort \
             | bgzip -@ {threads} \
-        > {output.bed}
+                >{output.bed}
         """
 
 
@@ -33,20 +35,20 @@ rule fires_in_peaks:
     output:
         tmp=temp("temp/{sm}/tmp.FIREs-{v}-in-peaks.bed"),
         txt="results/{sm}/additional-outputs-{v}/fire-peaks/{sm}-{v}-fires-in-peaks.txt",
-    threads: 4
     conda:
         DEFAULT_ENV
+    threads: 4
     params:
         script=workflow.source_path("../scripts/percent-in-clusters.sh"),
     shell:
         """
-        bedtools intersect -sorted -a {input.fire} -b {input.exclude} -v > {output.tmp}
+        bedtools intersect -sorted -a {input.fire} -b {input.exclude} -v >{output.tmp}
 
-        echo "Total # of FIREs within normal coverage regions" >> {output.txt}
-        wc -l {output.tmp} >> {output.txt}
+        echo "Total # of FIREs within normal coverage regions" >>{output.txt}
+        wc -l {output.tmp} >>{output.txt}
 
-        echo "# of FIREs within peaks" >> {output.txt}
-        bedtools intersect -sorted -u -a {input.fire} -b {input.peaks} | wc -l >> {output.txt} 
+        echo "# of FIREs within peaks" >>{output.txt}
+        bedtools intersect -sorted -u -a {input.fire} -b {input.peaks} | wc -l >>{output.txt}
         """
 
 
@@ -78,8 +80,8 @@ rule hap_differences:
         ),
         bed="results/{sm}/{sm}-fire-{v}-hap-differences.bed.gz",
         bed9=temp("temp/{sm}/hap1-vs-hap2/FIRE-{v}.hap.differences.bed9"),
-    threads: 4
     conda:
         "../envs/R.yaml"
+    threads: 4
     script:
         "../scripts/hap-diffs.R"

@@ -41,12 +41,12 @@ rule leviosam2:
         lifted=temp("temp/{sm}/leviosam2/{sm}-{chrom}-committed.bam"),
         deferred=temp("temp/{sm}/leviosam2/{sm}-{chrom}-deferred.bam"),
         unliftable=temp("temp/{sm}/leviosam2/{sm}-{chrom}-unliftable.bam"),
+    conda:
+        DEFAULT_ENV
     threads: MAX_THREADS
     resources:
         mem_mb=MAX_THREADS * 4 * 1024,
         runtime=16 * 60,
-    conda:
-        DEFAULT_ENV
     params:
         # maximum number of CIGAR opts to change, also the max gap size that can be spanned
         G=config.get("levio_G", 100_000),
@@ -83,12 +83,12 @@ rule leviosam2_sorted:
         ref=REF,
     output:
         bam=temp("temp/{sm}/leviosam2/{sm}-{chrom}-sorted.bam"),
+    conda:
+        DEFAULT_ENV
     threads: SORT_THREADS
     resources:
         mem_mb=SORT_THREADS * 4 * 1024,
         runtime=16 * 60,
-    conda:
-        DEFAULT_ENV
     shell:
         """
         samtools sort {input.lifted} \

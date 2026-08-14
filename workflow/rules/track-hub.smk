@@ -5,9 +5,9 @@ rule percent_accessible:
     output:
         tmp=temp("temp/{sm}/{hp}/{v}-percent.accessible.bed"),
         bw="results/{sm}/trackHub-{v}/bw/{hp}.percent.accessible.bw",
-    threads: 4
     conda:
         DEFAULT_ENV
+    threads: 4
     resources:
         mem_mb=get_mem_mb,
     params:
@@ -19,17 +19,16 @@ rule percent_accessible:
         bgzip -cd {input.bed} \
             | bioawk -tc hdr '$coverage{params.suffix}>0' \
             | bioawk -tc hdr \
-              'NR>1{{print $1,$2,$3,100*$fire_coverage{params.suffix}/$coverage{params.suffix}}}' \
-        > {output.tmp}
+                'NR>1{{print $1,$2,$3,100*$fire_coverage{params.suffix}/$coverage{params.suffix}}}' \
+                >{output.tmp}
 
         # add fake if file is empty
         if [[ -s {output.tmp} ]]; then
             echo "File is not empty"
         else
             echo "File is empty"
-            printf "{params.chrom}\t0\t1\t0\\n" > {output.tmp}
+            printf "{params.chrom}\t0\t1\t0\\n" >{output.tmp}
         fi
-
 
         bigtools bedgraphtobigwig \
             --nzooms {params.nzooms} -s start \
@@ -65,9 +64,9 @@ rule fdr_track_to_bw:
         fai=ancient(FAI),
     output:
         bw="results/{sm}/trackHub-{v}/bw/{col}.bw",
-    threads: 4
     conda:
         DEFAULT_ENV
+    threads: 4
     params:
         nzooms=NZOOMS,
     shell:
@@ -86,9 +85,9 @@ rule fire_peaks_bb:
         fai=ancient(FAI),
     output:
         bb="results/{sm}/trackHub-{v}/bb/fire-peaks.bb",
-    threads: 4
     conda:
         DEFAULT_ENV
+    threads: 4
     params:
         bedfmt=workflow.source_path("../templates/fire_peak.as"),
     shell:
@@ -109,19 +108,19 @@ rule hap_differences_track:
         fai=ancient(FAI),
     output:
         bb="results/{sm}/trackHub-{v}/bb/hap_differences.bb",
+    conda:
+        DEFAULT_ENV
     threads: 4
     resources:
         mem_mb=get_mem_mb,
-    conda:
-        DEFAULT_ENV
     params:
         chrom=get_chroms()[0],
         bed9_as=workflow.source_path("../templates/bed9.as"),
     shell:
         """
-        ( \
-            printf "{params.chrom}\t0\t1\tfake\t100\t+\t0\t1\t230,230,230\\n"; \
-            bedtools sort -i {input.bed9} \
+        (
+            printf "{params.chrom}\t0\t1\tfake\t100\t+\t0\t1\t230,230,230\\n"
+            bedtools sort -i {input.bed9}
         ) \
             | bigtools bedtobigbed \
                 -s start -a {params.bed9_as} \
@@ -135,11 +134,11 @@ rule trackhub:
     output:
         hub="results/{sm}/trackHub-{v}/hub.txt",
         description="results/{sm}/trackHub-{v}/fire-description.html",
-    resources:
-        load=get_load,
-    threads: 4
     conda:
         "../envs/python.yaml"
+    threads: 4
+    resources:
+        load=get_load,
     params:
         ref=REF_NAME,
         script=workflow.source_path("../scripts/trackhub.py"),
@@ -147,9 +146,9 @@ rule trackhub:
     shell:
         """
         python {params.script} -v 2 \
-          --trackhub-dir results/{wildcards.sm}/trackHub-{wildcards.v} \
-          --reference {params.ref} \
-          --sample {wildcards.sm} \
-          --average-coverage $(cat {input.cov}) 
+            --trackhub-dir results/{wildcards.sm}/trackHub-{wildcards.v} \
+            --reference {params.ref} \
+            --sample {wildcards.sm} \
+            --average-coverage $(cat {input.cov})
         cp {params.description} {output.description}
         """
