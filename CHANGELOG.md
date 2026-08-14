@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.3
+
+- Workaround for a bioawk edge-case failure producing phantom empty records
+- Misc fixes: `min_coverage` handling in the Snakefile, env and
+  decorated-reads updates (#37)
+
 ## v0.1.2
 
 - fix #34
