@@ -154,7 +154,8 @@ rule exclude_from_shuffle:
             fi
         ) \
             | cut -f 1-3 \
-            | bedtools sort \
+            | awk 'NR==FNR {{keep[$1] = 1; next}} keep[$1]' {input.genome} - \
+            | bedtools sort -g {input.genome} \
             | bedtools merge \
             | bgzip -@ {threads} \
                 >{output.bed}

@@ -303,7 +303,7 @@ rule wide_fire_peaks:
                 | bioawk -tc hdr 'NR==1 || (NF>0 && $coverage>0 && $fire_coverage/$coverage>={params.min_frac_acc})'
         ) \
             | cut -f 1-3 \
-            | bedtools sort \
+            | bedtools sort -g {input.genome} \
             | bedtools merge -d {params.nuc_size} \
             | bgzip -@ {threads} \
                 >{output.bed}
@@ -321,6 +321,7 @@ rule one_percent_fire_peaks:
     input:
         bed=rules.fire_peaks.output.bed,
         track=rules.pileup.output.bed,
+        genome=rules.genome_file.output.genome,
     output:
         bed="results/{sm}/additional-outputs-{v}/fire-peaks/one-percent-FDR/{sm}-fire-{v}-01-fire-peaks.bed.gz",
         tbi="results/{sm}/additional-outputs-{v}/fire-peaks/one-percent-FDR/{sm}-fire-{v}-01-fire-peaks.bed.gz.tbi",
@@ -344,7 +345,7 @@ rule one_percent_fire_peaks:
             bioawk -tc hdr '$FDR<=0.01' {input.track}
         ) \
             | cut -f 1-3 \
-            | bedtools sort \
+            | bedtools sort -g {input.genome} \
             | bedtools merge -d {params.nuc_size} \
             | bgzip -@ {threads} \
                 >{output.wide}
