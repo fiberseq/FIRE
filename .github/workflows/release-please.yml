@@ -1,0 +1,21 @@
+name: release-please
+
+# Release automation: conventional commits on main accumulate into a release
+# PR that bumps the version in pixi.toml and updates CHANGELOG.md; merging
+# that PR tags vX.Y.Z and cuts a GitHub release.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

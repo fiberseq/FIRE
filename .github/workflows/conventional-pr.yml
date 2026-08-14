@@ -1,0 +1,19 @@
+name: conventional-pr-title
+
+# PRs are squash-merged, so the PR title becomes the commit message on main
+# that release-please reads. This check requires titles to follow
+# conventional commits (feat:, fix:, docs:, ci:, chore:, ...).
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  lint-pr-title:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
