@@ -1,0 +1,2 @@
+sample	bam	ref	ref_name
+test	test.cram	test.fa.gz	hg38	extra

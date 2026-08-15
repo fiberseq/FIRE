@@ -35,7 +35,8 @@ Error cases (`err-*`, the dry run must fail with a specific message):
 | `err-no-ref-anywhere.yaml` | No reference in the manifest or the config. |
 | `err-ref-col-only.yaml` + `.tbl` | Manifest has `ref` without `ref_name`. |
 | `err-config-ref-only.yaml` | Config has `ref` without `ref_name`. |
-| `err-nan-cell.yaml` + `.tbl` | Short manifest row (missing cells). |
+| `err-nan-cell.yaml` + `.tbl` | Short manifest row (missing cells); rejected at parse time. |
+| `err-extra-column.yaml` + `.tbl` | Manifest row with one extra column (would silently column-shift without index_col=False). |
 | `err-sentinel-no-config.yaml` + `.tbl` | `.` cell with no config value to fall back to. |
 | `err-dup-sample.yaml` + `.tbl` | Duplicate sample names. |
 | `err-missing-refpath.yaml` + `.tbl` | Reference fasta does not exist. |

@@ -1,6 +1,7 @@
 import re
 import logging
 import sys
+import warnings
 from functools import lru_cache
 
 import pysam
@@ -167,12 +168,28 @@ def get_manifest():
         raise ValueError(f"FIRE: manifest file {manifest_path} does not exist")
     try:
         # dtype=str + keep_default_na=False keep every cell as literal text:
-        # numeric sample names stay strings, a sample named NA stays "NA",
-        # and missing trailing cells parse as "" instead of NaN
-        manifest = pd.read_csv(
-            manifest_path, sep=r"\s+", comment="#", dtype=str, keep_default_na=False
-        )
-    except (pd.errors.ParserError, pd.errors.EmptyDataError) as e:
+        # numeric sample names stay strings and a sample named NA stays "NA"
+        # (missing trailing cells still parse as NaN; the malformed-row check
+        # below catches both NaN and ""). index_col=False stops pandas from
+        # silently treating the first field as an index when every data row
+        # has one extra column; promoting ParserWarning to an error turns
+        # the resulting silent field drop into a loud failure
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", pd.errors.ParserWarning)
+            manifest = pd.read_csv(
+                manifest_path,
+                sep=r"\s+",
+                comment="#",
+                dtype=str,
+                keep_default_na=False,
+                index_col=False,
+                engine="python",
+            )
+    except (
+        pd.errors.ParserError,
+        pd.errors.EmptyDataError,
+        pd.errors.ParserWarning,
+    ) as e:
         raise ValueError(f"FIRE: cannot parse manifest {manifest_path}: {e}") from e
     for col in ["sample", "bam"]:
         if col not in manifest.columns:
@@ -190,7 +207,8 @@ def get_manifest():
             raise ValueError(f"FIRE: sample name '{sm}' must match [A-Za-z0-9_.-]+")
     manifest = manifest.set_index("sample")
     manifest = _fill_manifest_refs(manifest)
-    malformed = manifest.index[manifest[["bam", "ref", "ref_name"]].eq("").any(axis=1)]
+    ref_cols = manifest[["bam", "ref", "ref_name"]]
+    malformed = manifest.index[(ref_cols.isna() | ref_cols.eq("")).any(axis=1)]
     if len(malformed) > 0:
         raise ValueError(
             f"FIRE: samples {malformed.tolist()} have missing or malformed manifest "

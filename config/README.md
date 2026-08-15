@@ -22,7 +22,7 @@ sample1	/path/to/sample1.bam	/path/to/hg38.fa	hg38
 sample2	/path/to/sample2.bam	/path/to/chm13.fa	GCA_009914755.4
 sample3	/path/to/sample3.bam	.	.
 ```
-Each `bam` file must be indexed and aligned to its reference genome. FIRE reads the chromosome names and lengths from the bam header, in header order, not from the fasta, so the fasta can contain extra contigs that the bam does not use. Because of this, FIRE opens every manifest bam when it starts, for every command including dry-runs — keep the input bams readable for the lifetime of the results.
+Each `bam` file must be indexed and aligned to its reference genome. FIRE reads the chromosome names and lengths from the bam header, in header order, not from the fasta, so the fasta can contain extra contigs that the bam does not use. Because of this, FIRE opens every manifest bam when it starts, for every command including dry-runs — keep the input bams readable for the lifetime of the results. Output bed files follow the bam header order (for hg38: chr1, chr2, ...), not the lexicographic order of earlier FIRE versions; anchor downstream `bedtools intersect -sorted` calls with `-g`, and rerun old results directories from scratch rather than resuming them.
 ```
 manifest: config/config.tbl
 ```
@@ -54,7 +54,7 @@ excludes:
     - annotations/cnvs.bed
 ```
 
-Reference contigs smaller than this length are skipped by the FIRE pipeline. Default is `0`.
+Contigs in the bam header smaller than this length are skipped by the FIRE pipeline. Default is `0`.
 ```
 min_contig_length: 0
 ```
