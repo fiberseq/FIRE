@@ -31,11 +31,11 @@ def _bam_contigs(bam):
 
 @lru_cache(maxsize=None)
 def _sample_chroms(sm):
-    """Filtered chromosome names for one sample, in BAM header order.
+    """Filtered chromosome names for one sample, in bam header order.
 
-    Header order is the sort order of the data (mosdepth output, coordinate
-    sorted reads), so it must be preserved for the sorted bedtools
-    operations downstream.
+    Header order is the sort order of the data. The reads are coordinate
+    sorted, and mosdepth output follows the header. The sorted bedtools
+    steps downstream depend on this order.
     """
     min_contig_length = config.get("min_contig_length", 0)
     try:
@@ -83,8 +83,8 @@ def get_chroms(wc):
 
 
 def all_chroms():
-    # sorted only for a deterministic wildcard-constraint regex; the
-    # alternation order has no effect on matching
+    # sorted only to make the wildcard-constraint regex deterministic.
+    # The alternation order has no effect on matching.
     return sorted({chrom for sm in MANIFEST.index for chrom in _sample_chroms(sm)})
 
 
@@ -167,13 +167,13 @@ def get_manifest():
     if not os.path.exists(manifest_path):
         raise ValueError(f"FIRE: manifest file {manifest_path} does not exist")
     try:
-        # dtype=str + keep_default_na=False keep every cell as literal text:
-        # numeric sample names stay strings and a sample named NA stays "NA"
-        # (missing trailing cells still parse as NaN; the malformed-row check
-        # below catches both NaN and ""). index_col=False stops pandas from
-        # silently treating the first field as an index when every data row
-        # has one extra column; promoting ParserWarning to an error turns
-        # the resulting silent field drop into a loud failure
+        # dtype=str and keep_default_na=False keep every cell as literal
+        # text. Numeric sample names stay strings. A sample named NA stays
+        # "NA". Missing trailing cells still parse as NaN. The malformed-row
+        # check below catches both NaN and "". Without index_col=False,
+        # pandas makes the first field an index when every row has one
+        # extra column. A ParserWarning becomes an error, so a dropped
+        # field fails loudly.
         with warnings.catch_warnings():
             warnings.simplefilter("error", pd.errors.ParserWarning)
             manifest = pd.read_csv(
