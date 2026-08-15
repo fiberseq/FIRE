@@ -15,4 +15,6 @@ jobs:
         with:
           pixi-version: v0.70.2
           cache: true
+      - run: pixi run test-dry
       - run: pixi run test
+      - run: pixi run test-verify

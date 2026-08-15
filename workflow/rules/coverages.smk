@@ -1,10 +1,26 @@
+rule genome_file:
+    input:
+        # ancient() for the same reason as in rule fire: a re-copied bam
+        # gets a new mtime, and that must not rerun every genome-file
+        # consumer. A bam that is swapped mid-run can leave a stale temp
+        # file. Swapped inputs require a fresh run. That is the same
+        # contract as the rest of the pipeline.
+        bam=lambda wc: ancient(get_input_bam(wc)),
+    output:
+        genome=temp("temp/{sm}/{sm}.genome"),
+    localrule: True
+    run:
+        with open(output.genome, "w") as out:
+            out.write(genome_file_content(wildcards.sm))
+
+
 #
 # Coverage calculations
 #
 rule genome_bedgraph:
     input:
-        ref=ancient(REF),
-        fai=ancient(FAI),
+        ref=lambda wc: ancient(get_ref(wc)),
+        fai=lambda wc: ancient(get_fai(wc)),
         cram=rules.fire.output.cram,
         crai=rules.fire.output.crai,
     output:
@@ -17,9 +33,10 @@ rule genome_bedgraph:
     threads: 16
     shell:
         """
+        # mosdepth output is position sorted in bam header order. Keep
+        # that order. Every other per-sample file uses it.
         mosdepth -F 4 -f {input.ref} -t {threads} tmp {input.cram}
         bgzip -cd tmp.per-base.bed.gz \
-            | LC_ALL=C sort --parallel={threads} -k1,1 -k2,2n -k3,3n -k4,4 \
             | bgzip -@ {threads} \
                 >{output.bg}
         tabix -f -p bed {output.bg}
@@ -43,7 +60,7 @@ rule coverage:
     params:
         coverage_within_n_sd=COVERAGE_WITHIN_N_SD,
         min_coverage=MIN_COVERAGE,
-        chroms=get_chroms(),
+        chroms=get_chroms,
     script:
         "../scripts/cov.py"
 
@@ -76,12 +93,13 @@ rule fiber_locations:
     input:
         fibers=expand(
             rules.fiber_locations_chromosome.output.bed,
-            chrom=get_chroms(),
+            chrom=get_chroms,
             allow_missing=True,
         ),
         bg=rules.genome_bedgraph.output.bg,
         minimum=rules.coverage.output.minimum,
         maximum=rules.coverage.output.maximum,
+        genome=rules.genome_file.output.genome,
     output:
         bed=temp("temp/{sm}/coverage/{v}-fiber-locations.bed.gz"),
         bed_tbi=temp("temp/{sm}/coverage/{v}-fiber-locations.bed.gz.tbi"),
@@ -104,7 +122,7 @@ rule fiber_locations:
         # get filtered fiber locations
         MIN=$(cat {input.minimum})
         MAX=$(cat {input.maximum})
-        bedtools intersect -header -sorted -v -f {params.max_frac_overlap} \
+        bedtools intersect -header -sorted -g {input.genome} -v -f {params.max_frac_overlap} \
             -a {output.bed} \
             -b <(bgzip -cd {input.bg} | awk -v MAX="$MAX" -v MIN="$MIN" '$4 <= MIN || $4 >= MAX') \
             | bgzip -@ {threads} \
@@ -119,24 +137,25 @@ rule fiber_locations:
 rule exclude_from_shuffle:
     input:
         filtered=rules.fiber_locations.output.filtered,
-        fai=ancient(FAI),
+        genome=rules.genome_file.output.genome,
     output:
         bed="results/{sm}/additional-outputs-{v}/coverage/exclude-from-shuffles.bed.gz",
     conda:
         DEFAULT_ENV
     threads: 4
     params:
-        exclude=lambda wc: " ".join(EXCLUDES) if EXCLUDES else "",
+        exclude=lambda wc: " ".join(get_excludes(wc)),
     shell:
         """
         (
-            bedtools genomecov -bga -i {input.filtered} -g {input.fai} | awk '$4 == 0'
+            bedtools genomecov -bga -i {input.filtered} -g {input.genome} | awk '$4 == 0'
             if [ -n "{params.exclude}" ]; then
                 gunzip -cf {params.exclude}
             fi
         ) \
             | cut -f 1-3 \
-            | bedtools sort \
+            | awk 'NR==FNR {{keep[$1] = 1; next}} keep[$1]' {input.genome} - \
+            | bedtools sort -g {input.genome} \
             | bedtools merge \
             | bgzip -@ {threads} \
                 >{output.bed}
@@ -148,7 +167,7 @@ rule unreliable_coverage_regions:
         bg=rules.genome_bedgraph.output.bg,
         minimum=rules.coverage.output.minimum,
         maximum=rules.coverage.output.maximum,
-        fai=ancient(FAI),
+        genome=rules.genome_file.output.genome,
     output:
         bed="results/{sm}/additional-outputs-{v}/coverage/unreliable-coverage-regions.bed.gz",
         bed_tbi="results/{sm}/additional-outputs-{v}/coverage/unreliable-coverage-regions.bed.gz.tbi",
@@ -177,7 +196,7 @@ rule unreliable_coverage_regions:
         bedtools merge -i {output.bed} >{output.tmp}
         bigtools bedtobigbed \
             -s start -a {params.bed3_as} \
-            {output.tmp} {input.fai} {output.bb}
+            {output.tmp} {input.genome} {output.bb}
 
         # index
         tabix -f -p bed {output.bed}

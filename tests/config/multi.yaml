@@ -1,0 +1,5 @@
+manifest: ../tests/config/multi.tbl
+ref: test.fa.gz
+ref_name: testref2
+excludes:
+  - ../tests/config/extra-exclude.bed

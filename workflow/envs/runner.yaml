@@ -5,7 +5,4 @@ channels:
 dependencies:
   - numpy
   - pandas==2.2.3
-#- tqdm
-#- pip
-#- pip:
-#- pysam==0.22.1
+  - pysam

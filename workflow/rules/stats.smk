@@ -4,7 +4,7 @@
 rule clustering_vs_null:
     input:
         bed=rules.fire_sites.output.bed,
-        fai=ancient(FAI),
+        genome=rules.genome_file.output.genome,
     output:
         tmp=temp("temp/{sm}/tmp.pre.calls.bed"),
         null=temp("temp/{sm}/null.calls.bed"),
@@ -15,13 +15,13 @@ rule clustering_vs_null:
     shell:
         """
         bgzip -cd -@{threads} {input.bed} | cut -f 1-3 >{output.tmp}
-        bedtools shuffle -chrom -i {output.tmp} -g {input.fai} >{output.null}
+        bedtools shuffle -chrom -i {output.tmp} -g {input.genome} >{output.null}
 
         (
-            bedtools genomecov -bg -i {output.tmp} -g {input.fai} | sed 's/$/\\tReal/g'
-            bedtools genomecov -bg -i {output.null} -g {input.fai} | sed 's/$/\\tNull/g'
+            bedtools genomecov -bg -i {output.tmp} -g {input.genome} | sed 's/$/\\tReal/g'
+            bedtools genomecov -bg -i {output.null} -g {input.genome} | sed 's/$/\\tNull/g'
         ) \
-            | bedtools sort \
+            | bedtools sort -g {input.genome} \
             | bgzip -@ {threads} \
                 >{output.bed}
         """
@@ -32,6 +32,7 @@ rule fires_in_peaks:
         fire=rules.fire_sites.output.bed,
         exclude=rules.unreliable_coverage_regions.output.bed,
         peaks=rules.fire_peaks.output.bed,
+        genome=rules.genome_file.output.genome,
     output:
         tmp=temp("temp/{sm}/tmp.FIREs-{v}-in-peaks.bed"),
         txt="results/{sm}/additional-outputs-{v}/fire-peaks/{sm}-{v}-fires-in-peaks.txt",
@@ -42,13 +43,13 @@ rule fires_in_peaks:
         script=workflow.source_path("../scripts/percent-in-clusters.sh"),
     shell:
         """
-        bedtools intersect -sorted -a {input.fire} -b {input.exclude} -v >{output.tmp}
+        bedtools intersect -sorted -g {input.genome} -a {input.fire} -b {input.exclude} -v >{output.tmp}
 
         echo "Total # of FIREs within normal coverage regions" >>{output.txt}
         wc -l {output.tmp} >>{output.txt}
 
         echo "# of FIREs within peaks" >>{output.txt}
-        bedtools intersect -sorted -u -a {input.fire} -b {input.peaks} | wc -l >>{output.txt}
+        bedtools intersect -sorted -g {input.genome} -u -a {input.fire} -b {input.peaks} | wc -l >>{output.txt}
         """
 
 

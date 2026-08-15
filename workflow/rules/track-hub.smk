@@ -1,7 +1,7 @@
 rule percent_accessible:
     input:
         bed=rules.pileup.output.bed,
-        fai=ancient(FAI),
+        genome=rules.genome_file.output.genome,
     output:
         tmp=temp("temp/{sm}/{hp}/{v}-percent.accessible.bed"),
         bw="results/{sm}/trackHub-{v}/bw/{hp}.percent.accessible.bw",
@@ -13,7 +13,7 @@ rule percent_accessible:
     params:
         suffix=get_hap_col_suffix,
         nzooms=NZOOMS,
-        chrom=get_chroms()[0],
+        chrom=lambda wc: get_chroms(wc)[0],
     shell:
         """
         bgzip -cd {input.bed} \
@@ -32,14 +32,14 @@ rule percent_accessible:
 
         bigtools bedgraphtobigwig \
             --nzooms {params.nzooms} -s start \
-            {output.tmp} {input.fai} {output.bw}
+            {output.tmp} {input.genome} {output.bw}
         """
 
 
 rule element_coverages_bw:
     input:
         bed=rules.pileup.output.bed,
-        fai=ancient(FAI),
+        genome=rules.genome_file.output.genome,
     output:
         bw="results/{sm}/trackHub-{v}/bw/{hp}.{el_type}.coverage.bw",
     conda:
@@ -54,14 +54,14 @@ rule element_coverages_bw:
             | grep -v "^#" \
             | bigtools bedgraphtobigwig \
                 -s start --nzooms {params.nzooms} \
-                - {input.fai} {output.bw}
+                - {input.genome} {output.bw}
         """
 
 
 rule fdr_track_to_bw:
     input:
         bed=rules.pileup.output.bed,
-        fai=ancient(FAI),
+        genome=rules.genome_file.output.genome,
     output:
         bw="results/{sm}/trackHub-{v}/bw/{col}.bw",
     conda:
@@ -75,14 +75,14 @@ rule fdr_track_to_bw:
             | grep -v "^#" \
             | bigtools bedgraphtobigwig \
                 -s start --nzooms {params.nzooms} \
-                - {input.fai} {output.bw}
+                - {input.genome} {output.bw}
         """
 
 
 rule fire_peaks_bb:
     input:
         bed=rules.fire_peaks.output.bed,
-        fai=ancient(FAI),
+        genome=rules.genome_file.output.genome,
     output:
         bb="results/{sm}/trackHub-{v}/bb/fire-peaks.bb",
     conda:
@@ -98,14 +98,14 @@ rule fire_peaks_bb:
             | rg -v '^#' \
             | bigtools bedtobigbed \
                 -a {params.bedfmt} -s start \
-                - {input.fai} {output.bb}
+                - {input.genome} {output.bb}
         """
 
 
 rule hap_differences_track:
     input:
         bed9=rules.hap_differences.output.bed9,
-        fai=ancient(FAI),
+        genome=rules.genome_file.output.genome,
     output:
         bb="results/{sm}/trackHub-{v}/bb/hap_differences.bb",
     conda:
@@ -114,17 +114,17 @@ rule hap_differences_track:
     resources:
         mem_mb=get_mem_mb,
     params:
-        chrom=get_chroms()[0],
+        chrom=lambda wc: get_chroms(wc)[0],
         bed9_as=workflow.source_path("../templates/bed9.as"),
     shell:
         """
         (
             printf "{params.chrom}\t0\t1\tfake\t100\t+\t0\t1\t230,230,230\\n"
-            bedtools sort -i {input.bed9}
+            bedtools sort -g {input.genome} -i {input.bed9}
         ) \
             | bigtools bedtobigbed \
                 -s start -a {params.bed9_as} \
-                - {input.fai} {output.bb}
+                - {input.genome} {output.bb}
         """
 
 
@@ -140,7 +140,7 @@ rule trackhub:
     resources:
         load=get_load,
     params:
-        ref=REF_NAME,
+        ref=get_ref_name,
         script=workflow.source_path("../scripts/trackhub.py"),
         description=workflow.source_path("../templates/fire-description.html"),
     shell:
