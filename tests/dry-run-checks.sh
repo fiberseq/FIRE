@@ -115,23 +115,6 @@ else
     FAILURES=$((FAILURES + 1))
 fi
 
-# a leftover genome file that no longer matches the bam header must be
-# removed at parse time (the staleness guard for the ancient() bam input)
-mkdir -p temp/test
-printf 'chrBOGUS\t12345\n' >temp/test/test.genome
-out=$(snk test.yaml 2>&1) || {
-    echo "FAIL: stale-genome dry-run did not build"
-    FAILURES=$((FAILURES + 1))
-}
-if ! grep -qF "removing stale genome file" <<<"$out"; then
-    echo "FAIL: stale genome file was not reported"
-    FAILURES=$((FAILURES + 1))
-elif [ -f temp/test/test.genome ]; then
-    echo "FAIL: stale genome file was not removed"
-    FAILURES=$((FAILURES + 1))
-else
-    echo "ok (stale guard): mismatched genome file removed at parse time"
-fi
 
 # error cases, one per validator branch; substrings are specific enough
 # that a wrong error cannot satisfy the assertion

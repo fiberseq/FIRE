@@ -2,9 +2,9 @@ rule genome_file:
     input:
         # ancient for the same reason as rule fire: a re-copied bam with a
         # fresh mtime must not cascade reruns through every genome-file
-        # consumer. Staleness is impossible: remove_stale_genome_files()
-        # deletes any leftover file that no longer matches the bam header
-        # at parse time, which forces regeneration.
+        # consumer. Like every ancient input, swapping the bam mid-run can
+        # leave a stale leftover temp file — swapped inputs require a fresh
+        # run, the same contract as the rest of the pipeline.
         bam=lambda wc: ancient(get_input_bam(wc)),
     output:
         genome=temp("temp/{sm}/{sm}.genome"),

@@ -239,26 +239,6 @@ def genome_file_content(sm):
     )
 
 
-def remove_stale_genome_files():
-    """Delete leftover genome files that no longer match the bam header.
-
-    The genome_file rule has an ancient() input, so a leftover temp file
-    from an interrupted run is not regenerated when the manifest bam is
-    swapped. Every parse reads the live bam headers anyway, so a
-    mismatched file is removed here, and the missing output then forces
-    regeneration before any consumer runs.
-    """
-    for sm in MANIFEST.index:
-        path = f"temp/{sm}/{sm}.genome"
-        if not os.path.exists(path):
-            continue
-        with open(path) as f:
-            existing = f.read()
-        if existing != genome_file_content(sm):
-            print(f"INFO: {sm}: removing stale genome file {path}", file=sys.stderr)
-            os.remove(path)
-
-
 def get_mem_mb(wildcards, attempt):
     if attempt < 3:
         return attempt * 1024 * 32
