@@ -45,6 +45,26 @@ else
     echo "ok: test-rev output preserves bam header order"
 fi
 
+# test-rev holds the same reads as test with a reversed header, so output
+# CONTENT must be identical modulo row order — the only assertion that can
+# catch a silent (non-crashing) ordering bug
+assert_same_content() {
+    local a=$1 b=$2 label=$3
+    if diff <(gunzip -c "$a" | grep -v "^#" | LC_ALL=C sort) \
+        <(gunzip -c "$b" | grep -v "^#" | LC_ALL=C sort) >/dev/null; then
+        echo "ok: $label content identical between test and test-rev"
+    else
+        echo "FAIL: $label content differs between test and test-rev"
+        FAILURES=$((FAILURES + 1))
+    fi
+}
+assert_same_content \
+    "results/test/test-fire-$V-peaks.bed.gz" \
+    "results/test-rev/test-rev-fire-$V-peaks.bed.gz" "peaks"
+assert_same_content \
+    "results/test/test-fire-$V-pileup.bed.gz" \
+    "results/test-rev/test-rev-fire-$V-pileup.bed.gz" "pileup"
+
 if [ "$FAILURES" -gt 0 ]; then
     echo "verify-multi: $FAILURES failure(s)"
     exit 1
