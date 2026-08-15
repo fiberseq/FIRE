@@ -1,0 +1,5 @@
+gunzip: can't stat: missing-a.bed.gz (missing-a.bed.gz.gz): No such file or directory
+gunzip: can't stat: missing-b.bed.gz (missing-b.bed.gz.gz): No such file or directory
+gunzip: can't stat: missing-b.bed.gz (missing-b.bed.gz.gz): No such file or directory
+gunzip: truncated.bed.gz: unexpected end of file
+gunzip: truncated.bed.gz: uncompress failed

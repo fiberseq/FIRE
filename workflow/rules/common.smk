@@ -190,7 +190,10 @@ def get_manifest():
         pd.errors.EmptyDataError,
         pd.errors.ParserWarning,
     ) as e:
-        raise ValueError(f"FIRE: cannot parse manifest {manifest_path}: {e}") from e
+        raise ValueError(
+            f"FIRE: cannot parse manifest {manifest_path}: {e} (check that every "
+            "row has the same number of whitespace-separated fields as the header)"
+        ) from e
     for col in ["sample", "bam"]:
         if col not in manifest.columns:
             raise ValueError(

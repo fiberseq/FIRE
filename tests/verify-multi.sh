@@ -50,6 +50,14 @@ fi
 # catch a silent (non-crashing) ordering bug
 assert_same_content() {
     local a=$1 b=$2 label=$3
+    # missing inputs must fail loudly, not compare two empty streams
+    for f in "$a" "$b"; do
+        if [ ! -f "$f" ]; then
+            echo "FAIL: $label missing file $f"
+            FAILURES=$((FAILURES + 1))
+            return
+        fi
+    done
     if diff <(gunzip -c "$a" | grep -v "^#" | LC_ALL=C sort) \
         <(gunzip -c "$b" | grep -v "^#" | LC_ALL=C sort) >/dev/null; then
         echo "ok: $label content identical between test and test-rev"
