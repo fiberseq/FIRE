@@ -43,7 +43,6 @@ COVERAGE_WITHIN_N_SD = config.get("coverage_within_n_sd", 5)
 # sample, haplotype, and chromosome wildcard building
 DEFAULT_ENV = config.get("env", "../envs/env.yaml")
 MANIFEST = get_manifest()
-remove_stale_genome_files()
 MIN_FIRE_FDR = config.get("min_fire_fdr", 0.10)
 
 # FDR / peak calling thresholds
