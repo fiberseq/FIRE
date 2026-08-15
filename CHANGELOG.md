@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0](https://github.com/fiberseq/FIRE/compare/v0.2.0...v0.3.0) (2026-08-15)
+
+
+### Features
+
+* per-sample reference support via manifest ref/ref_name columns ([#71](https://github.com/fiberseq/FIRE/issues/71)) ([6e1c24e](https://github.com/fiberseq/FIRE/commit/6e1c24e2b6fe0d81b2df6abdb1ca8b03b690fbbe))
+
+
+### Refactoring
+
+* remove the unused leviosam2 chain-lift rules ([#70](https://github.com/fiberseq/FIRE/issues/70)) ([150d68e](https://github.com/fiberseq/FIRE/commit/150d68e963f50c441f319a90e8239d52bf45ee70))
+
 ## [0.2.0](https://github.com/fiberseq/FIRE/compare/v0.1.3...v0.2.0) (2026-08-14)
 
 
