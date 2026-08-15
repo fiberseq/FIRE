@@ -2,11 +2,11 @@
 
 Two BAMs, each skipped when already present:
 
-- generated/test-chr20.bam: header lists only chr20, so the sample
-  exercises the BAM-contigs-are-a-subset-of-the-fasta case.
-- generated/test-rev.bam: header lists chr21 before chr20, so the sample
-  exercises header-order preservation (header order differs from
-  lexicographic order).
+- generated/test-chr20.bam: the header lists only chr20. This sample
+  tests a bam with fewer contigs than its fasta.
+- generated/test-rev.bam: the header lists chr21 before chr20. This
+  sample tests header-order preservation, because its header order
+  differs from lexicographic order.
 
 Run with the working directory set to fire-test-data (see the test-multi
 pixi task).

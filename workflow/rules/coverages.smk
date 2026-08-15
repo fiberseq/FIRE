@@ -1,10 +1,10 @@
 rule genome_file:
     input:
-        # ancient for the same reason as rule fire: a re-copied bam with a
-        # fresh mtime must not cascade reruns through every genome-file
-        # consumer. Like every ancient input, swapping the bam mid-run can
-        # leave a stale leftover temp file — swapped inputs require a fresh
-        # run, the same contract as the rest of the pipeline.
+        # ancient() for the same reason as in rule fire: a re-copied bam
+        # gets a new mtime, and that must not rerun every genome-file
+        # consumer. A bam that is swapped mid-run can leave a stale temp
+        # file. Swapped inputs require a fresh run. That is the same
+        # contract as the rest of the pipeline.
         bam=lambda wc: ancient(get_input_bam(wc)),
     output:
         genome=temp("temp/{sm}/{sm}.genome"),
@@ -33,8 +33,8 @@ rule genome_bedgraph:
     threads: 16
     shell:
         """
-        # mosdepth output is position sorted in bam header order; keep that
-        # order, it is the order of every other per-sample file
+        # mosdepth output is position sorted in bam header order. Keep
+        # that order. Every other per-sample file uses it.
         mosdepth -F 4 -f {input.ref} -t {threads} tmp {input.cram}
         bgzip -cd tmp.per-base.bed.gz \
             | bgzip -@ {threads} \

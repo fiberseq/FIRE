@@ -56,10 +56,10 @@ expect_pass "$CFG/two-sample.yaml"
 expect_pass "$CFG/sentinel.yaml"
 expect_stderr "$CFG/override-info.yaml" "manifest ref/ref_name columns override config-level values"
 
-# sample-attributed rendered-shell checks for exclude_from_shuffle;
-# -R forces the rule so cached results do not hide the rendering. The
-# rendered shell contains the sample-scoped output path, so paragraphs
-# (awk RS='') can be attributed to one sample.
+# rendered-shell checks for exclude_from_shuffle, attributed per sample.
+# -R forces the rule, so cached results cannot hide the rendering. The
+# rendered shell contains the sample-scoped output path. Paragraph mode
+# in awk (RS='') attributes each block to one sample.
 shell_block() {
     # config, sample -> the rendered exclude_from_shuffle shell for sample
     snakemake -s "$SNAKEFILE" -n -p -R exclude_from_shuffle --configfile "$1" 2>&1 \
@@ -86,16 +86,17 @@ check_block() {
     echo "ok (rendered shell): $label"
 }
 
-# with config excludes set: test gets hg38 blacklists + the config exclude,
-# test2 gets only the config exclude (a leak of hg38 paths into test2 fails)
+# with config excludes set, sample test gets the hg38 blacklists and the
+# config exclude. Sample test2 gets only the config exclude. A leak of
+# hg38 paths into test2 fails the check.
 block_test=$(shell_block "$CFG/two-sample.yaml" test)
 block_test2=$(shell_block "$CFG/two-sample.yaml" test2)
 check_block "test (hg38 excludes)" "$block_test" "hg38.blacklist" ""
 check_block "test (config exclude)" "$block_test" "extra-exclude.bed" ""
 check_block "test2 (no hg38 leak)" "$block_test2" "extra-exclude.bed" "hg38.blacklist"
-# the shell template references {params.exclude} twice (the [ -n ] guard
-# and gunzip), so each exclude path renders exactly twice; more means a
-# get_excludes mutation bug duplicated the list
+# the shell template uses {params.exclude} two times: in the [ -n ]
+# guard and in gunzip. Each exclude path must render exactly two times.
+# More than two means a mutation bug duplicated the list.
 gap_count=$(grep -oF "hg38.gap.bed.gz" <<<"$block_test" | wc -l | tr -d ' ')
 if [ "$gap_count" -ne 2 ]; then
     echo "FAIL: hg38.gap.bed.gz appears $gap_count times for test, expected 2"
@@ -104,8 +105,8 @@ else
     echo "ok (rendered shell): no exclude duplication for test"
 fi
 
-# without config excludes: test2 exercises the truly-empty excludes branch
-# (the [ -n ] guard must render with an empty parameter)
+# without config excludes, sample test2 uses the empty excludes branch.
+# The [ -n ] guard must render with an empty parameter.
 block_empty=$(shell_block "$CFG/no-excludes.yaml" test2)
 check_block "test2 (empty excludes)" "$block_empty" "" "gunzip -cf ."
 if grep -qF 'if [ -n "" ]' <<<"$block_empty"; then
@@ -116,8 +117,8 @@ else
 fi
 
 
-# error cases, one per validator branch; substrings are specific enough
-# that a wrong error cannot satisfy the assertion
+# error cases, one per validator branch. Each substring is specific,
+# so a wrong error cannot satisfy the assertion.
 expect_fail "$CFG/err-no-ref-anywhere.yaml" "no reference specified"
 expect_fail "$CFG/err-ref-col-only.yaml" "manifest columns 'ref' and 'ref_name' must be provided together"
 expect_fail "$CFG/err-config-ref-only.yaml" "config options 'ref' and 'ref_name' must be provided together"
