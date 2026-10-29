@@ -4,7 +4,7 @@ channels = ["conda-forge", "bioconda"]
 description = "A Snakemake pipeline for calling FIRE peaks using fibertools-rs."
 name = "FIRE"
 platforms = ["osx-arm64", "linux-64"]
-version = "0.2.0"
+version = "0.3.0"
 
 [tasks]
 fmt = "ruff format . && taplo format pixi.toml && snakefmt workflow/"
